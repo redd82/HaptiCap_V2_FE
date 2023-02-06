@@ -191,20 +191,6 @@ export default function MapInputForm({map, newMap}) {
         // }
     };
 
-    function DatePickerCustomOverlay({ classNames, selectedDay, children, ...props }) {
-        return (
-            <div
-                className={classNames.overlayWrapper}
-                style={{ marginLeft: -100 }}
-                {...props}
-            >
-                <div className={classNames.overlay}>
-                    {children}
-                </div>
-            </div>
-        );
-    }
-
     useEffect( () => {
         if(newMap) {
             setReadOnly(false);
