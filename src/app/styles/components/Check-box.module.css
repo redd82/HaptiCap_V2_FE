@@ -1,0 +1,12 @@
+
+.check-box{
+    display: grid;
+    padding: 4px 4px 4px;
+    grid-template-columns: 0.1fr;
+    grid-template-rows: 0;
+}
+
+.done-check{
+    margin-top: 5px;
+    margin-bottom: 5px;
+}

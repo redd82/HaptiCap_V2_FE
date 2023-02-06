@@ -1,0 +1,22 @@
+/*Used for showing palette*/
+.palette{
+    color: #E8F7EE;
+    color: #C6CAED;
+    color: #ADA8BE;
+    color: #A28497;
+    color: #6F5E5C;
+    color: #4A5240;
+}
+
+.main {
+    height: 100vh;
+    width: 100vw;
+    display: grid;
+    grid-template: 1fr 1fr 16fr 0.1fr / 4fr;
+    gap: 0 0;
+    grid-template-areas:
+    "header header"
+    "menubar menubar"
+    "content search"
+    "footer footer";
+}

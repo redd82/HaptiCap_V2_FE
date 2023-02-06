@@ -1,0 +1,128 @@
+/*Used for showing palette*/
+.palette{
+    color: #E8F7EE;
+    color: #C6CAED;
+    color: #ADA8BE;
+    color: #A28497;
+    color: #6F5E5C;
+    color: #4A5240;
+}
+
+.menubar {
+    grid-area: menubar;
+}
+
+.menu-ul {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: baseline;
+    align-content: stretch;
+    padding: 0;
+    overflow: hidden;
+    background-color: #663F46;
+    top: 0;
+    bottom: 0;
+}
+
+.menu-li {
+    padding: 14px 2px 14px 0px;
+}
+
+.menu-li a{
+    color: white;
+    text-align: center;
+    padding: 14px 50px;
+    text-decoration: none;
+    cursor: pointer;
+    background-image: linear-gradient(to bottom right, #A28497 50%, #A28497 50%, #6F5E5C);
+    background-size: 400%;
+    background-position: 0%;
+    transition: 0.4s;
+}
+
+.menu-li a:hover {
+    background-color: #4A5240;
+    background-position: 100% 0%;
+}
+
+.menu-li .active {
+    background-color: #3C362A;
+    background-position: 100% 0%;
+}
+
+.menu-li-last-child-a {
+    border-right: none;
+    /*padding: 20px 5px;*/
+    padding: 14px 2px 14px 0px;
+}
+
+.menu-li-last-child-a a {
+    color: white;
+    text-align: center;
+    padding: 14px 10px;
+    text-decoration: none;
+    cursor: pointer;
+    /*background-color: #6F5E5C;*/
+    /*border-radius: 8px;*/
+    background-image: linear-gradient(to bottom right, #A28497 50%, #A28497 50%, #6F5E5C);
+    background-size: 200%;
+    background-position: 0%;
+    transition: 0.4s;
+}
+
+.menu-li-last-child-a a:hover{
+    background-color: #4A5240;
+    background-position: 100% 10%;
+}
+
+.menu-li-last-child-a .active {
+    background-color: #3C362A;
+    background-position: 100% 10%;
+}
+
+.menu-li-last-child-b {
+    margin-right: 0px;
+    margin-left: auto;
+    border-right: none;
+    /*padding: 20px 5px;*/
+    padding: 14px 2px 14px 0px;
+}
+
+.menu-li-last-child-b a {
+    color: white;
+    text-align: center;
+    padding: 14px 10px;
+    text-decoration: none;
+    cursor: pointer;
+    background-color: #6F5E5C;
+    /*border-radius: 8px;*/
+    background-image: linear-gradient(to bottom right, #A28497 50%, #A28497 50%, #6F5E5C);
+    background-size: 200%;
+    background-position: 0%;
+    transition: 0.4s;
+}
+
+.menu-li-last-child-b a:hover{
+    background-color: #4A5240;
+    background-position: 100% 10%;
+}
+
+.menu-li-last-child-b .active {
+    background-color: #3C362A;
+    background-position: 100% 10%;
+}
+
+.dropdown-menu-li {
+    display: inline-block;
+    padding: 14px 5px;
+}
+
+.dropbtn {
+    display: inline-block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}

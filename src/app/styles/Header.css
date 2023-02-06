@@ -1,0 +1,28 @@
+/*Used for showing palette*/
+.palette{
+    color: #C6CAED;
+    color: #ADA8BE;
+    color: #A28497;
+    color: #6F5E5C;
+    color: #4A5240;
+}
+
+.header-area {
+    grid-area: header;
+    background: rgb(198,202,237);
+    background: linear-gradient(90deg, rgba(198,202,237,1) 0%, rgba(173,168,190,1) 35%, rgba(162,132,151,1) 100%);
+}
+
+.header {
+    display: flex;
+    padding: 0px;
+    background: transparent;
+    justify-content: center;
+    align-items: center;
+}
+
+.user-label {
+    display: flex;
+    flex-direction: row;
+    padding: 4px;
+}

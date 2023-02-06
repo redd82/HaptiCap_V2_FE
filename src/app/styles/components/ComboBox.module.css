@@ -1,0 +1,9 @@
+.comboBox{
+    font-size: 16px;
+    border-width: 1px;
+    border-style: inset;
+    width: 100%;
+    padding: 2px;
+    background-color: #ADA8BE;
+    border-radius: 8px;
+}

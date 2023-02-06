@@ -1,0 +1,129 @@
+/*Used for showing palette*/
+.palette{
+    color: #E8F7EE;
+    color: #C6CAED;
+    color: #ADA8BE;
+    color: #A28497;
+    color: #6F5E5C;
+    color: #4A5240;
+}
+
+.palette-color-background {
+
+}
+
+.content {
+    grid-area: content;
+    padding: 10px;
+    margin: 10px;
+}
+
+h1{
+    margin: 20px;
+}
+
+h2{
+    margin: 25px;
+}
+
+article{
+    margin: 30px;
+}
+
+.outlet{
+    margin: 30px;
+}
+
+.outlet-maps{
+    margin: 30px;
+}
+
+.outlet-settings{
+    margin: 30px;
+}
+
+.sub-menu ul{
+    display: flex;
+    flex-direction: row;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    position: sticky;
+    top: 0;
+    bottom: 0;
+}
+
+.sub-menu li {
+    padding: 2px 2px 0px 0px;
+}
+
+.sub-menu li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 10px 10px;
+    text-decoration: none;
+    cursor: pointer;
+    background-color: #6F5E5C;
+    /*border-radius: 8px;*/
+    background-image: linear-gradient(to bottom right, #A28497 50%, #A28497 50%, #6F5E5C);
+    background-size: 400%;
+    background-position: 0%;
+    transition: 0.4s;
+}
+
+.sub-menu li a:hover {
+    background-color: #4A5240;
+    background-position: 100% 0%;
+}
+
+.sub-menu .active {
+    background-color: #3C362A;
+    background-position: 100% 0%;
+}
+
+.listing-ul {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-content: flex-start;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #E8F7EE;
+    top: 0;
+    bottom: 0;
+}
+
+.standard-table {
+    border: 2px solid #c6caed;
+    width: 100%;
+    table-layout : auto;
+    align-items: center;
+}
+
+.header-tr{
+    vertical-align: middle;
+}
+
+.standard-th {
+    border-bottom: 1px solid black;
+}
+
+.standard-td {
+    width: 25%;
+    text-align: center;
+}
+
+.standard-tr{
+    vertical-align: middle;
+
+}
+
+.standard-tr:hover{
+    vertical-align: middle;
+    background-color: #cdf8de;
+}

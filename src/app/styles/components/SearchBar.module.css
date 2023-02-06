@@ -1,0 +1,25 @@
+.search-bar {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    padding: 4px;
+}
+
+.search-label {
+    font-size: 18px;
+    font-weight: bold;
+    width: 20%;
+    margin-right: 20px;
+}
+.search-bar-short {
+    display: flex;
+    flex-direction: row;
+    width: 40%;
+    padding: 4px;
+}
+
+.search-label-short {
+    font-size: 18px;
+    font-weight: bold;
+    width: 60%;
+}
