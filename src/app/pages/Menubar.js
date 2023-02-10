@@ -11,7 +11,7 @@ export default function Menubar(){
 
     try {
         homeLink = <div className={styles['menu-li']}><NavLink to="/">Home</NavLink></div>;
-        mapLink = <div className={styles['menu-li']}><NavLink to="/maps">Maps</NavLink></div>;
+        mapLink = <div className={styles['menu-li']}><NavLink to="/maps/map-list">Maps</NavLink></div>;
         settingsLink = <div className={styles['menu-li']}><NavLink to="/settings">Settings</NavLink></div>;
     }
     catch (e) {

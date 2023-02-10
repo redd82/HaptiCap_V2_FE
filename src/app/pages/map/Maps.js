@@ -6,11 +6,9 @@ import MapsContextProvider from "../../contexts/MapsContext";
 export default function Maps(){
     const location = useLocation();
     let newMapLink = <div/>;
-    let selectMapLink = <div/>;
 
     try {
-        newMapLink = <li><NavLink to="new-map">New map</NavLink></li>;
-        selectMapLink = <li><NavLink to="map-list">Map List</NavLink></li>;
+        newMapLink = <div className={styles['sub-menu-li']}><NavLink to="new-map">Install New map</NavLink></div>;
     }
     catch (e) {
         console.log("error:")
@@ -24,10 +22,9 @@ export default function Maps(){
     return(
         <div>
             <nav className={styles['sub-menu']}>
-                <ul>
+                <div className={styles['sub-menu-ul']}>
                     {newMapLink}
-                    {selectMapLink}
-                </ul>
+                </div>
             </nav>
             <main>
                 <div className={styles['outlet-maps']}>

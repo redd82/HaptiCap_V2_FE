@@ -5,6 +5,7 @@ import Maps from "../pages/map/Maps";
 import MapList from "../pages/map/MapList";
 import NewMap from "../pages/map/NewMap";
 import SelectMap from "../pages/map/SelectMap";
+import Settings from "../pages/settings/Settings";
 
 export default function Routing(){
     return(
@@ -16,6 +17,7 @@ export default function Routing(){
                     <Route path="new-map" element={<NewMap title="New Map Import"/>} />
                     <Route path="select-map" element={<SelectMap title="Selected Map"/>} />
                 </Route>
+                <Route path="/settings" element={<Settings title="Settings"/>}/>
             </Routes>
         </div>
     );

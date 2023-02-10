@@ -3,6 +3,7 @@ import React, {createContext, useContext, useEffect} from 'react';
 export const UtilityContext = createContext({});
 export default function UtilityContextProvider({ children }) {
     const DATEFORMAT = 'yyyy-MM-dd';
+    const myIP = '192.168.17.104'
 
     function sortNamesByNumberOrName(items) {
         items.sort(function (a, b) {

@@ -36,6 +36,7 @@
     padding: 14px 50px;
     text-decoration: none;
     cursor: pointer;
+    background-color: var(--color-4);
     background-image: linear-gradient(to bottom right, #A28497 50%, #A28497 50%, #6F5E5C);
     background-size: 400%;
     background-position: 0%;
@@ -47,14 +48,13 @@
     background-position: 100% 0%;
 }
 
-.menu-li .active {
+.menu-li a:active {
     background-color: #3C362A;
     background-position: 100% 0%;
 }
 
 .menu-li-last-child-a {
     border-right: none;
-    /*padding: 20px 5px;*/
     padding: 14px 2px 14px 0px;
 }
 

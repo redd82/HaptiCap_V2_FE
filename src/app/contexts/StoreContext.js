@@ -2,7 +2,8 @@ import React, {createContext, useContext, useEffect} from 'react';
 
 export const StoreContext = createContext({});
 export default function StoreContextProvider({ children }) {
-    const serverHost = 'http://localhost:8081';
+    const serverHost = 'http://192.168.17.105';
+    
     let storedData = [];
 
     function storeData(data, index){
