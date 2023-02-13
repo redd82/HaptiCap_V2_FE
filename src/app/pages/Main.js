@@ -7,6 +7,7 @@ import Footer from "./Footer";
 import Header from "./Header";
 import DateContextProvider from "../contexts/DateContext";
 import {useLocation} from "react-router-dom";
+import StoreContextProvider from '../contexts/StoreContext';
 
 export default function Main(){
     const location = useLocation();
@@ -21,8 +22,10 @@ export default function Main(){
             <Header title="HaptiCap V2"/>
                 <Search/>
                     <DateContextProvider>
-                        <Menubar/>
-                        <Routing/>
+                        <StoreContextProvider>
+                            <Menubar/>
+                            <Routing/>
+                        </StoreContextProvider>
                     </DateContextProvider>
              <Footer/>
          </div>

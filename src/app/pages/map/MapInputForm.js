@@ -229,25 +229,21 @@ export default function MapInputForm({map, newMap}) {
                 ) : (
                     <div id="id">{mapData.id}</div>
             )}
-            <div className={styles['empty-grid-space-1-niddle']}/>
-            <div className={styles['empty-grid-space-2-end']}/>
-            <label className={styles['info-label']} htmlFor="numberPlate">Name:</label>
+            <label className={styles['info-label']} htmlFor="name">Name:</label>
             {(newMap) ? (
-                <input className={styles['info-input']} name="numberPlate" type="text" id="numberPlate" defaultValue={mapData.name} onChange={handleInputUpdate} />
+                <input className={styles['info-input']} name="name" type="text" id="name" defaultValue={mapData.name} onChange={handleInputUpdate} />
             ) : (
                 <div className={styles['valueRO-info-button']}>
                 <div id={styles['valueRO-numberplate']}>{mapData.name}</div>
                     {/* <CarInfo carData={numberPlate}/> */}
                 </div>
             )}         
-            <div className={styles['empty-grid-space-2-end']}/>
             <label className={styles['info-label']} htmlFor="model">Country: </label>
             {(readOnly) ? (<div className={styles['ROdata']}> {mapData.country}</div>) : (
                 <input className={styles['info-input']} name="model" type="text" id="model" defaultValue={mapData.country}
                        onChange={handleInputUpdate}/>
                 )
             }
-            <div className={styles['empty-grid-space-2-end']}/>
             {(readOnly) ? (<></>) : (
                 <>
                 <label className={styles['info-label']} htmlFor="documentPath">Map: </label>
@@ -261,7 +257,6 @@ export default function MapInputForm({map, newMap}) {
                 </>
                 )
             }
-            <div className={styles['empty-grid-space-2-end']}/>
             {(readOnly) ? (<></>) : (
                 <>
                 <label className={styles['info-label']} htmlFor="documentPath">KML: </label>
@@ -276,27 +271,26 @@ export default function MapInputForm({map, newMap}) {
                 )
             }
             {(newMap) ? (
-                <div className={styles['empty-grid-space-2-end']}/>
+                <div className={styles['empty-grid-space-2']}/>
             ): (
                 <>
-                            <div className={styles['empty-grid-space-1-front']}/>
+                    <div className={styles['empty-grid-space-1-front']}/>
                     <button className={styles['apply-button']} onClick={handleDownload} type="button"> Use map</button>
                 </>
             )}
-            <div className={styles['empty-grid-space-2-end']}/>
             <div className={styles['empty-grid-space-1-front']}/>
             <input type="submit" id="submit-button" className={styles['apply-button']} value="Apply Changes"/>
-        <div className={styles['empty-grid-space-4']}/>
-        <div className={styles['error-message']}>
-            {(error !== "") ? (
-                <div className={styles['error']}>{error}</div>
-            ) : ((success !== "") ? (
-                <div className={styles['success']}>{success}</div>
-            ) : (
-                <div className={styles['no-error']}> <br /> </div>
-                )
-            )}
-        </div>
+            <div className={styles['empty-grid-space-4']}/>
+            <div className={styles['error-message']}>
+                {(error !== "") ? (
+                    <div className={styles['error']}>{error}</div>
+                ) : ((success !== "") ? (
+                    <div className={styles['success']}>{success}</div>
+                ) : (
+                    <div className={styles['no-error']}> <br /> </div>
+                    )
+                )}
+            </div>
         </form>
     );
 }

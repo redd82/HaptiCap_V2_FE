@@ -10,7 +10,7 @@
 
 .info-form {
     display: grid;
-    grid-template-columns: 0.20fr 0.80fr;
+    grid-template-columns: 0.40fr 0.60fr;
     grid-template-rows: 0.8fr;
     gap: 4px 4px;
     width: 100%;
@@ -101,6 +101,10 @@
     background-position: 100% 0;
 }
 
+.debug-row{
+    display: flex;
+}
+
 .info-input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
     color: black;
     opacity: 1; /* Firefox */
@@ -127,15 +131,15 @@
 }
 
 .error-message{
-    grid-column: 2 / span 3;
+    grid-column: 1 / span 2;
 }
 
 .error-message-pw{
-    grid-column: 4 / span 3;
+    grid-column: 1 / span 2;
 }
 
 .error-message-userid{
-    grid-column: 3 / span 4;
+    grid-column: 1 / span 2;
 }
 
 .success{
@@ -144,63 +148,17 @@
 }
 
 .success-message{
-    grid-column: 4 / span 3;
+    grid-column: 1 / span 2;
 }
 
 .empty-grid-space-1-front{
     grid-column: 1 / span 1;
 }
 
-.empty-grid-space-1-middle{
-    grid-column: 3 / span 1;
-}
-
-.empty-grid-space-2-middle{
-    grid-column: 3 / span 2;
-}
-
-.empty-grid-space-3-middle{
-    grid-column: 3 / span 3;
-}
-
 .empty-grid-space-1-end{
-    grid-column: 6 / span 1;
+    grid-column: 2 / span 1;
 }
 
-.empty-grid-space-2-end{
-    grid-column: 5 / span 2;
-}
-
-.empty-grid-space-3-end{
-    grid-column: 4 / span 3;
-}
-
-.empty-grid-space-4-end{
-    grid-column: 3 / span 4;
-}
-
-.info-input-grid-space-2-middle{
-    grid-column-start: 2;
-    grid-column-end: 4;
-}
-
-.activities-grid {
-    grid-column-start: 5;
-    grid-column-end: 7;
-    grid-row-start: 2;
-    grid-row-end: 8;
-}
-
-.parts-grid {
-    grid-column-start: 5;
-    grid-column-end: 7;
-    grid-row-start: 10;
-    grid-row-end: 13;
-}
-
-.faults-grid {
-    grid-column-start: 4;
-    grid-column-end: 7;
-    grid-row-start: 9;
-    grid-row-end: 10;
+.empty-grid-space-2{
+    grid-column: 1 / span 2;
 }
