@@ -100,6 +100,8 @@ export default function SettingsInputForm({}) {
 
     return (
         <form className={styles['info-form']} onSubmit={handleSubmit(onSubmit)}>
+            <Checkbox parentCallback={handleCheckBoxChange} disabled={false} name="asAP" defaultChecked={settingsData.asAP}/>
+            <label className={styles['info-label']} htmlFor="asAP">Is AccessPoint</label>
             <label className={styles['info-label']} htmlFor="clientSSID">Client SSID:</label>
             <input className={styles['info-input']} name="clientSSID" type="text" id="clientSSID" defaultValue={settingsData.clientSSID} onChange={handleInputUpdate} />
             <label className={styles['info-label']} htmlFor="clientPasswd">Client Password:</label>
