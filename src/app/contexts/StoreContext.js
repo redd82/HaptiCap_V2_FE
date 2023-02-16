@@ -29,6 +29,36 @@ export default function StoreContextProvider({ children }) {
         }
     }
 
+    async function fetchCalData() {
+        try {
+            const response = await axios.get(serverHost + '/caldata.json', {
+                headers: {
+                    "Content-Type": "application/json",
+                    
+                }, withCredentials: false,
+            });
+            //console.log(response.data);
+            return response.data;
+        } catch (e) {
+            //setTimeout(() => navigate('/settings'), 1000);
+        }
+    }
+
+    async function fetchDebugSettings() {
+        try {
+            const response = await axios.get(serverHost + '/debug.json', {
+                headers: {
+                    "Content-Type": "application/json",
+                    
+                }, withCredentials: false,
+            });
+            //console.log(response.data);
+            return response.data;
+        } catch (e) {
+            //setTimeout(() => navigate('/settings'), 1000);
+        }
+    }
+
     function getServerHost(){
         return serverHost;
     }
@@ -36,6 +66,8 @@ export default function StoreContextProvider({ children }) {
     const contextData = {
         storeData:storeData,
         fetchSettings:fetchSettings,
+        fetchCalData:fetchCalData,
+        fetchDebugSettings:fetchDebugSettings,
         getServerHost:getServerHost,
     };
 

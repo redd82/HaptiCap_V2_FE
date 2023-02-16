@@ -24,64 +24,115 @@ export default function SettingsInputForm({}) {
     const [success, setSuccess] = useState("");
     const [readOnly, setReadOnly] = useState(true);
     const [settingsData, setSettingsData] = useState({clientSSID: ""});
-    let newFaultTemp = {};
 
-
-    async function onSubmit(data){
+    async function onSubmit(){
         let serverHost = getServerHost();
-            console.log(data);
-            let json = '';
-            // let json = JSON.stringify({documentNr: carDocDetails.documentNr, filePathName:data.filePathName, inspectionCode: carDocDetails.inspectionCode,
-            //     firstRegistrationDate: carDocDetails.firstRegistrationDate, lastOwnerChangeDate: carDocDetails.lastOwnerChangeDate, numberOrCompanyName: carDocDetails.numberOrCompanyName,
-            //     registrationType: carDocDetails.registrationType, carDTO: {id: carData.id, brand:carData.brand, model:carData.model, year:carData.year, version:carData.version,
-            //     nrOfDrivenKMs:carData.nrOfDrivenKMs, numberPlate:carData.numberPlate, lastCheckupDate: carData.lastCheckupDate, broughtInDate: carData.broughtInDate,
-            //     workFinishedDate:carData.workFinishedDate}});
-            // console.log(json);
-            // try{
-            //     const response = await axios.put(serverHost + '/api/cars/documents/updateDocument', json, {
-            //         headers: {
-            //             "Content-Type": "application/json",
-            //         },
-            //     });
-            //     setError("");
-            //     setSuccess(response.data.message);
-            // }   catch (e){
-            //     setError(e.response.data.message);
-            //     if(e.response.status >= 401) {
+            let json = JSON.stringify({asAP: settingsData.asAP, clientSSID: settingsData.clientSSID, clientPasswd: settingsData.clientPasswd, connectionTimeOut: settingsData.connectionTimeOut,
+                deviceName: settingsData.deviceName, apPasswd: settingsData.apPasswd, gpsPollSec: settingsData.gpsPollSec, targetReached: settingsData.targetReached, 
+                compPollMs: settingsData.compPollMs, compOffset: settingsData.compOffset, HOME_LAT: settingsData.HOME_LAT, HOME_LON: settingsData.HOME_LON, WAYPOINT_LAT: settingsData.WAYPOINT_LAT, 
+                WAYPOINT_LON: settingsData.WAYPOINT_LON, declAngleRad: settingsData.declAngleRad, sleepMins: settingsData.sleepMins, touchThreshold: settingsData.touchThreshold,
+                touchEnabled: settingsData.touchEnabled, maxDistance:settingsData.maxDistance, maxDelay:settingsData.maxDelay, timeZoneOffset:settingsData.timeZoneOffset, 
+                ftpEnabled: settingsData.ftpEnabled});
+            console.log(json);
+            try{
+                const response = await axios.post(serverHost + '/settings/settings_form', json, {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+                setError("");
+                setSuccess(response.data.message);
+            }   catch (e){
+                setError(e.response.data.message);
+                if(e.response.status >= 401) {
 
-            //     }else if(e.response.status === 400){
-            //         setError(e.response.data.message);
-            //     }
-            // }
+                }else if(e.response.status === 400){
+                    setError(e.response.data.message);
+                }
+            }
         }
-
-    const addObjectToArray = obj => {
-        //setCarFaultList(current => [...current, obj]);
-    };
-
-    const handleComboChange = (event) => {
-        console.log(event);
-        const value = event?.target?.value;
-    };
-
-    const handleFaultCheckbox = (event) => {
-        //updateFaultData(event);
-        console.log();
-    }
 
     const handleInputUpdate = (event) => {
         const value = event?.target?.value;
-        // if (event.target.name === "documentNr") {
-        //     setCarDocDetails({...carDocDetails, documentNr: value});
-        // }
-        // if (event.target.name === "filePathName") {
-        //     setCarDocDetails({...carDocDetails, filePathName: value});
-        // }
+        console.log(value);
+        if (event.target.name === "asAP") {
+            setSettingsData({...settingsData, asAP: value});
+        }
+        if (event.target.name === "clientSSID") {
+            setSettingsData({...settingsData, clientSSID: value});
+        }
+        if (event.target.name === "clientPasswd") {
+            setSettingsData({...settingsData, clientPasswd: value});
+        }
+        if (event.target.name === "connectionTimeOut") {
+            setSettingsData({...settingsData, connectionTimeOut: value});
+        }
+        if (event.target.name === "deviceName") {
+            setSettingsData({...settingsData, deviceName: value});
+        }
+        if (event.target.name === "apPasswd") {
+            setSettingsData({...settingsData, apPasswd: value});
+        }
+        if (event.target.name === "gpsPollSec") {
+            setSettingsData({...settingsData, gpsPollSec: value});
+        }
+        if (event.target.name === "targetReached") {
+            setSettingsData({...settingsData, targetReached: value});
+        }
+        if (event.target.name === "compPollMs") {
+            setSettingsData({...settingsData, compPollMs: value});
+        }
+        if (event.target.name === "compOffset") {
+            setSettingsData({...settingsData, compOffset: value});
+        }
+        if (event.target.name === "HOME_LAT") {
+            setSettingsData({...settingsData, HOME_LAT: value});
+        }
+        if (event.target.name === "HOME_LON") {
+            setSettingsData({...settingsData, HOME_LON: value});
+        }
+        if (event.target.name === "WAYPOINT_LAT") {
+            setSettingsData({...settingsData, WAYPOINT_LAT: value});
+        }
+        if (event.target.name === "WAYPOINT_LON") {
+            setSettingsData({...settingsData, WAYPOINT_LON: value});
+        }
+        if (event.target.name === "declAngleRad") {
+            setSettingsData({...settingsData, declAngleRad: value});
+        }
+        if (event.target.name === "sleepMins") {
+            setSettingsData({...settingsData, sleepMins: value});
+        }
+        if (event.target.name === "maxDistance") {
+            setSettingsData({...settingsData, maxDistance: value});
+        }
+        if (event.target.name === "maxDelay") {
+            setSettingsData({...settingsData, maxDelay: value});
+        }
+        if (event.target.name === "timeZoneOffset") {
+            setSettingsData({...settingsData, timeZoneOffset: value});
+        }
+        if (event.target.name === "touchThreshold") {
+            setSettingsData({...settingsData, touchThreshold: value});
+        }
+        if (event.target.name === "touchEnabled") {
+            setSettingsData({...settingsData, touchEnabled: value});
+        }           
     };
 
     const handleCheckBoxChange = (checkBoxValue) => {
-        if(checkBoxValue.name === 'debugSerial') {
-            setSettingsData({...settingsData, touchEnabled: checkBoxValue.checked});
+        let checkValue = 0;
+        if(checkBoxValue.checked){
+            checkValue = 1;
+        }else{
+            checkValue = 0;
+        }
+        console.log(checkValue);
+        if(checkBoxValue.name === 'touchEnabled') {
+            setSettingsData({...settingsData, touchEnabled: checkValue});
+        }
+        if(checkBoxValue.name === 'asAP') {
+            setSettingsData({...settingsData, asAP: checkValue});
         }
     };
 
@@ -100,12 +151,14 @@ export default function SettingsInputForm({}) {
 
     return (
         <form className={styles['info-form']} onSubmit={handleSubmit(onSubmit)}>
-            <Checkbox parentCallback={handleCheckBoxChange} disabled={false} name="asAP" defaultChecked={settingsData.asAP}/>
+            <Checkbox id='1' parentCallback={handleCheckBoxChange} disabled={false} name="asAP" labelname=""/>
             <label className={styles['info-label']} htmlFor="asAP">Is AccessPoint</label>
             <label className={styles['info-label']} htmlFor="clientSSID">Client SSID:</label>
             <input className={styles['info-input']} name="clientSSID" type="text" id="clientSSID" defaultValue={settingsData.clientSSID} onChange={handleInputUpdate} />
             <label className={styles['info-label']} htmlFor="clientPasswd">Client Password:</label>
             <input className={styles['info-input']} name="clientPasswd" type="text" id="clientPasswd" defaultValue={settingsData.clientPasswd} onChange={handleInputUpdate} />
+            <label className={styles['info-label']} htmlFor="connectionTimeOut">Connection Timeout:</label>
+            <input className={styles['info-input']} name="connectionTimeOut" type="text" id="connectionTimeOut" defaultValue={settingsData.connectionTimeOut} onChange={handleInputUpdate} />
             <label className={styles['info-label']} htmlFor="deviceName">Devicename:</label>
             <input className={styles['info-input']} name="deviceName" type="text" id="deviceName" defaultValue={settingsData.deviceName} onChange={handleInputUpdate} />
             <label className={styles['info-label']} htmlFor="apPasswd">AP Password:</label>
@@ -126,10 +179,24 @@ export default function SettingsInputForm({}) {
             <input className={styles['info-input']} name="compPollMs" type="text" id="compPollMs" defaultValue={settingsData.compPollMs} onChange={handleInputUpdate} />
             <label className={styles['info-label']} htmlFor="compOffset">Compass Offset (deg):</label>
             <input className={styles['info-input']} name="compOffset" type="text" id="compOffset" defaultValue={settingsData.compOffset} onChange={handleInputUpdate} />
+            <label className={styles['info-label']} htmlFor="touchEnabled">Touch enabled</label>
+            <input className={styles['info-input']} name="touchEnabled" type="text" id="touchEnabled" defaultValue={settingsData.touchEnabled} onChange={handleInputUpdate} />
             <label className={styles['info-label']} htmlFor="touchThreshold">Touch threshold:</label>
             <input className={styles['info-input']} name="touchThreshold" type="text" id="touchThreshold" defaultValue={settingsData.touchThreshold} onChange={handleInputUpdate} />
             <label className={styles['info-label']} htmlFor="timeZoneOffset">Timezone Offset (h):</label>
             <input className={styles['info-input']} name="timeZoneOffset" type="text" id="timeZoneOffset" defaultValue={settingsData.timeZoneOffset} onChange={handleInputUpdate} />            
+            <input type="submit" id="submit-button" className={styles['apply-button']} value="Apply Changes"/>
+            <div className={styles['empty-grid-space-4']}/>
+            <div className={styles['error-message']}>
+                {(error !== "") ? (
+                    <div className={styles['error']}>{error}</div>
+                ) : ((success !== "") ? (
+                    <div className={styles['success']}>{success}</div>
+                ) : (
+                    <div className={styles['no-error']}> <br /> </div>
+                    )
+                )}
+            </div>
         </form>
     );
 }

@@ -10,7 +10,7 @@
 
 .info-form {
     display: grid;
-    grid-template-columns: 0.40fr 0.60fr;
+    grid-template-columns: 0.50fr 0.50fr;
     grid-template-rows: 0.8fr;
     gap: 4px 4px;
     width: 100%;

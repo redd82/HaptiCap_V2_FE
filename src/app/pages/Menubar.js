@@ -6,13 +6,13 @@ export default function Menubar(){
     const navigate = useNavigate();
     const location = useLocation();
     let homeLink = <div/>;
-    let mapLink = <div/>;
-    let settingsLink = <div/>;
+    let navigationLink = <div/>;
+    let systemLink = <div/>;
 
     try {
         homeLink = <div className={styles['menu-li']}><NavLink to="/">Home</NavLink></div>;
-        mapLink = <div className={styles['menu-li']}><NavLink to="/maps/map-list">Maps</NavLink></div>;
-        settingsLink = <div className={styles['menu-li']}><NavLink to="/settings">Settings</NavLink></div>;
+        navigationLink = <div className={styles['menu-li']}><NavLink to="/navigation/map-list">Navigation</NavLink></div>;
+        systemLink = <div className={styles['menu-li']}><NavLink to="/system">System</NavLink></div>;
     }
     catch (e) {
         console.log("error:")
@@ -24,8 +24,8 @@ export default function Menubar(){
         <nav className={styles.menubar}>
             <div className={styles['menu-ul']}>
                 {homeLink}
-                {mapLink}
-                {settingsLink}
+                {navigationLink}
+                {systemLink}
             </div>
         </nav>
     );

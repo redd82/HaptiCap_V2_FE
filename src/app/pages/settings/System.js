@@ -4,7 +4,7 @@ import {NavLink, Outlet, useLocation} from "react-router-dom";
 import styles from '../../styles/Content.module.css';
 import SettingsInputForm from "./SettingsInputForm";
 
-export default function Settings({title}){
+export default function System({title}){
     const location = useLocation();
     let debugLink = <div/>;
     let settingsLink = <div/>;

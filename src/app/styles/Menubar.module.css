@@ -33,7 +33,7 @@
 .menu-li a{
     color: white;
     text-align: center;
-    padding: 14px 50px;
+    padding: 14px 40px;
     text-decoration: none;
     cursor: pointer;
     background-color: var(--color-4);
