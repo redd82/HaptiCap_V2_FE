@@ -30,15 +30,13 @@ export default function System({title}){
             <nav className={styles['sub-menu']}>
                 <div className={styles['sub-menu-ul']}>
                     {debugLink}
-                    {settingsLink}
                     {calibrationLink}
+                    {settingsLink}                    
                 </div>
             </nav>
             <main>
                 <div className={styles['outlet-maps']}>
-                    <StoreContextProvider>
                         <Outlet />
-                    </StoreContextProvider>
                 </div>
             </main>
         </div>

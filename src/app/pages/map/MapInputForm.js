@@ -235,7 +235,6 @@ export default function MapInputForm({map, newMap}) {
             ) : (
                 <div className={styles['valueRO-info-button']}>
                 <div id={styles['valueRO-numberplate']}>{mapData.name}</div>
-                    {/* <CarInfo carData={numberPlate}/> */}
                 </div>
             )}         
             <label className={styles['info-label']} htmlFor="model">Country: </label>

@@ -1,23 +1,14 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {useForm} from 'react-hook-form';
 import axios from 'axios';
-import {MapsContext} from "../../contexts/MapsContext";
-import ComboBox from "../components/ComboBox";
-import {FilePicker} from 'react-file-picker';
-import {nl} from "date-fns/locale";
 import styles from '../../styles/pages/InputForm.module.css';
-import {saveAs} from 'file-saver'
-import {UtilityContext} from "../../contexts/UtilityContext";
-import {DateContext} from "../../contexts/DateContext";
 import {StoreContext} from "../../contexts/StoreContext";
 import Checkbox from "../components/CheckBox";
 import Button from "../components/Button";
 
 export default function SettingsInputForm({}) {
     const DATEFORMAT = 'yyyy-MM-dd';
-    const {sortNames } = useContext(UtilityContext);
-    const {parseDate, formatDate } = useContext(DateContext);
-    const {storeData, fetchSettings, getServerHost} = useContext(StoreContext);
+    const {storeData, fetchSettings, getServerHost, restartHaptiCap} = useContext(StoreContext);
     const [loading, setLoading] = useState(true);
     const {register, handleSubmit, formState: { errors } } = useForm();
     const [error, setError] = useState("");
@@ -40,8 +31,15 @@ export default function SettingsInputForm({}) {
                         "Content-Type": "application/json",
                     },
                 });
+                console.log(response);
                 setError("");
-                setSuccess(response.data.message);
+                setSuccess("");               
+                if(response.status === 200){
+                    setTimeout(500);
+                    setSuccess("Settings changed");
+                }else{
+                    setError("Error");
+                }
             }   catch (e){
                 setError(e.response.data.message);
                 if(e.response.status >= 401) {
@@ -121,20 +119,26 @@ export default function SettingsInputForm({}) {
     };
 
     const handleCheckBoxChange = (checkBoxValue) => {
-        let checkValue = 0;
-        if(checkBoxValue.checked){
-            checkValue = 1;
-        }else{
-            checkValue = 0;
-        }
-        console.log(checkValue);
         if(checkBoxValue.name === 'touchEnabled') {
-            setSettingsData({...settingsData, touchEnabled: checkValue});
+            console.log(checkBoxValue.checked);
+            setSettingsData({...settingsData, touchEnabled: checkBoxValue.checked});
         }
         if(checkBoxValue.name === 'asAP') {
-            setSettingsData({...settingsData, asAP: checkValue});
+            console.log(checkBoxValue.checked);
+            setSettingsData({...settingsData, asAP: checkBoxValue.checked});
+        }
+        if(checkBoxValue.name === 'ftpEnabled') {
+            console.log(checkBoxValue.checked);
+            setSettingsData({...settingsData, ftpEnabled: checkBoxValue.checked});
         }
     };
+
+    const handleButton = (event) => {
+        console.log(event);
+        if (event === "restart") {
+            restartHaptiCap();
+        }
+    }
 
     useEffect( () => {
         fetchSettings().then(r => {
@@ -151,8 +155,8 @@ export default function SettingsInputForm({}) {
 
     return (
         <form className={styles['info-form']} onSubmit={handleSubmit(onSubmit)}>
-            <Checkbox id='1' parentCallback={handleCheckBoxChange} disabled={false} name="asAP" labelname=""/>
             <label className={styles['info-label']} htmlFor="asAP">Is AccessPoint</label>
+            <Checkbox id='1' parentCallback={handleCheckBoxChange} defaultChecked={settingsData.asAP} disabled={false} name="asAP" labelname=""/>
             <label className={styles['info-label']} htmlFor="clientSSID">Client SSID:</label>
             <input className={styles['info-input']} name="clientSSID" type="text" id="clientSSID" defaultValue={settingsData.clientSSID} onChange={handleInputUpdate} />
             <label className={styles['info-label']} htmlFor="clientPasswd">Client Password:</label>
@@ -180,20 +184,22 @@ export default function SettingsInputForm({}) {
             <label className={styles['info-label']} htmlFor="compOffset">Compass Offset (deg):</label>
             <input className={styles['info-input']} name="compOffset" type="text" id="compOffset" defaultValue={settingsData.compOffset} onChange={handleInputUpdate} />
             <label className={styles['info-label']} htmlFor="touchEnabled">Touch enabled</label>
-            <input className={styles['info-input']} name="touchEnabled" type="text" id="touchEnabled" defaultValue={settingsData.touchEnabled} onChange={handleInputUpdate} />
+            <Checkbox id='2' parentCallback={handleCheckBoxChange} defaultChecked={settingsData.touchEnabled} disabled={false} name="touchEnabled" labelname=""/>
             <label className={styles['info-label']} htmlFor="touchThreshold">Touch threshold:</label>
             <input className={styles['info-input']} name="touchThreshold" type="text" id="touchThreshold" defaultValue={settingsData.touchThreshold} onChange={handleInputUpdate} />
             <label className={styles['info-label']} htmlFor="timeZoneOffset">Timezone Offset (h):</label>
             <input className={styles['info-input']} name="timeZoneOffset" type="text" id="timeZoneOffset" defaultValue={settingsData.timeZoneOffset} onChange={handleInputUpdate} />            
+            {/* <label className={styles['info-label']} htmlFor="ftpEnabled">FTP enabled</label>
+            <Checkbox id='3' parentCallback={handleCheckBoxChange} defaultChecked={settingsData.ftpEnabled} disabled={false} name="ftpEnabled" labelname=""/> */}
             <input type="submit" id="submit-button" className={styles['apply-button']} value="Apply Changes"/>
-            <div className={styles['empty-grid-space-4']}/>
+            <Button buttonText='Restart HaptiCap' parentCallback={handleButton} buttonName="restart" styleName='add-button'/>
             <div className={styles['error-message']}>
                 {(error !== "") ? (
                     <div className={styles['error']}>{error}</div>
                 ) : ((success !== "") ? (
                     <div className={styles['success']}>{success}</div>
                 ) : (
-                    <div className={styles['no-error']}> <br /> </div>
+                    <div className={styles['no-error']}> </div>
                     )
                 )}
             </div>

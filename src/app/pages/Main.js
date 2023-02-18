@@ -9,7 +9,7 @@ import DateContextProvider from "../contexts/DateContext";
 import {useLocation} from "react-router-dom";
 import StoreContextProvider from '../contexts/StoreContext';
 
-export default function Main(){
+export default function Main(props){
     const location = useLocation();
     // const [ openedPage, setOpenedPage ] = useState('');
     useEffect( () => {
@@ -22,10 +22,8 @@ export default function Main(){
             <Header title="HaptiCap V2"/>
                 <Search/>
                     <DateContextProvider>
-                        <StoreContextProvider>
-                            <Menubar/>
-                            <Routing/>
-                        </StoreContextProvider>
+                        <Menubar/>
+                        <Routing/>
                     </DateContextProvider>
              <Footer/>
          </div>

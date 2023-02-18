@@ -2,16 +2,12 @@ import React, {useContext, useEffect, useState} from 'react';
 import {useForm} from 'react-hook-form';
 import axios from 'axios';
 import styles from '../../styles/pages/InputForm.module.css';
-import {UtilityContext} from "../../contexts/UtilityContext";
-import {DateContext} from "../../contexts/DateContext";
 import {StoreContext} from "../../contexts/StoreContext";
 import Checkbox from "../components/CheckBox";
 import Button from "../components/Button";
 
 export default function DebugInputForm({}) {
     const DATEFORMAT = 'yyyy-MM-dd';
-    const {sortNames } = useContext(UtilityContext);
-    const {parseDate, formatDate } = useContext(DateContext);
     const {storeData, fetchDebugSettings, getServerHost} = useContext(StoreContext);
     const [loading, setLoading] = useState(true);
     const {register, handleSubmit, formState: { errors } } = useForm();
@@ -34,8 +30,15 @@ export default function DebugInputForm({}) {
                         "Content-Type": "application/json",
                     },
                 });
+                console.log(response);
                 setError("");
-                setSuccess(response.data.message);
+                setSuccess("");               
+                if(response.status === 200){
+                    setTimeout(500);
+                    setSuccess("Settings changed");
+                }else{
+                    setError("Error");
+                }
             }   catch (e){
                 setError(e.response.data.message);
                 if(e.response.status >= 401) {
@@ -51,30 +54,28 @@ export default function DebugInputForm({}) {
     };
 
     const handleCheckBoxChange = (checkBoxValue) => {
-        let checkValue = 0;
-        if(checkBoxValue.checked){
-            checkValue = 1;
-        }else{
-            checkValue = 0;
-        }
-        console.log(checkValue);
         if(checkBoxValue.name === 'debug2Serial') {
-            setDebugSettingsData({...debugSettingsData, debug2Serial: checkValue});
+            setDebugSettingsData({...debugSettingsData, debug2Serial: checkBoxValue});
         }
         if(checkBoxValue.name === 'debug2Telnet') {
-            setDebugSettingsData({...debugSettingsData, debug2Telnet: checkValue});
+            setDebugSettingsData({...debugSettingsData, debug2Telnet: checkBoxValue});
         }
         if(checkBoxValue.name === 'debugData2Serial') {
-            setDebugSettingsData({...debugSettingsData, debugData2Serial: checkValue});
+            setDebugSettingsData({...debugSettingsData, debugData2Serial: checkBoxValue});
         }
         if(checkBoxValue.name === 'debugHaptic') {
-            setDebugSettingsData({...debugSettingsData, debugHaptic: checkValue});
+            setDebugSettingsData({...debugSettingsData, debugHaptic: checkBoxValue});
         }
     };
+
+    function setCheckboxes(){
+        
+    }
 
     useEffect( () => {
         fetchDebugSettings().then(r => {
             setDebugSettingsData(r);
+            setCheckboxes(r);
             console.log(r);
         });
         
@@ -87,14 +88,14 @@ export default function DebugInputForm({}) {
 
     return (
         <form className={styles['info-form']} onSubmit={handleSubmit(onSubmit)}>
-                <Checkbox id='1' parentCallback={handleCheckBoxChange} disabled={false} name="debug2Serial" labelname="Serial" defaultChecked={debugSettingsData.debug2Serial}/>
-                <label className={styles['info-label']} htmlFor="debug2Serial"></label>
-                <Checkbox id='2' parentCallback={handleCheckBoxChange} disabled={false} name="debug2Telnet" labelname="Telnet" defaultChecked={debugSettingsData.debug2Telnet}/>
-                <label className={styles['info-label']} htmlFor="debug2Telnet"></label>
-                <Checkbox id='3' parentCallback={handleCheckBoxChange} disabled={false} name="debugData2Serial" labelname="Data 2Serial" defaultChecked={debugSettingsData.debugData2Serial}/>
-                <label className={styles['info-label']} htmlFor="debugData2Serial"></label>     
-                <Checkbox id='4' parentCallback={handleCheckBoxChange} disabled={false} name="debugHaptic" labelname="Haptic" defaultChecked={debugSettingsData.debugHaptic}/>
-                <label className={styles['info-label']} htmlFor="debugHaptic"></label> 
+                <Checkbox id='1' parentCallback={handleCheckBoxChange} disabled={false} name="debug2Serial" labelname="" defaultChecked={debugSettingsData.debug2Serial}/>
+                <label className={styles['info-label']} htmlFor="debug2Serial">Serial</label>
+                <Checkbox id='2' parentCallback={handleCheckBoxChange} disabled={false} name="debug2Telnet" labelname="" defaultChecked={debugSettingsData.debug2Telnet}/>
+                <label className={styles['info-label']} htmlFor="debug2Telnet">Telnet</label>
+                <Checkbox id='3' parentCallback={handleCheckBoxChange} disabled={false} name="debugData2Serial" labelname="" defaultChecked={debugSettingsData.debugData2Serial}/>
+                <label className={styles['info-label']} htmlFor="debugData2Serial">Data 2Serial</label>     
+                <Checkbox id='4' parentCallback={handleCheckBoxChange} disabled={false} name="debugHaptic" labelname="" defaultChecked={debugSettingsData.debugHaptic}/>
+                <label className={styles['info-label']} htmlFor="debugHaptic">Haptic</label> 
                 <input type="submit" id="submit-button" className={styles['apply-button']} value="Apply Changes"/>
             <div className={styles['empty-grid-space-4']}/>
             <div className={styles['error-message']}>
@@ -103,7 +104,7 @@ export default function DebugInputForm({}) {
                 ) : ((success !== "") ? (
                     <div className={styles['success']}>{success}</div>
                 ) : (
-                    <div className={styles['no-error']}> <br /> </div>
+                    <div className={styles['no-error']}></div>
                     )
                 )}
             </div>    

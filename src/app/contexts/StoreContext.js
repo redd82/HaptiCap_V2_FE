@@ -1,10 +1,11 @@
-import React, {createContext, useContext, useEffect} from 'react';
+import React, {createContext} from 'react';
 import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 
 export const StoreContext = createContext({});
 export default function StoreContextProvider({ children }) {
-    const serverHost = 'http://192.168.17.105';
+    //const serverHost = '%HOSTIP%';          // 
+    let serverHost = '';
     const navigate = useNavigate();
 
     let storedData = [];
@@ -22,7 +23,6 @@ export default function StoreContextProvider({ children }) {
                     
                 }, withCredentials: false,
             });
-            //console.log(response.data);
             return response.data;
         } catch (e) {
             //setTimeout(() => navigate('/settings'), 1000);
@@ -37,7 +37,6 @@ export default function StoreContextProvider({ children }) {
                     
                 }, withCredentials: false,
             });
-            //console.log(response.data);
             return response.data;
         } catch (e) {
             //setTimeout(() => navigate('/settings'), 1000);
@@ -52,11 +51,29 @@ export default function StoreContextProvider({ children }) {
                     
                 }, withCredentials: false,
             });
-            //console.log(response.data);
             return response.data;
         } catch (e) {
             //setTimeout(() => navigate('/settings'), 1000);
         }
+    }
+
+    async function restartHaptiCap() {
+        try {
+            const response = await axios.get(serverHost + '/restart', {
+                headers: {
+                    "Content-Type": "application/json",
+                    
+                }, withCredentials: false,
+            });
+            return response.data;
+        } catch (e) {
+            //setTimeout(() => navigate('/settings'), 1000);
+        }
+    }
+
+    function setServerHost(hostAddress){
+        serverHost = hostAddress;
+        // console.log('Host Address set to:' + hostAddress);
     }
 
     function getServerHost(){
@@ -69,6 +86,8 @@ export default function StoreContextProvider({ children }) {
         fetchCalData:fetchCalData,
         fetchDebugSettings:fetchDebugSettings,
         getServerHost:getServerHost,
+        setServerHost:setServerHost,
+        restartHaptiCap:restartHaptiCap,
     };
 
 

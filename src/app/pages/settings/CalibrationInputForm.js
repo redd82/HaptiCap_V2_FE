@@ -1,22 +1,13 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {useForm} from 'react-hook-form';
 import axios from 'axios';
-import {MapsContext} from "../../contexts/MapsContext";
-import ComboBox from "../components/ComboBox";
-import {FilePicker} from 'react-file-picker';
-import {nl} from "date-fns/locale";
 import styles from '../../styles/pages/InputForm.module.css';
-import {saveAs} from 'file-saver'
-import {UtilityContext} from "../../contexts/UtilityContext";
-import {DateContext} from "../../contexts/DateContext";
 import {StoreContext} from "../../contexts/StoreContext";
 import Checkbox from "../components/CheckBox";
 import Button from "../components/Button";
 
 export default function CalibrationInputForm({}) {
     const DATEFORMAT = 'yyyy-MM-dd';
-    const {sortNames } = useContext(UtilityContext);
-    const {parseDate, formatDate } = useContext(DateContext);
     const {storeData, fetchCalData, getServerHost} = useContext(StoreContext);
     const [loading, setLoading] = useState(true);
     const {register, handleSubmit, formState: { errors } } = useForm();
@@ -40,9 +31,17 @@ export default function CalibrationInputForm({}) {
                         "Content-Type": "application/json",
                     },
                 });
+                console.log(response);
                 setError("");
-                setSuccess(response.data.message);
-            }   catch (e){
+                setSuccess("");               
+                if(response.status === 200){
+                    setTimeout(500);
+                    setSuccess("Settings changed");
+                }else{
+                    setError("Error");
+                }
+            }   
+                catch (e){
                 setError(e.response.data.message);
                 if(e.response.status >= 401) {
 
@@ -154,7 +153,7 @@ export default function CalibrationInputForm({}) {
                 ) : ((success !== "") ? (
                     <div className={styles['success']}>{success}</div>
                 ) : (
-                    <div className={styles['no-error']}> <br /> </div>
+                    <div className={styles['no-error']}></div>
                     )
                 )}
             </div>
