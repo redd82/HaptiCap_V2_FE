@@ -2,13 +2,13 @@ import React, {useContext, useEffect, useState} from 'react';
 import {useForm} from 'react-hook-form';
 import axios from 'axios';
 import styles from '../../styles/pages/InputForm.module.css';
-import {StoreContext} from "../../contexts/StoreContext";
+import {CommsContext} from "../../contexts/CommsContext";
 import Checkbox from "../components/CheckBox";
 import Button from "../components/Button";
 
 export default function DebugInputForm({}) {
     const DATEFORMAT = 'yyyy-MM-dd';
-    const {storeData, fetchDebugSettings, getServerHost} = useContext(StoreContext);
+    const {storeData, fetchDebugSettings, getServerHost} = useContext(CommsContext);
     const [loading, setLoading] = useState(true);
     const {register, handleSubmit, formState: { errors } } = useForm();
     const [error, setError] = useState("");

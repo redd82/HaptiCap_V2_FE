@@ -9,6 +9,7 @@ import SettingsInputForm from "../pages/settings/SettingsInputForm";
 import DebugInputForm from "../pages/settings/DebugInputForm";
 import CalibrationInputForm from "../pages/settings/CalibrationInputForm";
 import Navigation from "../pages/map/Navigation";
+import SystemForm from "../pages/settings/SystemForm";
 
 export default function Routing(){
     return(
@@ -22,6 +23,7 @@ export default function Routing(){
                     <Route path="waypoints" element={<SelectMap title="Selected Map"/>} />
                 </Route>
                 <Route path="/system" element={<Settings title="System"/>}>
+                    <Route path="system-info" element={<SystemForm title="System Info" />} />
                     <Route path="debugform" element={<DebugInputForm title="Debugging" />} />
                     <Route path="settingsform" element={<SettingsInputForm title="HaptiCap Settings" />} />
                     <Route path="calibrationform" element={<CalibrationInputForm title="Calibration" />} />

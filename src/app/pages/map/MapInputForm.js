@@ -9,7 +9,7 @@ import styles from '../../styles/pages/InputForm.module.css';
 import {saveAs} from 'file-saver'
 import {UtilityContext} from "../../contexts/UtilityContext";
 import {DateContext} from "../../contexts/DateContext";
-import {StoreContext} from "../../contexts/StoreContext";
+import {CommsContext} from "../../contexts/CommsContext";
 import Checkbox from "../components/CheckBox";
 import Button from "../components/Button";
 
@@ -18,7 +18,7 @@ export default function MapInputForm({map, newMap}) {
     const {fetchMapList} = useContext(MapsContext);
     const {sortNames } = useContext(UtilityContext);
     const {parseDate, formatDate } = useContext(DateContext);
-    const {storeData, fetchData, getServerHost} = useContext(StoreContext);
+    const {storeData, fetchData, getServerHost} = useContext(CommsContext);
     const [loading, setLoading] = useState(true);
     const {register, handleSubmit, formState: { errors } } = useForm();
     const [error, setError] = useState("");

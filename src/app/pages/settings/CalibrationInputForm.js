@@ -2,13 +2,13 @@ import React, {useContext, useEffect, useState} from 'react';
 import {useForm} from 'react-hook-form';
 import axios from 'axios';
 import styles from '../../styles/pages/InputForm.module.css';
-import {StoreContext} from "../../contexts/StoreContext";
+import {CommsContext} from "../../contexts/CommsContext";
 import Checkbox from "../components/CheckBox";
 import Button from "../components/Button";
 
 export default function CalibrationInputForm({}) {
     const DATEFORMAT = 'yyyy-MM-dd';
-    const {storeData, fetchCalData, getServerHost} = useContext(StoreContext);
+    const {storeData, fetchCalData, getServerHost} = useContext(CommsContext);
     const [loading, setLoading] = useState(true);
     const {register, handleSubmit, formState: { errors } } = useForm();
     const [error, setError] = useState("");
@@ -100,6 +100,13 @@ export default function CalibrationInputForm({}) {
         }
     };
 
+    const handleButton = (event) => {
+        console.log(event);
+        if (event === "calibrate") {
+            
+        }
+    }
+
     useEffect( () => {
         fetchCalData().then(r => {
             setCalibrationData(r);
@@ -146,7 +153,7 @@ export default function CalibrationInputForm({}) {
             <label className={styles['info-label']} htmlFor="accelScaleZ">Accel. Scale Z:</label>
             <input className={styles['info-input']} name="accelScaleZ" type="text" id="accelScaleZ" defaultValue={calibrationData.accelScaleZ} onChange={handleInputUpdate} />            
             <input type="submit" id="submit-button" className={styles['apply-button']} value="Apply Changes"/>
-            <div className={styles['empty-grid-space-4']}/>
+            <Button buttonText='Calibrate Compass' parentCallback={handleButton} buttonName="calibrate" styleName='add-button'/>
             <div className={styles['error-message']}>
                 {(error !== "") ? (
                     <div className={styles['error']}>{error}</div>
