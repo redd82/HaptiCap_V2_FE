@@ -99,6 +99,34 @@ export default function CommsContextProvider({ children }) {
         }
     }
 
+    async function fetchGPSData() {
+        try {
+            const response = await axios.get(serverHost + '/getGPSData', {
+                headers: {
+                    "Content-Type": "application/json",
+                    
+                }, withCredentials: false,
+            });
+            return response.data;
+        } catch (e) {
+            //setTimeout(() => navigate('/settings'), 1000);
+        }
+    }
+
+    async function setHome() {
+        try {
+            const response = await axios.get(serverHost + '/setHome', {
+                headers: {
+                    "Content-Type": "application/json",
+                    
+                }, withCredentials: false,
+            });
+            return response.data;
+        } catch (e) {
+            //setTimeout(() => navigate('/settings'), 1000);
+        }
+    }
+
     async function restartHaptiCap() {
         try {
             const response = await axios.get(serverHost + '/restart', {
@@ -132,6 +160,8 @@ export default function CommsContextProvider({ children }) {
         fetchTime:fetchTime,
         fetchDate:fetchDate,
         fetchData:fetchData,
+        fetchGPSData:fetchGPSData,
+        setHome:setHome,
         restartHaptiCap:restartHaptiCap,
     };
 
