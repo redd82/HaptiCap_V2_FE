@@ -99,9 +99,9 @@ export default function CommsContextProvider({ children }) {
         }
     }
 
-    async function fetchGPSData() {
+    async function fetchSensorData() {
         try {
-            const response = await axios.get(serverHost + '/getGPSData', {
+            const response = await axios.get(serverHost + '/getSensorData', {
                 headers: {
                     "Content-Type": "application/json",
                     
@@ -160,7 +160,7 @@ export default function CommsContextProvider({ children }) {
         fetchTime:fetchTime,
         fetchDate:fetchDate,
         fetchData:fetchData,
-        fetchGPSData:fetchGPSData,
+        fetchSensorData:fetchSensorData,
         setHome:setHome,
         restartHaptiCap:restartHaptiCap,
     };

@@ -25,7 +25,12 @@ export default function Main(props){
         });
         fetchTime().then(r => {
             tempTime.GPSTime = r.GPSTime;
-            setEspTime(r);
+            if(tempTime.GPSTime){
+                setEspTime(r);
+            }else{
+                setEspTime('00:00')
+            }
+
             console.log('GPSTime:');
             console.log(tempTime.GPSTime);
         });        
