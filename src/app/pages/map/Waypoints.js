@@ -43,11 +43,6 @@ export default function Waypoints({map, newMap}) {
         //setCarFaultList(current => [...current, obj]);
     };
 
-    // const handleFaultCheckbox = (event) => {
-    //     updateFaultData(event);
-    //     console.log(carFaultList);
-    // }
-
     const handleInputUpdate = (event) => {
         const value = event?.target?.value;
         // if (event.target.name === "documentNr") {

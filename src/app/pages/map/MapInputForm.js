@@ -28,64 +28,6 @@ export default function MapInputForm({map, newMap}) {
     let newFaultTemp = {};
 
 
-    async function onSubmit(data){
-        // let serverHost = getServerHost();
-        // if(newCar){
-        //     console.log(carDocDetails);
-        //     let json = JSON.stringify({documentNr: carDocDetails.documentNr, filePath:carDocDetails.filePathName, inspectionCode: carDocDetails.inspectionCode,
-        //         firstRegistrationDate: carDocDetails.firstRegistrationDate, lastOwnerChangeDate: carDocDetails.lastOwnerChangeDate, numberOrCompanyName: carDocDetails.numberOrCompanyName,
-        //         registrationType: carDocDetails.registrationType, car: {brand:carData.brand, model:carData.model, year:carData.year, version:carData.version, nrOfDrivenKMs:carData.nrOfDrivenKMs,
-        //             numberPlate:carData.numberPlate, lastCheckupDate: carData.lastCheckupDate, workFinishedDate:carData.workFinishedDate}});
-        //     console.log(json);
-        //    try{
-        //         const response = await axios.post(serverHost + '/api/cars/documents/add', json, {
-        //             headers: {
-        //                 "Content-Type": "application/json",
-        //                 Authorization: `Bearer ${getJWT()}`,
-        //             },
-        //         });
-        //         setError("");
-        //         setSuccess(response.data.message);
-        //     }   catch (e){
-        //         console.log(e.response.data.message);
-        //         setError(e.response.data.message);
-        //         if(e.response.status >= 401) {
-        //             console.log(e.response);
-        //             logout();
-        //         }else if(e.response.status === 400){
-        //             console.log(e.response.data.message);
-        //             setError(e.response.data.message);
-        //         }
-        //     }
-        // }else{
-        //     setCarDocDetails({...carDocDetails,registrationType: "Customer"});
-        //     console.log(data);
-        //     let json = JSON.stringify({documentNr: carDocDetails.documentNr, filePathName:data.filePathName, inspectionCode: carDocDetails.inspectionCode,
-        //         firstRegistrationDate: carDocDetails.firstRegistrationDate, lastOwnerChangeDate: carDocDetails.lastOwnerChangeDate, numberOrCompanyName: carDocDetails.numberOrCompanyName,
-        //         registrationType: carDocDetails.registrationType, carDTO: {id: carData.id, brand:carData.brand, model:carData.model, year:carData.year, version:carData.version,
-        //         nrOfDrivenKMs:carData.nrOfDrivenKMs, numberPlate:carData.numberPlate, lastCheckupDate: carData.lastCheckupDate, broughtInDate: carData.broughtInDate,
-        //         workFinishedDate:carData.workFinishedDate}});
-        //     console.log(json);
-        //     try{
-        //         const response = await axios.put(serverHost + '/api/cars/documents/updateDocument', json, {
-        //             headers: {
-        //                 "Content-Type": "application/json",
-        //                 Authorization: `Bearer ${getJWT()}`,
-        //             },
-        //         });
-        //         setError("");
-        //         setSuccess(response.data.message);
-        //     }   catch (e){
-        //         setError(e.response.data.message);
-        //         if(e.response.status >= 401) {
-        //             logout();
-        //         }else if(e.response.status === 400){
-        //             setError(e.response.data.message);
-        //         }
-        //     }
-        // }
-    }
-
     async function uploadFile(fileToUpload){
         let serverHost = getServerHost();
         let expectedFilename = mapData.name + '.png';
@@ -96,7 +38,7 @@ export default function MapInputForm({map, newMap}) {
         if(fileToUpload.name === expectedFilename) {
             console.log(formData);
             try {
-                const response = await axios.post(serverHost + '/api/file-upload', formData, {
+                const response = await axios.post(serverHost + '/file-upload', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
@@ -114,7 +56,7 @@ export default function MapInputForm({map, newMap}) {
                 }
             }
         }else{
-            setError("Filename doesn't match document number!");
+            setError("Filename doesn't match map name!");
         }
     }
 
@@ -159,60 +101,23 @@ export default function MapInputForm({map, newMap}) {
 
     const handleInputUpdate = (event) => {
         const value = event?.target?.value;
-        // if (event.target.name === "documentNr") {
-        //     setCarDocDetails({...carDocDetails, documentNr: value});
-        // }
-        // if (event.target.name === "filePathName") {
-        //     setCarDocDetails({...carDocDetails, filePathName: value});
-        // }
-        // if (event.target.name === "inspectionCode") {
-        //     setCarDocDetails({...carDocDetails, inspectionCode: value});
-        // }
-        // if (event.target.name === "documentNr") {
-        //     setCarDocDetails({...carDocDetails, documentNr: value});
-        // }
-        // if (event.target.name === "numberPlate") {
-        //     setCarData({...carData, numberPlate: value});
-        // }
-        // if (event.target.name === "brand") {
-        //     setCarData({...carData, brand: value});
-        // }
-        // if (event.target.name === "model") {
-        //     setCarData({...carData, model: value});
-        // }
-        // if (event.target.name === "year") {
-        //     setCarData({...carData, year: value});
-        // }
-        // if (event.target.name === "version") {
-        //     setCarData({...carData, version: value});
-        // }
-        // if (event.target.name === "nrOfDrivenKMs") {
-        //     setCarData({...carData, nrOfDrivenKMs: value});
-        // }
+        if (event.target.name === "name") {
+            setMapData({...mapData, name: value});
+        }
+        if (event.target.name === "country") {
+            setMapData({...mapData, country: value});
+        }
+        if (event.target.name === "area") {
+            setMapData({...mapData, area: value});
+        }
     };
 
     useEffect( () => {
         if(newMap) {
             setReadOnly(false);
             setMapData({id: 0, name: "", country: "", mapFile: "", kmlFile: ""});
-            // fetchMapList().then(r => setMapList(extractCustomerNrs(r)));
         }else{
-            // getCarDataByNumberPlate(numberPlate).then(r => {
-            //     console.log(r);
-            //     if(r) {
-            //         console.log(r);
-            //         getCustomerData(r.numberOrCompanyName).then (cr => {
-            //             console.log(cr);
-            //             setOwnerData(cr);
-            //         })
-            //         setCarDocDetails(r);
-            //         setCarData(r.carDTO);
-            //         setCarFaultList( r.carDTO.faults);
-            //         console.log(r.carDTO.faults);
-            //     } else {
-            //         console.log("no data found");
-            //     }
-            // });
+
         }
         setLoading(false);
     }, []);
@@ -222,7 +127,7 @@ export default function MapInputForm({map, newMap}) {
     }
 
     return (
-        <form className={styles['info-form']} onSubmit={handleSubmit(onSubmit)}>
+        <form className={styles['info-form']} >
             <label className={styles['info-label']} htmlFor="id">ID: </label>
             {(newMap) ? (
                     <label>(new)</label>
@@ -236,11 +141,18 @@ export default function MapInputForm({map, newMap}) {
                 <div className={styles['valueRO-info-button']}>
                 <div id={styles['valueRO-numberplate']}>{mapData.name}</div>
                 </div>
-            )}         
-            <label className={styles['info-label']} htmlFor="model">Country: </label>
+            )}     
+            <label className={styles['info-label']} htmlFor="country">Country:</label>
+            {(newMap) ? (
+                <input className={styles['info-input']} name="country" type="text" id="country" defaultValue={mapData.country} onChange={handleInputUpdate} />
+            ) : (
+                <div className={styles['valueRO-info-button']}>
+                <div id={styles['valueRO-numberplate']}>{mapData.name}</div>
+                </div>
+            )}      
+            <label className={styles['info-label']} htmlFor="area">Area: </label>
             {(readOnly) ? (<div className={styles['ROdata']}> {mapData.country}</div>) : (
-                <input className={styles['info-input']} name="model" type="text" id="model" defaultValue={mapData.country}
-                       onChange={handleInputUpdate}/>
+                <input className={styles['info-input']} name="area" type="text" id="area" defaultValue={mapData.area} onChange={handleInputUpdate}/>
                 )
             }
             {(readOnly) ? (<></>) : (

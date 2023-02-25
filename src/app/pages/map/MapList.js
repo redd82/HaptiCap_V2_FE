@@ -10,7 +10,9 @@ import {UtilityContext} from "../../contexts/UtilityContext";
 export default function MapList({title}){
     const {fetchMapList} = useContext(MapsContext);
     const {sortData} = useContext(UtilityContext);
-    const [mapList, setMapList] = useState([{id: 1, name: "site 1", country: "Netherlands"},{id: 2, name: "site 2", country: "Chech Republic"}]);
+    const [mapList, setMapList] = useState([{id: 1, name: "site 1", country: "Netherlands", area: "Kaag en Braassem"},
+                                            {id: 2, name: "site 2", country: "Chech Republic", area: "Borderwar 12"},
+                                            {id: 3, name: "site 3", country: "Belgium", area: "Bunkers"}]);
     const [searchValue, setSearchValue] = useState("");
     const [loading, setLoading] = useState(true);
 
@@ -46,6 +48,7 @@ export default function MapList({title}){
                     <th className={styles['standard-th']}>id</th>
                     <th className={styles['standard-th']}>Name</th>
                     <th className={styles['standard-th']}>Country</th>
+                    <th className={styles['standard-th']}>Area</th>
                     </tr>
                 </thead>
                 {mapList

@@ -14,6 +14,7 @@ export default function Map({id, map}) {
             <td className={styles['standard-td']}>{map.id}</td>
             <td className={styles['standard-td']}>{map.name}</td>
             <td className={styles['standard-td']}>{map.country}</td>
+            <td className={styles['standard-td']}>{map.area}</td>
             </tr>
         </tbody>
     );
