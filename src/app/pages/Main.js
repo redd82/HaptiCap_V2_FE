@@ -8,38 +8,25 @@ import Header from "./Header";
 import DateContextProvider from "../contexts/DateContext";
 import {CommsContext} from "../contexts/CommsContext";
 import {useLocation} from "react-router-dom";
-import CommsContextProvider from '../contexts/CommsContext';
 
 export default function Main(props){
     const location = useLocation();
-    const [espTime, setEspTime] = useState({});
-    const [espDate, setEspDate] = useState({});
-    const {storeData, fetchSettings, getServerHost, restartHaptiCap, fetchTime, fetchDate} = useContext(CommsContext);
-    let tempTime = {GPSTime: ''};
+    const [espTimeDate, setEspTimeDate] = useState({});
+    const {storeData, fetchTimeDate} = useContext(CommsContext);
+    let tempTime = {GPSTime: '', GPSDate: ''};
     let timeDelay = 60000;
 
     useEffect( () => {
-        fetchDate().then(r => {
-            setEspDate(r);
+        fetchTimeDate().then(r => {
+            setEspTimeDate(r);
             console.log(r);
-        });
-        fetchTime().then(r => {
-            tempTime.GPSTime = r.GPSTime;
-            if(tempTime.GPSTime){
-                setEspTime(r);
-            }else{
-                setEspTime('00:00')
-            }
-
-            console.log('GPSTime:');
-            console.log(tempTime.GPSTime);
         });        
         }, []);
 
     useEffect(() => {
         const interval = setInterval(() => {
-            fetchTime().then(r => {
-                setEspTime(r);
+            fetchTimeDate().then(r => {
+                setEspTimeDate(r);
                 console.log(r);
             });
         }, timeDelay);
@@ -52,7 +39,7 @@ export default function Main(props){
     return (
     <>
          <div className={styles.main}>
-            <Header title="HaptiCap V2" time={espTime.GPSTime} date={espDate.GPSDate}/>
+            <Header title="HaptiCap V2" time={espTimeDate.GPSTime} date={espTimeDate.GPSDate}/>
                 <Search/>
                     <DateContextProvider>
                         <Menubar/>

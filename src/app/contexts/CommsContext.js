@@ -4,7 +4,6 @@ import axios from 'axios';
 
 export const CommsContext = createContext({});
 export default function CommsContextProvider({ children }) {
-    //const serverHost = '%HOSTIP%';          // 
     let serverHost = '';
     const navigate = useNavigate();
 
@@ -60,6 +59,20 @@ export default function CommsContextProvider({ children }) {
     async function fetchData() {
         try {
             const response = await axios.get(serverHost + '/data.json', {
+                headers: {
+                    "Content-Type": "application/json",
+                    
+                }, withCredentials: false,
+            });
+            return response.data;
+        } catch (e) {
+            //setTimeout(() => navigate('/settings'), 1000);
+        }
+    }
+
+    async function fetchTimeDate() {
+        try {
+            const response = await axios.get(serverHost + '/getGPSTimeDate', {
                 headers: {
                     "Content-Type": "application/json",
                     
@@ -157,6 +170,7 @@ export default function CommsContextProvider({ children }) {
         fetchDebugSettings:fetchDebugSettings,
         getServerHost:getServerHost,
         setServerHost:setServerHost,
+        fetchTimeDate:fetchTimeDate,
         fetchTime:fetchTime,
         fetchDate:fetchDate,
         fetchData:fetchData,

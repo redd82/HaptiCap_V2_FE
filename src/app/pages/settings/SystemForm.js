@@ -76,29 +76,35 @@ export default function SystemForm({}) {
             <label className={styles['info-label']} htmlFor="compassCardinal">Compass Cardinal Heading:</label>
             <input className={styles['ROdata']} name="compassCardinal" type="text" id="compassCardinal" defaultValue={sensorData.compassCardinal} disabled/>  
 
-            <label className={styles['info-label']} htmlFor="homebaseLat">Homebase Lat:</label>
-            <input className={styles['ROdata']} name="homebaseLat" type="text" id="homebaseLat" defaultValue={sensorData.homeBaseLat} disabled/>
+            <label className={styles['info-label']} htmlFor="homeBaseLat">Homebase Lat:</label>
+            <input className={styles['ROdata']} name="homeBaseLat" type="text" id="homeBaseLat" defaultValue={sensorData.homeBaseLat} disabled/>
 
-            <label className={styles['info-label']} htmlFor="homebaseLon">Homebase Lon:</label>
-            <input className={styles['ROdata']} name="homebaseLon" type="text" id="homebaseLon" defaultValue={sensorData.homeBaseLon} disabled/>
+            <label className={styles['info-label']} htmlFor="homeBaseLon">Homebase Lon:</label>
+            <input className={styles['ROdata']} name="homeBaseLon" type="text" id="homeBaseLon" defaultValue={sensorData.homeBaseLon} disabled/>
 
-            <label className={styles['info-label']} htmlFor="homeBaseBearing">Homebase Bearing:</label>
+            <label className={styles['info-label']} htmlFor="homeBaseBearing">Homebase bearing:</label>
             <input className={styles['ROdata']} name="homeBaseBearing" type="text" id="homeBaseBearing" defaultValue={sensorData.homeBaseBearing} disabled/>
 
-            <label className={styles['info-label']} htmlFor="homebaseCardinal">Homebase Direction:</label>
-            <input className={styles['ROdata']} name="homebaseCardinal" type="text" id="homebaseCardinal" defaultValue={sensorData.homebaseCardinal} disabled/>
+            <label className={styles['info-label']} htmlFor="homeBaseCardinal">Homebase direction:</label>
+            <input className={styles['ROdata']} name="homeBaseCardinal" type="text" id="homeBaseCardinal" defaultValue={sensorData.homeBaseCardinal} disabled/>
 
-            <label className={styles['info-label']} htmlFor="homeBaseDistance">Homebase Distance:</label>
+            <label className={styles['info-label']} htmlFor="homeBaseDistance">Homebase distance:</label>
             <input className={styles['ROdata']} name="homeBaseDistance" type="text" id="homeBaseDistance" defaultValue={sensorData.homeBaseDistance} disabled/>
 
-            <label className={styles['info-label']} htmlFor="currentWaypoint">Current Waypoint:</label>
-            <input className={styles['ROdata']} name="currentWaypoint" type="text" id="currentWaypoint" defaultValue={sensorData.currentWaypoint} disabled/>
+            <label className={styles['info-label']} htmlFor="wayPointLat">Current Waypoint Lat:</label>
+            <input className={styles['ROdata']} name="wayPointLat" type="text" id="wayPointLat" defaultValue={sensorData.wayPointLat} disabled/>
+
+            <label className={styles['info-label']} htmlFor="wayPointLon">Current Waypoint Lon:</label>
+            <input className={styles['ROdata']} name="wayPointLon" type="text" id="wayPointLon" defaultValue={sensorData.wayPointLon} disabled/>
 
             <label className={styles['info-label']} htmlFor="waypointBearing">Waypoint bearing:</label>
-            <input className={styles['ROdata']} name="waypointBearing" type="text" id="waypointBearing" defaultValue={sensorData.waypointBearing} disabled/>
+            <input className={styles['ROdata']} name="waypointBearing" type="text" id="wayPointBearing" defaultValue={sensorData.wayPointBearing} disabled/>
 
-            <label className={styles['info-label']} htmlFor="waypointCardinal">Waypoint Direction:</label>
-            <input className={styles['ROdata']} name="waypointCardinal" type="text" id="waypointCardinal" defaultValue={sensorData.waypointCardinal} disabled/>
+            <label className={styles['info-label']} htmlFor="wayPointCardinal">Waypoint direction:</label>
+            <input className={styles['ROdata']} name="wayPointCardinal" type="text" id="wayPointCardinal" defaultValue={sensorData.wayPointCardinal} disabled/>
+
+            <label className={styles['info-label']} htmlFor="wayPointDistance">Waypoint distance:</label>
+            <input className={styles['ROdata']} name="wayPointDistance" type="text" id="wayPointDistance" defaultValue={sensorData.wayPointDistance} disabled/>
         
             <Button buttonText='Set Home' parentCallback={handleButton} buttonName="setHome" styleName='add-button'/>
             <div className={styles['error-message']}>
