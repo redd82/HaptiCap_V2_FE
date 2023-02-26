@@ -1,4 +1,4 @@
-import React, {createContext} from 'react';
+import React, {createContext, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 
@@ -6,7 +6,8 @@ export const CommsContext = createContext({});
 export default function CommsContextProvider({ children }) {
     let serverHost = '';
     const navigate = useNavigate();
-
+    const [defaultTimeDateData, setDefaultTimeDateData] = useState({GPSTime: '12:24', GPSDate: '2023-2-26'});
+    const [defaultData, setDefaultData] = useState({});
     let storedData = [];
 
     function storeData(data, index){
@@ -24,7 +25,7 @@ export default function CommsContextProvider({ children }) {
             });
             return response.data;
         } catch (e) {
-            //setTimeout(() => navigate('/settings'), 1000);
+            return defaultData;
         }
     }
 
@@ -38,7 +39,7 @@ export default function CommsContextProvider({ children }) {
             });
             return response.data;
         } catch (e) {
-            //setTimeout(() => navigate('/settings'), 1000);
+            return defaultData;
         }
     }
 
@@ -52,7 +53,7 @@ export default function CommsContextProvider({ children }) {
             });
             return response.data;
         } catch (e) {
-            //setTimeout(() => navigate('/settings'), 1000);
+            return defaultData;
         }
     }
 
@@ -66,7 +67,7 @@ export default function CommsContextProvider({ children }) {
             });
             return response.data;
         } catch (e) {
-            //setTimeout(() => navigate('/settings'), 1000);
+            return defaultData;
         }
     }
 
@@ -80,7 +81,7 @@ export default function CommsContextProvider({ children }) {
             });
             return response.data;
         } catch (e) {
-            //setTimeout(() => navigate('/settings'), 1000);
+            return defaultTimeDateData;
         }
     }
 
@@ -94,7 +95,7 @@ export default function CommsContextProvider({ children }) {
             });
             return response.data;
         } catch (e) {
-            //setTimeout(() => navigate('/settings'), 1000);
+            return defaultTimeDateData;
         }
     }
 
@@ -108,7 +109,7 @@ export default function CommsContextProvider({ children }) {
             });
             return response.data;
         } catch (e) {
-            //setTimeout(() => navigate('/settings'), 1000);
+            return defaultTimeDateData;
         }
     }
 
@@ -122,7 +123,7 @@ export default function CommsContextProvider({ children }) {
             });
             return response.data;
         } catch (e) {
-            //setTimeout(() => navigate('/settings'), 1000);
+            return defaultData;
         }
     }
 
@@ -136,7 +137,7 @@ export default function CommsContextProvider({ children }) {
             });
             return response.data;
         } catch (e) {
-            //setTimeout(() => navigate('/settings'), 1000);
+            return defaultData;
         }
     }
 
@@ -150,7 +151,7 @@ export default function CommsContextProvider({ children }) {
             });
             return response.data;
         } catch (e) {
-            //setTimeout(() => navigate('/settings'), 1000);
+            return defaultData;
         }
     }
 

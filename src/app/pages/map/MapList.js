@@ -10,9 +10,9 @@ import {UtilityContext} from "../../contexts/UtilityContext";
 export default function MapList({title}){
     const {fetchMapList} = useContext(MapsContext);
     const {sortData} = useContext(UtilityContext);
-    const [mapList, setMapList] = useState([{id: 1, name: "site 1", country: "Netherlands", area: "Kaag en Braassem"},
-                                            {id: 2, name: "site 2", country: "Chech Republic", area: "Borderwar 12"},
-                                            {id: 3, name: "site 3", country: "Belgium", area: "Bunkers"}]);
+    const [mapList, setMapList] = useState([{id: 1, name: "site 1", country: "Netherlands", area: "Kaag en Braassem", pngFile:"", kmlFile:""},     // Temporary test data
+                                            {id: 2, name: "site 2", country: "Chech Republic", area: "Borderwar 12", pngFile:"", kmlFile:""},
+                                            {id: 3, name: "site 3", country: "Belgium", area: "Bunkers", pngFile:"", kmlFile:""}]);
     const [searchValue, setSearchValue] = useState("");
     const [loading, setLoading] = useState(true);
 

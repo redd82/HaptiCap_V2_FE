@@ -2,18 +2,15 @@ import React, {useContext, useEffect, useState} from 'react';
 import {useForm} from 'react-hook-form';
 import axios from 'axios';
 import {MapsContext} from "../../contexts/MapsContext";
-import ComboBox from "../components/ComboBox";
-import {FilePicker} from 'react-file-picker';
-import {nl} from "date-fns/locale";
 import styles from '../../styles/pages/InputForm.module.css';
-import {saveAs} from 'file-saver'
 import {UtilityContext} from "../../contexts/UtilityContext";
 import {DateContext} from "../../contexts/DateContext";
 import {CommsContext} from "../../contexts/CommsContext";
-import Checkbox from "../components/CheckBox";
+
+
 import Button from "../components/Button";
 
-export default function Waypoints({map, newMap}) {
+export default function Waypoints({map}) {
     const DATEFORMAT = 'yyyy-MM-dd';
     const {fetchMapList} = useContext(MapsContext);
     const {sortNames } = useContext(UtilityContext);
@@ -27,11 +24,6 @@ export default function Waypoints({map, newMap}) {
     const [mapData, setMapData] = useState(map);
     let newFaultTemp = {};
 
-
-    async function onSubmit(data){
-
-    }
-
     const handleComboChange = (event) => {
         console.log(event);
         const value = event?.target?.value;
@@ -40,7 +32,7 @@ export default function Waypoints({map, newMap}) {
     };
 
     const addObjectToArray = obj => {
-        //setCarFaultList(current => [...current, obj]);
+        //setList(current => [...current, obj]);
     };
 
     const handleInputUpdate = (event) => {
@@ -51,11 +43,6 @@ export default function Waypoints({map, newMap}) {
     };
 
     useEffect( () => {
-        if(newMap) {
-            setReadOnly(false);
-        }else{
-
-        }
         setLoading(false);
     }, []);
 
@@ -66,11 +53,8 @@ export default function Waypoints({map, newMap}) {
     return (
         <form className={styles['info-form']} >
             <label className={styles['info-label']} htmlFor="id">ID: </label>
-            {(newMap) ? (
-                    <label>(new)</label>
-                ) : (
-                    <div id="id">{mapData.id}</div>
-            )}
+            <div id="id">1</div> 
+            {/* {mapData.id} */}
         </form>
     );
 }

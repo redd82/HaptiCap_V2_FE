@@ -21,8 +21,7 @@ export default function DebugInputForm({}) {
     async function onSubmit(data){
         let serverHost = getServerHost();
             console.log(data);
-            let json = JSON.stringify({debug2Serial: debugSettingsData.debug2Serial, debug2Telnet:debugSettingsData.debug2Telnet, debugData2Serial: debugSettingsData.debugData2Serial,
-                debugHaptic: debugSettingsData.debugHaptic});
+            let json = JSON.stringify({debug2Serial: debugSettingsData.debug2Serial, debugGPS2Serial: debugSettingsData.debugGPS2Serial, debugHaptic: debugSettingsData.debugHaptic});
                 console.log(json);
             try{
                 const response = await axios.post(serverHost + '/settings/debug_form', json, {
@@ -57,11 +56,8 @@ export default function DebugInputForm({}) {
         if(checkBoxValue.name === 'debug2Serial') {
             setDebugSettingsData({...debugSettingsData, debug2Serial: checkBoxValue});
         }
-        if(checkBoxValue.name === 'debug2Telnet') {
-            setDebugSettingsData({...debugSettingsData, debug2Telnet: checkBoxValue});
-        }
-        if(checkBoxValue.name === 'debugData2Serial') {
-            setDebugSettingsData({...debugSettingsData, debugData2Serial: checkBoxValue});
+        if(checkBoxValue.name === 'debugGPS2Serial') {
+            setDebugSettingsData({...debugSettingsData, debugGPS2Serial: checkBoxValue});
         }
         if(checkBoxValue.name === 'debugHaptic') {
             setDebugSettingsData({...debugSettingsData, debugHaptic: checkBoxValue});
@@ -90,10 +86,8 @@ export default function DebugInputForm({}) {
         <form className={styles['info-form']} onSubmit={handleSubmit(onSubmit)}>
                 <Checkbox id='1' parentCallback={handleCheckBoxChange} disabled={false} name="debug2Serial" labelname="" defaultChecked={debugSettingsData.debug2Serial}/>
                 <label className={styles['info-label']} htmlFor="debug2Serial">Serial</label>
-                <Checkbox id='2' parentCallback={handleCheckBoxChange} disabled={false} name="debug2Telnet" labelname="" defaultChecked={debugSettingsData.debug2Telnet}/>
-                <label className={styles['info-label']} htmlFor="debug2Telnet">Telnet</label>
-                <Checkbox id='3' parentCallback={handleCheckBoxChange} disabled={false} name="debugData2Serial" labelname="" defaultChecked={debugSettingsData.debugData2Serial}/>
-                <label className={styles['info-label']} htmlFor="debugData2Serial">Data 2Serial</label>     
+                <Checkbox id='3' parentCallback={handleCheckBoxChange} disabled={false} name="debugGPS2Serial" labelname="" defaultChecked={debugSettingsData.debugGPS2Serial}/>
+                <label className={styles['info-label']} htmlFor="debugGPS2Serial">GPS2Serial</label>     
                 <Checkbox id='4' parentCallback={handleCheckBoxChange} disabled={false} name="debugHaptic" labelname="" defaultChecked={debugSettingsData.debugHaptic}/>
                 <label className={styles['info-label']} htmlFor="debugHaptic">Haptic</label> 
                 <input type="submit" id="submit-button" className={styles['apply-button']} value="Apply Changes"/>

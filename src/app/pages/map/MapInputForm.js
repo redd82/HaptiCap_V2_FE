@@ -27,64 +27,58 @@ export default function MapInputForm({map, newMap}) {
     const [mapData, setMapData] = useState(map);
     let newFaultTemp = {};
 
-    async function uploadPNGFile(fileToUpload){
+    async function uploadMapFile(fileToUpload) {
+        console.log();
         let serverHost = getServerHost();
         let formData = new FormData();
-        formData.append('file', fileToUpload);
-        console.log(fileToUpload);
         console.log(formData);
-        try {
-            const response = await axios.post(serverHost + '/file-upload', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-            console.log(response.data.filePath);
-            setMapData({...mapData, filePathName: response.data.filePath});
-            setError("");
-            setSuccess("File uploaded.");
-            return response;
-        } catch (e) {
-            setError(e.response.data.message);
-            if (e.response.status >= 401) {
-            } else if (e.response.status === 400) {
+        if(checkFields(fileToUpload)){
+            formData.append('file', fileToUpload);
+            console.log(fileToUpload);
+            console.log(formData);
+            try {
+                const response = await axios.post(serverHost + '/file-upload', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                });
+                console.log(response);
+                if(fileToUpload.type === "image/png"){
+                    setMapData({...mapData, pngFile: response.data.filePath});
+                }
+                if(fileToUpload.type === ""){
+                    setMapData({...mapData, kmlFile: response.data.filePath});
+                }
+
+
+                setError("");
+                setSuccess("File uploaded.");
+                return response;
+            } catch (e) {
                 setError(e.response.data.message);
+                if (e.response.status >= 401) {
+                } else if (e.response.status === 400) {
+                    setError(e.response.data.message);
+                }
             }
+        }else{
+            setError("Check input.");
         }
     }
 
-    async function uploadKMLFile(fileToUpload){
-        let serverHost = getServerHost();
-        let formData = new FormData();
-        formData.append('file', fileToUpload);
-        console.log(fileToUpload);
-        console.log(formData);
-        try {
-            const response = await axios.post(serverHost + '/file-upload', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-            console.log(response.data.filePath);
-            setMapData({...mapData, filePathName: response.data.filePath});
-            setError("");
-            setSuccess("File uploaded.");
-            return response;
-        } catch (e) {
-            setError(e.response.data.message);
-            if (e.response.status >= 401) {
-            } else if (e.response.status === 400) {
-                setError(e.response.data.message);
-            }
-        }
+    function useMap() {
+        setSuccess("Map selected for use.");
     }
 
-    function handleDownload(){
-
+    function checkFields(fileToUpload) {
+        console.log(fileToUpload);
+        if(mapData.name === '' || mapData.country === '' || mapData.area === ''){
+            return false;
+        }
+        return true;
     }
 
     const addObjectToArray = obj => {
-        //setCarFaultList(current => [...current, obj]);
     };
 
     const handleInputUpdate = (event) => {
@@ -110,7 +104,7 @@ export default function MapInputForm({map, newMap}) {
         setLoading(false);
     }, []);
 
-    if(loading){
+    if(loading) {
         return <div className={styles['loading-text']}>Loading Data... Please Wait...</div>
     }
 
@@ -135,22 +129,23 @@ export default function MapInputForm({map, newMap}) {
                 <input className={styles['info-input']} name="country" type="text" id="country" defaultValue={mapData.country} onChange={handleInputUpdate} />
             ) : (
                 <div className={styles['valueRO-info-button']}>
-                <div id={styles['valueRO-numberplate']}>{mapData.name}</div>
+                <div id={styles['valueRO-numberplate']}>{mapData.country}</div>
                 </div>
             )}      
             <label className={styles['info-label']} htmlFor="area">Area: </label>
-            {(readOnly) ? (<div className={styles['ROdata']}> {mapData.country}</div>) : (
+            {(readOnly) ? (<div className={styles['ROdata']}> {mapData.area}</div>
+            ) : (
                 <input className={styles['info-input']} name="area" type="text" id="area" defaultValue={mapData.area} onChange={handleInputUpdate}/>
                 )
             }
             {(readOnly) ? (<></>) : (
                 <>
-                <label className={styles['info-label']} htmlFor="mapPNGFile">Map: </label>
+                <label className={styles['info-label']} htmlFor="mapPNGFile">Map (PNG): </label>
                 <FilePicker extensions={['png']}
-                            onChange={FileObject => (uploadPNGFile(FileObject))}
+                            onChange={FileObject => (uploadMapFile(FileObject))}
                             onError={errMsg => (setError(errMsg))}>
-                    <button type="button">
-                        Upload map file
+                    <button type="button" name="PNGUpload">
+                        Upload PNG map file
                     </button>
                 </FilePicker>
                 </>
@@ -158,12 +153,12 @@ export default function MapInputForm({map, newMap}) {
             }
             {(readOnly) ? (<></>) : (
                 <>
-                <label className={styles['info-label']} htmlFor="kmlFile">KML: </label>
+                <label className={styles['info-label']} htmlFor="kmlFile">KML map: </label>
                 <FilePicker extensions={['kml']}
-                            onChange={FileObject => (uploadKMLFile(FileObject))}
+                            onChange={FileObject => (uploadMapFile(FileObject))}
                             onError={errMsg => (setError(errMsg))}>
-                    <button type="button">
-                        Upload KML file
+                    <button type="button" name="KMLUpload">
+                        Upload KML map file
                     </button>
                 </FilePicker>
                 </>
@@ -174,11 +169,13 @@ export default function MapInputForm({map, newMap}) {
             ): (
                 <>
                     <div className={styles['empty-grid-space-1-front']}/>
-                    <button className={styles['apply-button']} onClick={handleDownload} type="button"> Use map</button>
+                    <button className={styles['apply-button']} onClick={useMap} type="button"> Use map</button>
                 </>
             )}
-            <div className={styles['empty-grid-space-1-front']}/>
-            <input type="submit" id="submit-button" className={styles['apply-button']} value="Apply Changes"/>
+            {/* <div className={styles['empty-grid-space-1-front']}/>
+
+            <input type="submit" id="submit-button" className={styles['apply-button']} value="Apply Changes"/> */}
+            
             <div className={styles['empty-grid-space-4']}/>
             <div className={styles['error-message']}>
                 {(error !== "") ? (
