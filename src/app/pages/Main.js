@@ -8,17 +8,23 @@ import Header from "./Header";
 import DateContextProvider from "../contexts/DateContext";
 import {CommsContext} from "../contexts/CommsContext";
 import {useLocation} from "react-router-dom";
+import MapsContextProvider from '../contexts/MapsContext';
 
 export default function Main(props){
     const location = useLocation();
     const [espTimeDate, setEspTimeDate] = useState({});
-    const {storeData, fetchTimeDate} = useContext(CommsContext);
+    const [deviceData, setDeviceData] = useState({deviceName: ""});
+    const {storeData, fetchTimeDate, fetchDeviceName} = useContext(CommsContext);
     let tempTime = {GPSTime: '', GPSDate: ''};
     let timeDelay = 60000;
 
     useEffect( () => {
         fetchTimeDate().then(r => {
             setEspTimeDate(r);
+            console.log(r);
+        });
+        fetchDeviceName().then(r => {
+            setDeviceData(r);
             console.log(r);
         });        
         }, []);
@@ -39,12 +45,14 @@ export default function Main(props){
     return (
     <>
          <div className={styles.main}>
-            <Header title="HaptiCap V2" time={espTimeDate.GPSTime} date={espTimeDate.GPSDate}/>
+            <Header title={deviceData.deviceName} time={espTimeDate.GPSTime} date={espTimeDate.GPSDate}/>
                 <Search/>
-                    <DateContextProvider>
-                        <Menubar/>
-                        <Routing/>
-                    </DateContextProvider>
+                <MapsContextProvider>
+                        <DateContextProvider>
+                            <Menubar/>
+                            <Routing/>
+                        </DateContextProvider>
+                    </MapsContextProvider>
              <Footer/>
          </div>
     </>

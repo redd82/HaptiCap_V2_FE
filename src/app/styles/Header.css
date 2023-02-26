@@ -26,3 +26,8 @@
     flex-direction: row;
     padding: 4px;
 }
+
+.time-date{
+    display: flex;
+    justify-content: center;
+}

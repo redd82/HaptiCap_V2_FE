@@ -2,7 +2,7 @@ import React from 'react';
 import {useNavigate} from "react-router-dom";
 import styles from '../../../styles/Content.module.css';
 
-export default function Map({id, map}) {
+export default function MapData({id, map}) {
     const navigate = useNavigate();
     function handleClick(){
         navigate("../select-map", { replace: true, state: {map} });   //id: map.id, name: map.name, country: map.country

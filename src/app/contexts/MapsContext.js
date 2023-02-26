@@ -2,29 +2,32 @@ import React, {createContext, useContext, useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import {UtilityContext} from "./UtilityContext";
+import { CommsContext } from './CommsContext';
 
 export const MapsContext = createContext({});
 export default function MapsContextProvider({ children }) {
-    const serverHost = 'http://localhost:8081';
     const { sortData } = useContext(UtilityContext);
+    const { getServerHost } = useContext(CommsContext);
+
+    let selectedMap = {};
     const navigate = useNavigate();
 
     async function fetchMapList() {
         try {
-            const response = await axios.get(serverHost + '/api/maps/all', {
+            const response = await axios.get(getServerHost() + '/api/maps/all', {
                 headers: {
                     "Content-Type": "application/json",
                 },
             });
-            return sortData(response.data.cars);
+            return response;
         } catch (e) {
             setTimeout(() => navigate('/'), 1000);
         }
     }
 
-    async function getMapDataByNumber(number){
+    async function getMapDataByID(id){
         try {
-            const response = await axios.get(serverHost + `/api/maps/${number}`, {
+            const response = await axios.get(getServerHost() + `/api/maps/${id}`, {
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -38,7 +41,7 @@ export default function MapsContextProvider({ children }) {
 
     async function getMapDataByName(name){
         try {
-            const response = await axios.get(serverHost + `/api/maps/${name}`, {
+            const response = await axios.get(getServerHost() + `/api/maps/${name}`, {
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -50,14 +53,25 @@ export default function MapsContextProvider({ children }) {
         }
     }
 
+    function setSelelectedMap(map){
+        selectedMap = map;
+    }
+
+    function getSelectedMap(){
+        return selectedMap;
+    }
+
+
     useEffect( () => {
 
     }, []);
 
     const contextData = {
         fetchMapList:fetchMapList,
-        getMapDataByNumber:getMapDataByNumber,
+        getMapDataByID:getMapDataByID,
         getMapDataByName:getMapDataByName,
+        setSelelectedMap:setSelelectedMap,
+        getSelectedMap:getSelectedMap,
     };
 
     return (

@@ -8,6 +8,7 @@ export default function CommsContextProvider({ children }) {
     const navigate = useNavigate();
     const [defaultTimeDateData, setDefaultTimeDateData] = useState({GPSTime: '12:24', GPSDate: '2023-2-26'});
     const [defaultData, setDefaultData] = useState({});
+    const [defaultDeviceName, setDefaultDeviceName] = useState("Hapticap Default Name")
     let storedData = [];
 
     function storeData(data, index){
@@ -113,6 +114,21 @@ export default function CommsContextProvider({ children }) {
         }
     }
 
+    async function fetchDeviceName() {
+        try {
+            const response = await axios.get(serverHost + '/getDeviceName', {
+                headers: {
+                    "Content-Type": "application/json",
+                    
+                }, withCredentials: false,
+            });
+            return response.data;
+        } catch (e) {
+            return defaultDeviceName;
+        }
+    }
+
+
     async function fetchSensorData() {
         try {
             const response = await axios.get(serverHost + '/getSensorData', {
@@ -157,7 +173,7 @@ export default function CommsContextProvider({ children }) {
 
     function setServerHost(hostAddress){
         serverHost = hostAddress;
-        // console.log('Host Address set to:' + hostAddress);
+        // console.log('Host Address (from index.html) set to:' + hostAddress);
     }
 
     function getServerHost(){
@@ -174,6 +190,7 @@ export default function CommsContextProvider({ children }) {
         fetchTimeDate:fetchTimeDate,
         fetchTime:fetchTime,
         fetchDate:fetchDate,
+        fetchDeviceName:fetchDeviceName,
         fetchData:fetchData,
         fetchSensorData:fetchSensorData,
         setHome:setHome,

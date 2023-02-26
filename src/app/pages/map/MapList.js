@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useState} from "react";
 import styles from '../../styles/Content.module.css';
 import stylesSearchBar from "../../styles/components/SearchBar.module.css";
-import Map from "./components/Map"
+import Map from "./components/MapData"
 import SubHeader from "../components/SubHeader";
 import {MapsContext} from "../../contexts/MapsContext";
 import {UtilityContext} from "../../contexts/UtilityContext";
@@ -10,9 +10,8 @@ import {UtilityContext} from "../../contexts/UtilityContext";
 export default function MapList({title}){
     const {fetchMapList} = useContext(MapsContext);
     const {sortData} = useContext(UtilityContext);
-    const [mapList, setMapList] = useState([{id: 1, name: "site 1", country: "Netherlands", area: "Kaag en Braassem", pngFile:"", kmlFile:""},     // Temporary test data
-                                            {id: 2, name: "site 2", country: "Chech Republic", area: "Borderwar 12", pngFile:"", kmlFile:""},
-                                            {id: 3, name: "site 3", country: "Belgium", area: "Bunkers", pngFile:"", kmlFile:""}]);
+    const [mapList, setMapList] = useState([{id: 1, name: "Home", country: "Netherlands", area: "Kaag en Braassem", pngFile:"home.png", kmlFile:"home.kml"},     // Temporary test data
+                                            {id: 2, name: "site 2", country: "Chech Republic", area: "Borderwar 12", pngFile:"", kmlFile:""}]);
     const [searchValue, setSearchValue] = useState("");
     const [loading, setLoading] = useState(true);
 
