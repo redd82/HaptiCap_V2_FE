@@ -1,19 +1,19 @@
 import React, {useContext, useEffect, useState} from 'react';
+import {useNavigate} from "react-router-dom";
 import {useForm} from 'react-hook-form';
 import axios from 'axios';
 import {MapsContext} from "../../contexts/MapsContext";
-import ComboBox from "../components/ComboBox";
 import {FilePicker} from 'react-file-picker';
 import {nl} from "date-fns/locale";
 import styles from '../../styles/pages/InputForm.module.css';
-import {saveAs} from 'file-saver'
 import {UtilityContext} from "../../contexts/UtilityContext";
 import {DateContext} from "../../contexts/DateContext";
 import {CommsContext} from "../../contexts/CommsContext";
-import Checkbox from "../components/CheckBox";
 import Button from "../components/Button";
 
 export default function MapInputForm({map, newMap}) {
+    // console.log(map.pngFile);
+    const navigate = useNavigate();
     const DATEFORMAT = 'yyyy-MM-dd';
     const {fetchMapList} = useContext(MapsContext);
     const {sortNames } = useContext(UtilityContext);
@@ -42,6 +42,8 @@ export default function MapInputForm({map, newMap}) {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
+                    maxBodyLength: Infinity,
+                    maxContentLength: Infinity,
                 });
                 console.log(response);
                 let fileType = fileToUpload.type;
@@ -105,6 +107,7 @@ export default function MapInputForm({map, newMap}) {
 
     function useMap() {
         setSuccess("Map selected for use.");
+        navigate("../use-map", { state: {mapData} });   //id: map.id, name: map.name, country: map.country
     }
 
     function checkFields(fileToUpload) {
@@ -116,9 +119,6 @@ export default function MapInputForm({map, newMap}) {
         }
         return true;
     }
-
-    const addObjectToArray = obj => {
-    };
 
     const handleInputUpdate = (event) => {
         const value = event?.target?.value;
@@ -138,7 +138,7 @@ export default function MapInputForm({map, newMap}) {
             setReadOnly(false);
             setMapData({id: 0, name: "", country: "", mapPNG: "", kmlFile: ""});
         }else{
-
+            setMapData(map);
         }
         setLoading(false);
     }, []);
@@ -155,7 +155,7 @@ export default function MapInputForm({map, newMap}) {
                 ) : (
                     <div id="id">{mapData.id}</div>
             )}
-            <label className={styles['info-label']} htmlFor="name">Name:</label>
+            <label className={styles['info-label']} htmlFor="name">Name (short):</label>
             {(newMap) ? (
                 <input className={styles['info-input']} name="name" type="text" id="name" defaultValue={mapData.name} onChange={handleInputUpdate} />
             ) : (
@@ -180,7 +180,8 @@ export default function MapInputForm({map, newMap}) {
             {(!newMap) ? (<></>) : (
                 <>
                 <label className={styles['info-label']} htmlFor="mapPNGFile">Map (PNG): </label>
-                <FilePicker extensions={['png']}
+                <FilePicker maxSize={1.5}
+                            extensions={['png']}
                             onChange={FileObject => (uploadMapFile(FileObject))}
                             onError={errMsg => (setError(errMsg))}>
                     <button type="button">
@@ -212,11 +213,7 @@ export default function MapInputForm({map, newMap}) {
                     <div className={styles['empty-grid-space-1-front']}/>
                     <button className={styles['apply-button']} onClick={useMap} type="button"> Use map</button>
                 </>
-            )}
-            {/* <div className={styles['empty-grid-space-1-front']}/>
-
-            <input type="submit" id="submit-button" className={styles['apply-button']} value="Apply Changes"/> */}
-            
+            )}          
             <div className={styles['empty-grid-space-4']}/>
             <div className={styles['error-message']}>
                 {(error !== "") ? (

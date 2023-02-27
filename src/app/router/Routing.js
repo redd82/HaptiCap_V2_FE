@@ -4,6 +4,7 @@ import Home from "../pages/Home";
 import MapList from "../pages/map/MapList";
 import NewMap from "../pages/map/NewMap";
 import SelectMap from "../pages/map/SelectMap";
+import UseMap from "../pages/map/UseMap";
 import Settings from "../pages/settings/System";
 import SettingsInputForm from "../pages/settings/SettingsInputForm";
 import DebugInputForm from "../pages/settings/DebugInputForm";
@@ -21,6 +22,7 @@ export default function Routing(){
                     <Route path="map-list" element={<MapList title="Map list" />} />
                     <Route path="new-map" element={<NewMap title="Install New Map"/>} />
                     <Route path="select-map" element={<SelectMap title="Map"/>} />
+                    <Route path="use-map" element={<UseMap title="Map"/>} />
                     <Route path="waypoints" element={<Waypoints title="Waypoints current map"/>} />
                 </Route>
                 <Route path="/system" element={<Settings title="System"/>}>

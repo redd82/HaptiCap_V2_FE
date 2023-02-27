@@ -1,12 +1,15 @@
 import React from 'react';
 import styles from '../../styles/Content.module.css';
+import {useLocation} from "react-router-dom";
 
-export default function UseMap({title, imagesource}){
+export default function UseMap({}){
+    const location = useLocation();
+    const { mapData } = location.state;
+    console.log(mapData);
 
     return(
         <div>
-            <h1>{title}</h1>
-            <img className={styles['map']} src={imagesource} usemap='#gridmap' alt=""></img>
+            <img className={styles['map']} src={mapData.pngFile} useMap='#gridmap' alt=""></img>
         </div>
     );
 }

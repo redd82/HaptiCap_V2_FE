@@ -1,17 +1,16 @@
 import React, {useContext, useEffect, useState} from "react";
 import styles from '../../styles/Content.module.css';
 import stylesSearchBar from "../../styles/components/SearchBar.module.css";
-import Map from "./components/MapData"
+import MapData from "./components/MapData"
 import SubHeader from "../components/SubHeader";
 import {MapsContext} from "../../contexts/MapsContext";
 import {UtilityContext} from "../../contexts/UtilityContext";
 
-
 export default function MapList({title}){
     const {fetchMapList} = useContext(MapsContext);
     const {sortData} = useContext(UtilityContext);
-    const [mapList, setMapList] = useState([{id: 1, name: "Home", country: "Netherlands", area: "Kaag en Braassem", pngFile:"home.png", kmlFile:"home.kml"},     // Temporary test data
-                                            {id: 2, name: "site 2", country: "Chech Republic", area: "Borderwar 12", pngFile:"", kmlFile:""}]);
+    const [mapList, setMapList] = useState([{id: 1, name: "Home", country: "Netherlands", area: "Kaag en Braassem", pngFile:"/Home.png", kmlFile:"/Home.kml"},     // Temporary test data
+                                            {id: 2, name: "BW12", country: "Chech Republic", area: "Borderwar 12", pngFile:"", kmlFile:""}]);
     const [searchValue, setSearchValue] = useState("");
     const [loading, setLoading] = useState(true);
 
@@ -54,7 +53,7 @@ export default function MapList({title}){
                     .filter(map => map.country.match(new RegExp(searchValue, "i")))
                     .map((map) => (
                     <React.Fragment key={map.id}>
-                            <Map id={map.id} map={map}/>
+                            <MapData id={map.id} map={map}/>
                     </React.Fragment>
                 ))}
             </table>
