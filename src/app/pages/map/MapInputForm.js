@@ -30,6 +30,7 @@ export default function MapInputForm({map, newMap}) {
 
 
     async function uploadMapFile(fileToUpload) {
+        setError("");
         let serverHost = getServerHost();
         let formData = new FormData();
         if(checkFields(fileToUpload)){
@@ -51,10 +52,12 @@ export default function MapInputForm({map, newMap}) {
                     case "image/png" :
                         console.log("png uploaded");
                         setPngUploaded(true);
-                        setMapData({...mapData, pngFile: response.data.filePath});
+                        setSuccess("PNG File uploaded.");
+                        // setMapData({...mapData, pngFile: response.data.filePath});
                         break;
                     case "application/vnd.google-earth.kml+xml" :
-                        setMapData({...mapData, kmlFile: response.data.filePath});
+                        //setMapData({...mapData, kmlFile: response.data.filePath});
+                        setSuccess("KML File uploaded.");
                         sendMapInfo();
                         break;
                     default :
@@ -62,8 +65,11 @@ export default function MapInputForm({map, newMap}) {
                         setError("Wrong filetype upload.");
                         break;
                 }
-                setError("");
-                setSuccess("File uploaded.");
+                if(response.statusText === "OK"){
+                    setSuccess("File uploaded.");
+                } else {
+                    setError("Upload failed.");
+                }
                 return response;
             } catch (e) {
                 setError(e.response.data.message);
@@ -80,6 +86,7 @@ export default function MapInputForm({map, newMap}) {
     async function sendMapInfo(){
         let serverHost = getServerHost();
         let json = JSON.stringify({name: mapData.name, country: mapData.country, area: mapData.area});
+        console.log(json);
         try{
             const response = await axios.post(serverHost + '/navigation/register-map', json, {
                 headers: {
@@ -91,7 +98,7 @@ export default function MapInputForm({map, newMap}) {
             setSuccess("");               
             if(response.status === 200){
                 setTimeout(500);
-                setSuccess("Settings changed");
+                setSuccess("Map registered.");
             }else{
                 setError("Error");
             }
@@ -112,7 +119,7 @@ export default function MapInputForm({map, newMap}) {
 
     function checkFields(fileToUpload) {
         console.log(fileToUpload);
-        if(mapData.name === '' || mapData.country === '' || mapData.area === ''){
+        if(mapData.name === '' || mapData.country === '' || mapData.area === '' || fileToUpload.name === 'current.png'){
             return false;
         }else{
 
@@ -180,7 +187,7 @@ export default function MapInputForm({map, newMap}) {
             {(!newMap) ? (<></>) : (
                 <>
                 <label className={styles['info-label']} htmlFor="mapPNGFile">Map (PNG): </label>
-                <FilePicker maxSize={1.5}
+                <FilePicker maxSize={1.6}
                             extensions={['png']}
                             onChange={FileObject => (uploadMapFile(FileObject))}
                             onError={errMsg => (setError(errMsg))}>

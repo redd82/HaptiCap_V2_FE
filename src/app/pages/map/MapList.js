@@ -10,7 +10,7 @@ export default function MapList({title}){
     const {fetchMapList} = useContext(MapsContext);
     const {sortData} = useContext(UtilityContext);
     const [mapList, setMapList] = useState([{id: 1, name: "Home", country: "Netherlands", area: "Kaag en Braassem", pngFile:"/Home.png", kmlFile:"/Home.kml"},     // Temporary test data
-                                            {id: 2, name: "BW12", country: "Chech Republic", area: "Borderwar 12", pngFile:"", kmlFile:""}]);
+                                            {id: 2, name: "BW12", country: "Chech Republic", area: "Borderwar 12", pngFile:"/BW12.png", kmlFile:"BW12.kml"}]);
     const [searchValue, setSearchValue] = useState("");
     const [loading, setLoading] = useState(true);
 
