@@ -99,6 +99,7 @@ export default function MapInputForm({map, newMap}) {
             if(response.status === 200){
                 setTimeout(500);
                 setSuccess("Map registered.");
+                setError("");
             }else{
                 setError("Error");
             }
