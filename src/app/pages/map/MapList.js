@@ -14,7 +14,10 @@ export default function MapList({title}){
     const [loading, setLoading] = useState(true);
 
     useEffect( () => {
-        //fetchMapList().then(r => setMapList(sortData(r)));
+        fetchMapList().then(r => {
+            setMapList(r);
+            console.log(r);
+        });
         setLoading(false);
     }, []);
 

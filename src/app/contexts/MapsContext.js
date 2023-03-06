@@ -14,12 +14,12 @@ export default function MapsContextProvider({ children }) {
 
     async function fetchMapList() {
         try {
-            const response = await axios.get(getServerHost() + '/api/maps/all', {
+            const response = await axios.get(getServerHost() + '/mapData.json', {
                 headers: {
                     "Content-Type": "application/json",
                 },
             });
-            return response;
+            return response.data.maps;
         } catch (e) {
             setTimeout(() => navigate('/'), 1000);
         }

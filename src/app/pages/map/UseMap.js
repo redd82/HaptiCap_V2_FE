@@ -9,7 +9,7 @@ export default function UseMap({}){
 
     return(
         <div>
-            <img className={styles['map']} src={mapData.pngFile} useMap='#gridmap' alt=""></img>
+            <img className={styles['map']} src={mapData.pngFile} alt=""></img>
         </div>
     );
 }
