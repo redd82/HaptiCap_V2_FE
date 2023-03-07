@@ -9,7 +9,7 @@ import {UtilityContext} from "../../contexts/UtilityContext";
 export default function MapList({title}){
     const {fetchMapList} = useContext(MapsContext);
     const {sortData} = useContext(UtilityContext);
-    const [mapList, setMapList] = useState([{id: 1, name: "Home", country: "Netherlands", area: "Kaag en Braassem", pngFile:"/Home.png", kmlFile:"/Home.kml"}]);
+    const [mapList, setMapList] = useState([]);
     const [searchValue, setSearchValue] = useState("");
     const [loading, setLoading] = useState(true);
 

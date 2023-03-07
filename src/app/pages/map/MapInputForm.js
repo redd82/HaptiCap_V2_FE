@@ -24,6 +24,7 @@ export default function MapInputForm({map, newMap}) {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [readOnly, setReadOnly] = useState(true);
+    const [editMap, setEditMap] = useState(newMap);
     const [mapData, setMapData] = useState(map);
     const [pngUploaded, setPngUploaded] = useState(false);
     let newFaultTemp = {};
@@ -53,10 +54,8 @@ export default function MapInputForm({map, newMap}) {
                         console.log("png uploaded");
                         setPngUploaded(true);
                         setSuccess("PNG File uploaded.");
-                        // setMapData({...mapData, pngFile: response.data.filePath});
                         break;
                     case "application/vnd.google-earth.kml+xml" :
-                        //setMapData({...mapData, kmlFile: response.data.filePath});
                         setSuccess("KML File uploaded.");
                         sendMapInfo();
                         break;
@@ -85,7 +84,7 @@ export default function MapInputForm({map, newMap}) {
 
     async function sendMapInfo(){
         let serverHost = getServerHost();
-        let json = JSON.stringify({name: mapData.name, country: mapData.country, area: mapData.area});
+        let json = JSON.stringify({id: mapData.id, name: mapData.name, country: mapData.country, area: mapData.area});
         console.log(json);
         try{
             const response = await axios.post(serverHost + '/navigation/register-map', json, {
@@ -113,8 +112,46 @@ export default function MapInputForm({map, newMap}) {
         }
     }
 
+    async function requestMap(){
+        let serverHost = getServerHost();
+        let json = JSON.stringify({id: mapData.id, name: mapData.name, country: mapData.country, area: mapData.area, pngFile: mapData.pngFile, kmlFile: mapData.kmlFile});
+        console.log(json);
+        try{
+            const response = await axios.post(serverHost + '/navigation/request-map', json, {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            console.log(response);
+            setError("");
+            setSuccess("");               
+            if(response.status === 200){
+                setTimeout(500);
+                setSuccess("Map request sent.");
+                setError("");
+            }else{
+                setError("Error");
+            }
+        }   catch (e){
+            setError(e.response.data.message);
+            if(e.response.status >= 401) {
+
+            }else if(e.response.status === 400){
+                setError(e.response.data.message);
+            }
+        }
+    }
+
+    function editSelectedMap(){
+        setEditMap(true);
+    }
+
+    function saveChangesSelectedMap(){
+        setEditMap(false);
+    }
+
     function useMap() {
-        setSuccess("Map selected for use.");
+        requestMap();
         navigate("../use-map", { state: {mapData} });   //id: map.id, name: map.name, country: map.country
     }
 
@@ -142,12 +179,7 @@ export default function MapInputForm({map, newMap}) {
     };
 
     useEffect( () => {
-        if(newMap) {
-            setReadOnly(false);
-            setMapData({id: 0, name: "", country: "", mapPNG: "", kmlFile: ""});
-        }else{
-            setMapData(map);
-        }
+        setMapData(map);
         setLoading(false);
     }, []);
 
@@ -158,13 +190,9 @@ export default function MapInputForm({map, newMap}) {
     return (
         <form className={styles['info-form']} >
             <label className={styles['info-label']} htmlFor="id">ID: </label>
-            {(newMap) ? (
-                    <label>(new)</label>
-                ) : (
-                    <div id="id">{mapData.id}</div>
-            )}
+            <div id="id">{mapData.id}</div>
             <label className={styles['info-label']} htmlFor="name">Name (short):</label>
-            {(newMap) ? (
+            {(editMap) ? (
                 <input className={styles['info-input']} name="name" type="text" id="name" defaultValue={mapData.name} onChange={handleInputUpdate} />
             ) : (
                 <div className={styles['valueRO-info-button']}>
@@ -172,7 +200,7 @@ export default function MapInputForm({map, newMap}) {
                 </div>
             )}     
             <label className={styles['info-label']} htmlFor="country">Country:</label>
-            {(newMap) ? (
+            {(editMap) ? (
                 <input className={styles['info-input']} name="country" type="text" id="country" defaultValue={mapData.country} onChange={handleInputUpdate} />
             ) : (
                 <div className={styles['valueRO-info-button']}>
@@ -180,12 +208,14 @@ export default function MapInputForm({map, newMap}) {
                 </div>
             )}      
             <label className={styles['info-label']} htmlFor="area">Area: </label>
-            {(readOnly) ? (<div className={styles['ROdata']}> {mapData.area}</div>
-            ) : (
+            {(editMap) ? (
                 <input className={styles['info-input']} name="area" type="text" id="area" defaultValue={mapData.area} onChange={handleInputUpdate}/>
-                )
-            }
-            {(!newMap) ? (<></>) : (
+            ) : (
+                <div className={styles['valueRO-info-button']}>
+                <div id={styles['valueRO-numberplate']}>{mapData.area}</div>
+                </div>
+            )}
+            {(!editMap) ? (<></>) : (
                 <>
                 <label className={styles['info-label']} htmlFor="mapPNGFile">Map (PNG): </label>
                 <FilePicker maxSize={1.6}
@@ -199,7 +229,7 @@ export default function MapInputForm({map, newMap}) {
                 </>
                 )
             }
-            {(!newMap) ? (<></>) : (
+            {(!editMap) ? (<></>) : (
                     (!pngUploaded) ? (<></>) : (
                 <>
                 <label className={styles['info-label']} htmlFor="kmlFile">KML map: </label>
@@ -214,12 +244,15 @@ export default function MapInputForm({map, newMap}) {
                     )
                 )
             }
-            {(newMap) ? (
-                <div className={styles['empty-grid-space-2']}/>
+            {(editMap) ? (
+                <>
+                    {/* <div className={styles['empty-grid-space-1-front']}/> */}
+                    <button className={styles['apply-button']} onClick={saveChangesSelectedMap} type="button"> Save Changes</button>
+                </>
             ): (
                 <>
-                    <div className={styles['empty-grid-space-1-front']}/>
-                    <button className={styles['apply-button']} onClick={useMap} type="button"> Use map</button>
+                    <button className={styles['apply-button']} onClick={editSelectedMap} type="button"> Edit Map</button>
+                    <button className={styles['apply-button']} onClick={useMap} type="button"> Use Map</button>
                 </>
             )}          
             <div className={styles['empty-grid-space-4']}/>

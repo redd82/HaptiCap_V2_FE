@@ -25,7 +25,7 @@ export default function Navigation(){
         <div>
             <nav className={styles['sub-menu']}>
                 <div className={styles['sub-menu-ul']}>
-                    {newMapLink}
+                    {/* {newMapLink} */}
                     {waypointsLink}
                 </div>
             </nav>
