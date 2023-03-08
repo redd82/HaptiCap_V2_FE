@@ -23,6 +23,7 @@ export default function MapInputForm({map, newMap}) {
     const {register, handleSubmit, formState: { errors } } = useForm();
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const [uploading, setUploading] = useState(false);
     const [readOnly, setReadOnly] = useState(true);
     const [editMap, setEditMap] = useState(newMap);
     const [mapData, setMapData] = useState(map);
@@ -148,6 +149,7 @@ export default function MapInputForm({map, newMap}) {
 
     function saveChangesSelectedMap(){
         setEditMap(false);
+        sendMapInfo();
     }
 
     function useMap() {
