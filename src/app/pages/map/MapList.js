@@ -19,24 +19,15 @@ export default function MapList({title}){
             setTimeout(() => {
                 setLoading(false);
               }, 2000);
-            // setLoading(false);
             console.log(r);
         });
         
     }, []);
 
-    // if(loading){
-    //     return <>
-    //         {/* <div className={styles['loading-text']}>Loading Data... Please Wait...</div> */}
-    //         <div className="loader-container">
-    //         <div className="spinner"></div>
-    //         </div>
-    //     </>
-    // }else{
+
     //     if(!mapList || mapList.length === 0){
     //         return <p>No Maps</p>
     //     }
-    // }
     
 
     return(

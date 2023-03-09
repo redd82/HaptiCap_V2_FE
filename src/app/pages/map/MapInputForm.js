@@ -6,6 +6,7 @@ import {MapsContext} from "../../contexts/MapsContext";
 import {FilePicker} from 'react-file-picker';
 import {nl} from "date-fns/locale";
 import styles from '../../styles/pages/InputForm.module.css';
+import stylesContent from '../../styles/Content.module.css';
 import {UtilityContext} from "../../contexts/UtilityContext";
 import {DateContext} from "../../contexts/DateContext";
 import {CommsContext} from "../../contexts/CommsContext";
@@ -41,6 +42,7 @@ export default function MapInputForm({map, newMap}) {
             console.log(formData);
             try {
                 setSuccess("Uploading file....");
+                setLoading(true);
                 const response = await axios.post(serverHost + '/file-upload', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
@@ -55,20 +57,25 @@ export default function MapInputForm({map, newMap}) {
                         console.log("png uploaded");
                         setPngUploaded(true);
                         setSuccess("PNG File uploaded.");
+                        setLoading(false);
                         break;
                     case "application/vnd.google-earth.kml+xml" :
                         setSuccess("KML File uploaded.");
+                        setLoading(false);
                         sendMapInfo();
                         break;
                     default :
                         setSuccess("");
+                        setLoading(false);
                         setError("Wrong filetype upload.");
                         break;
                 }
                 if(response.statusText === "OK"){
                     setSuccess("File uploaded.");
+                    setLoading(false);
                 } else {
                     setError("Upload failed.");
+                    setLoading(false);
                 }
                 return response;
             } catch (e) {
@@ -185,9 +192,9 @@ export default function MapInputForm({map, newMap}) {
         setLoading(false);
     }, []);
 
-    if(loading) {
-        return <div className={styles['loading-text']}>Loading Data... Please Wait...</div>
-    }
+    // if(loading) {
+    //     return <div className={styles['loading-text']}>Loading Data... Please Wait...</div>
+    // }
 
     return (
         <form className={styles['info-form']} >
@@ -259,14 +266,25 @@ export default function MapInputForm({map, newMap}) {
             )}          
             <div className={styles['empty-grid-space-4']}/>
             <div className={styles['error-message']}>
-                {(error !== "") ? (
+                {(loading) ? (    
+                    <>
+                        <div className={styles['success']}>{success}</div>             
+                        <div className={stylesContent['loader-container-mapinput']}>
+                            <div className={stylesContent['spinner']}> </div>
+                        </div> 
+                    </>
+                ): (
+                (error !== "") ? (
                     <div className={styles['error']}>{error}</div>
-                ) : ((success !== "") ? (
-                    <div className={styles['success']}>{success}</div>
-                ) : (
-                    <div className={styles['no-error']}> <br /> </div>
-                    )
-                )}
+                    ) : (
+                        (success !== "") ? (
+                            <div className={styles['success']}>{success}</div>
+                        ) : (
+                        <div className={styles['no-error']}> <br /> </div>
+                        )
+                )
+                )
+                }
             </div>
         </form>
     );
