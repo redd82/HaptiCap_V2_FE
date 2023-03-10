@@ -19,7 +19,7 @@ export default function MapsContextProvider({ children }) {
                     "Content-Type": "application/json",
                 },
             });
-            return response.data.maps;
+            return response;
         } catch (e) {
             setTimeout(() => navigate('/'), 1000);
         }

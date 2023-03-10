@@ -29,6 +29,7 @@ export default function MapInputForm({map, newMap}) {
     const [editMap, setEditMap] = useState(newMap);
     const [mapData, setMapData] = useState(map);
     const [pngUploaded, setPngUploaded] = useState(false);
+    const [kmlUploaded, setKmlUploaded] = useState(false);
     let newFaultTemp = {};
 
 
@@ -61,6 +62,7 @@ export default function MapInputForm({map, newMap}) {
                         break;
                     case "application/vnd.google-earth.kml+xml" :
                         setSuccess("KML File uploaded.");
+                        setKmlUploaded(true);
                         setLoading(false);
                         sendMapInfo();
                         break;
@@ -192,10 +194,6 @@ export default function MapInputForm({map, newMap}) {
         setLoading(false);
     }, []);
 
-    // if(loading) {
-    //     return <div className={styles['loading-text']}>Loading Data... Please Wait...</div>
-    // }
-
     return (
         <form className={styles['info-form']} >
             <label className={styles['info-label']} htmlFor="id">ID: </label>
@@ -253,11 +251,16 @@ export default function MapInputForm({map, newMap}) {
                     )
                 )
             }
-            {(editMap) ? (
-                <>
-                    {/* <div className={styles['empty-grid-space-1-front']}/> */}
-                    <button className={styles['apply-button']} onClick={saveChangesSelectedMap} type="button"> Save Changes</button>
-                </>
+            {(editMap) ? ( 
+                (!kmlUploaded) ? 
+                    (
+                        <button className={styles['apply-button']} onClick={saveChangesSelectedMap} type="button"> Save Changes</button>
+                        // <div className={styles['empty-grid-space-1-front']}/>
+                    ):(
+                        <>
+                            <button className={styles['apply-button']} onClick={saveChangesSelectedMap} type="button"> Save Changes</button>
+                        </>
+                    )
             ): (
                 <>
                     <button className={styles['apply-button']} onClick={editSelectedMap} type="button"> Edit Map</button>

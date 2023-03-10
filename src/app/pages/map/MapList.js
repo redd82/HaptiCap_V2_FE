@@ -15,20 +15,18 @@ export default function MapList({title}){
 
     useEffect( () => {
         fetchMapList().then(r => {
-            setMapList(r);
+            if (typeof r.data.maps !== 'undefined'){
+                setMapList(r.data.maps);
+            }else{
+                setMapList([]);
+            }
             setTimeout(() => {
                 setLoading(false);
-              }, 2000);
+              }, 1000);
             console.log(r);
         });
         
     }, []);
-
-
-    //     if(!mapList || mapList.length === 0){
-    //         return <p>No Maps</p>
-    //     }
-    
 
     return(
         <>
@@ -36,7 +34,7 @@ export default function MapList({title}){
                 <div className={styles['loader-container']}>
                     <div className={styles['spinner']}> </div>
                 </div>
-            ) : (
+            ) : ( (mapList.length === 0) ? (<>No maps in list...</>) :(
             <>
                 <div className={stylesSearchBar['search-bar']}>
                     <label className={stylesSearchBar['search-label']} htmlFor="search">Country:</label>
@@ -66,6 +64,7 @@ export default function MapList({title}){
                     ))}
                 </table>
             </>
+            )
              )}
         </>
     );
