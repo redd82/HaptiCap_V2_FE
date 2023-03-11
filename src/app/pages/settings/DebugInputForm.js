@@ -8,7 +8,7 @@ import Button from "../components/Button";
 
 export default function DebugInputForm({}) {
     const DATEFORMAT = 'yyyy-MM-dd';
-    const {storeData, fetchDebugSettings, getServerHost} = useContext(CommsContext);
+    const {storeData, fetchDebugSettings, getServerHost, listFiles} = useContext(CommsContext);
     const [loading, setLoading] = useState(true);
     const {register, handleSubmit, formState: { errors } } = useForm();
     const [error, setError] = useState("");
@@ -68,6 +68,10 @@ export default function DebugInputForm({}) {
         
     }
 
+    function listFilesButton(){
+        listFiles();
+    }
+
     useEffect( () => {
         fetchDebugSettings().then(r => {
             setDebugSettingsData(r);
@@ -84,12 +88,15 @@ export default function DebugInputForm({}) {
 
     return (
         <form className={styles['info-form']} onSubmit={handleSubmit(onSubmit)}>
-                <Checkbox id='1' parentCallback={handleCheckBoxChange} disabled={false} name="debug2Serial" labelname="" defaultChecked={debugSettingsData.debug2Serial}/>
                 <label className={styles['info-label']} htmlFor="debug2Serial">Serial</label>
+                <Checkbox id='1' parentCallback={handleCheckBoxChange} disabled={false} name="debug2Serial" labelname="" defaultChecked={debugSettingsData.debug2Serial}/>
+                <label className={styles['info-label']} htmlFor="debugGPS2Serial">GPS2Serial</label>  
                 <Checkbox id='3' parentCallback={handleCheckBoxChange} disabled={false} name="debugGPS2Serial" labelname="" defaultChecked={debugSettingsData.debugGPS2Serial}/>
-                <label className={styles['info-label']} htmlFor="debugGPS2Serial">GPS2Serial</label>     
-                <Checkbox id='4' parentCallback={handleCheckBoxChange} disabled={false} name="debugHaptic" labelname="" defaultChecked={debugSettingsData.debugHaptic}/>
                 <label className={styles['info-label']} htmlFor="debugHaptic">Haptic</label> 
+                <Checkbox id='4' parentCallback={handleCheckBoxChange} disabled={false} name="debugHaptic" labelname="" defaultChecked={debugSettingsData.debugHaptic}/>
+                <label className={styles['info-label']} htmlFor="fileList">Files:</label>
+
+                <button className={styles['apply-button']} onClick={listFilesButton} type="button"> List files </button>
                 <input type="submit" id="submit-button" className={styles['apply-button']} value="Apply Changes"/>
             <div className={styles['empty-grid-space-4']}/>
             <div className={styles['error-message']}>

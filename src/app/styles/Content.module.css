@@ -102,14 +102,23 @@ article{
     border-bottom: 1px solid var(--color-8);
 }
 
-.standard-td {
+.standard-td-5 {
+    width: 5%;
+    text-align: center;
+}
+
+.standard-td-10 {
+    width: 10%;
+    text-align: center;
+}
+
+.standard-td-25 {
     width: 25%;
     text-align: center;
 }
 
 .standard-tr{
     vertical-align: middle;
-
 }
 
 .standard-tr:hover{

@@ -7,6 +7,7 @@ export default function CommsContextProvider({ children }) {
     let serverHost = '';
     const navigate = useNavigate();
     const [defaultTimeDateData, setDefaultTimeDateData] = useState({GPSTime: '00:00', GPSDate: '00-00-00'});
+    const [defaultPositionData, setDefaultPositionData] = useState({GPSLat: 0.00000000, GPSLon: 0.00000000});
     const [defaultData, setDefaultData] = useState({});
     const [defaultDeviceName, setDefaultDeviceName] = useState("Hapticap Default Name")
     let storedData = [];
@@ -114,6 +115,20 @@ export default function CommsContextProvider({ children }) {
         }
     }
 
+    async function fetchPosition() {
+        try {
+            const response = await axios.get(serverHost + '/getGPSPosition', {
+                headers: {
+                    "Content-Type": "application/json",
+                    
+                }, withCredentials: false,
+            });
+            return response.data;
+        } catch (e) {
+            return defaultPositionData;
+        }
+    }
+
     async function fetchDeviceName() {
         try {
             const response = await axios.get(serverHost + '/getDeviceName', {
@@ -146,6 +161,20 @@ export default function CommsContextProvider({ children }) {
     async function setHome() {
         try {
             const response = await axios.get(serverHost + '/setHome', {
+                headers: {
+                    "Content-Type": "application/json",
+                    
+                }, withCredentials: false,
+            });
+            return response.data;
+        } catch (e) {
+            return defaultData;
+        }
+    }
+
+    async function listFiles() {
+        try {
+            const response = await axios.get(serverHost + '/listFiles', {
                 headers: {
                     "Content-Type": "application/json",
                     
@@ -190,10 +219,12 @@ export default function CommsContextProvider({ children }) {
         fetchTimeDate:fetchTimeDate,
         fetchTime:fetchTime,
         fetchDate:fetchDate,
+        fetchPosition:fetchPosition,
         fetchDeviceName:fetchDeviceName,
         fetchData:fetchData,
         fetchSensorData:fetchSensorData,
         setHome:setHome,
+        listFiles:listFiles,
         restartHaptiCap:restartHaptiCap,
     };
 

@@ -12,10 +12,10 @@ export default function MapData({id, map}) {
     return (
         <tbody>
             <tr className={styles['standard-tr']} key={map.id} onClick={handleClick}>
-            <td className={styles['standard-td']}>{map.id}</td>
-            <td className={styles['standard-td']}>{map.name}</td>
-            <td className={styles['standard-td']}>{map.country}</td>
-            <td className={styles['standard-td']}>{map.area}</td>
+            <td className={styles['standard-td-10']}>{map.id}</td>
+            <td className={styles['standard-td-25']}>{map.name}</td>
+            <td className={styles['standard-td-25']}>{map.country}</td>
+            <td className={styles['standard-td-25']}>{map.area}</td>
             </tr>
         </tbody>
     );

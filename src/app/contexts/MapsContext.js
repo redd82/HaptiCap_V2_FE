@@ -25,34 +25,6 @@ export default function MapsContextProvider({ children }) {
         }
     }
 
-    async function getMapDataByID(id){
-        try {
-            const response = await axios.get(getServerHost() + `/api/maps/${id}`, {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-            return response;
-        } catch (e) {
-            console.error(e);
-            setTimeout(() => navigate('/'), 1000);
-        }
-    }
-
-    async function getMapDataByName(name){
-        try {
-            const response = await axios.get(getServerHost() + `/api/maps/${name}`, {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-            return response;
-        } catch (e) {
-            console.error(e);
-            setTimeout(() => navigate('/'), 1000);
-        }
-    }
-
     function setSelelectedMap(map){
         selectedMap = map;
     }
@@ -68,8 +40,6 @@ export default function MapsContextProvider({ children }) {
 
     const contextData = {
         fetchMapList:fetchMapList,
-        getMapDataByID:getMapDataByID,
-        getMapDataByName:getMapDataByName,
         setSelelectedMap:setSelelectedMap,
         getSelectedMap:getSelectedMap,
     };
