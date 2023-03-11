@@ -7,7 +7,6 @@ export default function MapData({id, map}) {
     function handleClick(){
         navigate("../select-map", { replace: true, state: {map} });   //id: map.id, name: map.name, country: map.country
     }
-    //console.log(map);
 
     return (
         <tbody>

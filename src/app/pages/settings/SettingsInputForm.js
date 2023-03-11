@@ -24,7 +24,7 @@ export default function SettingsInputForm({}) {
                 WAYPOINT_LON: settingsData.WAYPOINT_LON, declAngleRad: settingsData.declAngleRad, sleepMins: settingsData.sleepMins, touchThreshold: settingsData.touchThreshold,
                 touchEnabled: settingsData.touchEnabled, maxDistance:settingsData.maxDistance, maxDelay:settingsData.maxDelay, timeZoneOffset:settingsData.timeZoneOffset, 
                 ftpEnabled: settingsData.ftpEnabled});
-            console.log(json);
+                console.log(json);
             try{
                 const response = await axios.post(serverHost + '/settings/settings_form', json, {
                     headers: {
@@ -34,7 +34,7 @@ export default function SettingsInputForm({}) {
                 console.log(response);
                 setError("");
                 setSuccess("");               
-                if(response.status === 200){
+                if(response.statusText === "OK"){
                     setTimeout(500);
                     setSuccess("Settings changed");
                 }else{
@@ -153,8 +153,9 @@ export default function SettingsInputForm({}) {
         return <div className={styles['loading-text']}>Loading Data... Please Wait...</div>
     }
 
+    //onSubmit={handleSubmit(onSubmit)}
     return (
-        <form className={styles['info-form']} onSubmit={handleSubmit(onSubmit)}>
+        <form className={styles['info-form']} >
             <label className={styles['info-label']} htmlFor="asAP">Is AccessPoint</label>
             <Checkbox id='1' parentCallback={handleCheckBoxChange} defaultChecked={settingsData.asAP} disabled={false} name="asAP" labelname=""/>
             <label className={styles['info-label']} htmlFor="clientSSID">Client SSID:</label>
@@ -189,9 +190,8 @@ export default function SettingsInputForm({}) {
             <input className={styles['info-input']} name="touchThreshold" type="text" id="touchThreshold" defaultValue={settingsData.touchThreshold} onChange={handleInputUpdate} />
             <label className={styles['info-label']} htmlFor="timeZoneOffset">Timezone Offset (h):</label>
             <input className={styles['info-input']} name="timeZoneOffset" type="text" id="timeZoneOffset" defaultValue={settingsData.timeZoneOffset} onChange={handleInputUpdate} />            
-            {/* <label className={styles['info-label']} htmlFor="ftpEnabled">FTP enabled</label>
-            <Checkbox id='3' parentCallback={handleCheckBoxChange} defaultChecked={settingsData.ftpEnabled} disabled={false} name="ftpEnabled" labelname=""/> */}
-            <input type="submit" id="submit-button" className={styles['apply-button']} value="Apply Changes"/>
+            {/* <input type="submit" id="submit-button" className={styles['apply-button']} value="Apply Changes"/> */}
+            <button className={styles['apply-button']} onClick={onSubmit} type="button"> Apply Changes</button>
             <Button buttonText='Restart HaptiCap' parentCallback={handleButton} buttonName="restart" styleName='add-button'/>
             <div className={styles['error-message']}>
                 {(error !== "") ? (

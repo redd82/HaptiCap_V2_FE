@@ -112,6 +112,11 @@ article{
     text-align: center;
 }
 
+.standard-td-15 {
+    width: 15%;
+    text-align: center;
+}
+
 .standard-td-25 {
     width: 25%;
     text-align: center;

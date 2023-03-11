@@ -2,24 +2,19 @@ import React, {useContext, useEffect, useState} from 'react';
 import {useNavigate} from "react-router-dom";
 import {useForm} from 'react-hook-form';
 import axios from 'axios';
-import {MapsContext} from "../../contexts/MapsContext";
 import {FilePicker} from 'react-file-picker';
-import {nl} from "date-fns/locale";
+import {CommsContext} from "../../contexts/CommsContext";
+import { StoreContext } from '../../contexts/StoreContext';
 import styles from '../../styles/pages/InputForm.module.css';
 import stylesContent from '../../styles/Content.module.css';
-import {UtilityContext} from "../../contexts/UtilityContext";
-import {DateContext} from "../../contexts/DateContext";
-import {CommsContext} from "../../contexts/CommsContext";
 import Button from "../components/Button";
 
 export default function MapInputForm({map, newMap}) {
     // console.log(map.pngFile);
     const navigate = useNavigate();
     const DATEFORMAT = 'yyyy-MM-dd';
-    const {fetchMapList} = useContext(MapsContext);
-    const {sortNames } = useContext(UtilityContext);
-    const {parseDate, formatDate } = useContext(DateContext);
     const {storeData, fetchData, getServerHost} = useContext(CommsContext);
+    const {setHomeToUseMap} = useContext(StoreContext);
     const [loading, setLoading] = useState(true);
     const {register, handleSubmit, formState: { errors } } = useForm();
     const [error, setError] = useState("");
@@ -199,6 +194,8 @@ export default function MapInputForm({map, newMap}) {
 
     function useMap() {
         requestMap();
+        setHomeToUseMap(mapData);
+        console.log("navigate to usemap");
         navigate("../use-map", { state: {mapData} });   //id: map.id, name: map.name, country: map.country
     }
 
@@ -291,7 +288,6 @@ export default function MapInputForm({map, newMap}) {
                 (!kmlUploaded) ? 
                     (
                         <button className={styles['apply-button']} onClick={saveChangesSelectedMap} type="button"> Save Changes</button>
-                        // <div className={styles['empty-grid-space-1-front']}/>
                     ):(
                         <>
                             <button className={styles['apply-button']} onClick={saveChangesSelectedMap} type="button"> Save Changes</button>

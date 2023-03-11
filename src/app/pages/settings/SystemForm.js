@@ -43,22 +43,6 @@ export default function SystemForm({}) {
         return <div className={styles['loading-text']}>Loading Data... Please Wait...</div>
     }
 
-
-    // SensorDataDoc["sensor"] = "gps";
-    // SensorDataDoc["time"] = sensorData.gpsTime;
-    // SensorDataDoc["ownLat"] = sensorData.ownLat;  
-    // SensorDataDoc["ownLon"] = sensorData.ownLon;
-    // SensorDataDoc["homeBaseLat"] = sensorData.homeBaseLat;
-    // SensorDataDoc["homeBaseLon"] = sensorData.homeBaseLon;
-    // SensorDataDoc["homeBaseBearing"] = sensorData.homeBaseBearing;
-    // SensorDataDoc["homebaseCardinal"] = sensorData.homebaseCardinal;
-    // SensorDataDoc["homeBaseDistance"] = sensorData.homeBaseDistance;
-    // SensorDataDoc["wayPointBearing"] = sensorData.wayPointBearing;
-    // SensorDataDoc["waypointCardinal"] = sensorData.waypointCardinal;
-    // SensorDataDoc["compassHeading"] = sensorData.compassHeading;
-    // SensorDataDoc["compassCardinal"] = sensorData.compassCardinal;
-    // SensorDataDoc["nrOfSatellites"] = sensorData.nrOfSatellites;
-
     return (
         <form className={styles['info-form']} >
             <label className={styles['info-label']} htmlFor="nrOfSatellites">Number of Sats.:</label>
@@ -73,7 +57,7 @@ export default function SystemForm({}) {
             <label className={styles['info-label']} htmlFor="compassHeading">Compass Heading:</label>
             <input className={styles['ROdata']} name="compassHeading" type="text" id="compassHeading" defaultValue={sensorData.compassHeading} disabled/>
 
-            <label className={styles['info-label']} htmlFor="compassCardinal">Compass Cardinal Heading:</label>
+            <label className={styles['info-label']} htmlFor="compassCardinal">Compass Cardinal Hdg:</label>
             <input className={styles['ROdata']} name="compassCardinal" type="text" id="compassCardinal" defaultValue={sensorData.compassCardinal} disabled/>  
 
             <label className={styles['info-label']} htmlFor="homeBaseLat">Homebase Lat:</label>

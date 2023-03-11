@@ -10,7 +10,9 @@ export default function Menubar(){
     let systemLink = <div/>;
 
     try {
+        
         homeLink = <div className={styles['menu-li']}><NavLink to="/">Home</NavLink></div>;
+        
         navigationLink = <div className={styles['menu-li']}><NavLink to="/navigation/map-list">Navigation</NavLink></div>;
         systemLink = <div className={styles['menu-li']}><NavLink to="/system/system-info">System</NavLink></div>;
     }

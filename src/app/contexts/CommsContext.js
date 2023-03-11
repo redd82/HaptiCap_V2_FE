@@ -7,7 +7,7 @@ export default function CommsContextProvider({ children }) {
     let serverHost = '';
     const navigate = useNavigate();
     const [defaultTimeDateData, setDefaultTimeDateData] = useState({GPSTime: '00:00', GPSDate: '00-00-00'});
-    const [defaultPositionData, setDefaultPositionData] = useState({GPSLat: 0.00000000, GPSLon: 0.00000000});
+    const [defaultPositionData, setDefaultPositionData] = useState({GPSLat:"", GPSLon: ""});
     const [defaultData, setDefaultData] = useState({});
     const [defaultDeviceName, setDefaultDeviceName] = useState("Hapticap Default Name")
     let storedData = [];
