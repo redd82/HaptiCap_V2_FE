@@ -12,7 +12,6 @@ import { convertLegacyProps } from 'antd/es/button/button';
 
 
 export default function DebugInputForm({}) {
-    const mountedRef = useRef(true);
     const DATEFORMAT = 'yyyy-MM-dd';
     const {storeData, fetchDebugSettings, getServerHost, listFiles} = useContext(CommsContext);
     const {DataConversion, CalculateDistance} = useContext(CalculationContext);
@@ -150,11 +149,11 @@ export default function DebugInputForm({}) {
     function runDataConversion(){
         let output = [];
         output = DataConversion(mapDataDebug.north, mapDataDebug.west, mapDataDebug.south, mapDataDebug.east, mapDataDebug.rotation, mapDataDebug.imageHeight, mapDataDebug.imageWidth);
+        setOutputDebug({...outputDebug, outLegs0: output[0], outlegs1: output[1], scaleHeight: output[2], scaleWidth: output[3]});
         //console.log(mapDataDebug);
-        //console.log(output);
+        console.log(output);
         //console.log(CalculateDistance(mapDataDebug.north, mapDataDebug.west, mapDataDebug.south, mapDataDebug.east));
         //output = [legs[0], legs[1], ScaleHeight, ScaleWidth];
-        setOutputDebug({...outputDebug, outLegs0: output[0], outlegs1: output[1], scaleHeight: output[2], scaleWidth: output[3]});
     } 
 
     useEffect( () => {
@@ -162,9 +161,9 @@ export default function DebugInputForm({}) {
             setDebugSettingsData(r);
             setCheckboxes(r);
         });
-        return () => {
-            mountedRef.current = false
-          }
+        // return () => {
+        //     mountedRef.current = false
+        //   }
         setLoading(false);
     }, []);
 
