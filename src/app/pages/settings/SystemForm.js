@@ -30,7 +30,6 @@ export default function SystemForm({}) {
         const interval = setInterval(() => {
             fetchSensorData().then(r => {
                 setSensorData(r);
-                console.log(r);
             });
         }, timeDelay);
         setLoading(false);

@@ -10,6 +10,7 @@ import {CommsContext} from "../contexts/CommsContext";
 import {useLocation} from "react-router-dom";
 import MapsContextProvider from '../contexts/MapsContext';
 import StoreContextProvider from '../contexts/StoreContext';
+import CalculationContextProvider from '../contexts/CalculationContext';
 
 export default function Main(props){
     const location = useLocation();
@@ -27,14 +28,16 @@ export default function Main(props){
             <div className={styles.main}>
                 <Header title={deviceData.deviceName}/>
                     <Search/>
-                    <StoreContextProvider>
-                            <MapsContextProvider>
-                                <DateContextProvider>
-                                    <Menubar/>
-                                    <Routing/>
-                                </DateContextProvider>
-                            </MapsContextProvider>
-                        </StoreContextProvider>
+                        <CalculationContextProvider>
+                            <StoreContextProvider>
+                                <MapsContextProvider>
+                                    <DateContextProvider>
+                                        <Menubar/>
+                                        <Routing/>
+                                    </DateContextProvider>
+                                </MapsContextProvider>
+                            </StoreContextProvider>
+                        </CalculationContextProvider>
                     <Footer />
             </div>
         </>
