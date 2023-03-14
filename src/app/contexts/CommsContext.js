@@ -158,6 +158,7 @@ export default function CommsContextProvider({ children }) {
         }
     }
 
+
     async function setHome() {
         try {
             const response = await axios.get(serverHost + '/setHome', {

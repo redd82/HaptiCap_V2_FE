@@ -1,19 +1,22 @@
 import React, {useContext, useEffect, useState} from 'react';
+
 import {useNavigate} from "react-router-dom";
 import {useForm} from 'react-hook-form';
 import axios from 'axios';
 import {FilePicker} from 'react-file-picker';
 import {CommsContext} from "../../contexts/CommsContext";
 import { StoreContext } from '../../contexts/StoreContext';
+import { MapsContext } from '../../contexts/MapsContext';
 import styles from '../../styles/pages/InputForm.module.css';
 import stylesContent from '../../styles/Content.module.css';
 import Button from "../components/Button";
+import XMLParser from 'fast-xml-parser';
 
 export default function MapInputForm({map, newMap}) {
-    // console.log(map.pngFile);
     const navigate = useNavigate();
     const DATEFORMAT = 'yyyy-MM-dd';
     const {storeData, fetchData, getServerHost} = useContext(CommsContext);
+    const {fetchKMLFile} = useContext(MapsContext);
     const {setHomeToUseMap} = useContext(StoreContext);
     const [loading, setLoading] = useState(true);
     const {register, handleSubmit, formState: { errors } } = useForm();
@@ -25,6 +28,7 @@ export default function MapInputForm({map, newMap}) {
     const [mapData, setMapData] = useState(map);
     const [pngUploaded, setPngUploaded] = useState(false);
     const [kmlUploaded, setKmlUploaded] = useState(false);
+    const [kmlData, setKmlData] = useState(null);
     let maxFileSize = 1.7;
     let newFaultTemp = {};
 
@@ -48,37 +52,7 @@ export default function MapInputForm({map, newMap}) {
                     maxContentLength: Infinity,
                 });
                 console.log(response);
-                let fileType = fileToUpload.type;
-                if(response.data === "Wrong filetype."){
-                    setError("Upload failed.");
-                    setLoading(false);
-                } else {
-                    setSuccess("File uploaded.");
-                    setLoading(false);
-                switch (fileType.toLowerCase()) {
-                    case "image/png" :
-                        console.log("fileToUpload.name");
-                        console.log("png uploaded");
-                        setPngUploaded(true);
-                        setSuccess("PNG File uploaded.");
-                        setMapData({...mapData, pngFile: "/maps/" + fileToUpload.name});
-                        setLoading(false);
-                        break;
-                    case "application/vnd.google-earth.kml+xml" :
-                        console.log("kml uploaded");
-                        setKmlUploaded(true);
-                        setSuccess("KML File uploaded.");
-                        setMapData({...mapData, kmlFile: "/maps/" + fileToUpload.name});
-                        setLoading(false);
-                        sendMapInfo();
-                        break;
-                    default :
-                        setSuccess("");
-                        setLoading(false);
-                        setError("Wrong filetype upload.");
-                        break;
-                }
-            }
+                processFileData(fileToUpload, response);
                 return response;
             } catch (e) {
                 setError(e.response.data.message);
@@ -92,16 +66,94 @@ export default function MapInputForm({map, newMap}) {
         }
     }
 
-    async function sendMapInfo(){
+    async function processFileData(fileToUpload, response){
+        let fileType = fileToUpload.type;
+        if(response.data === "Wrong filetype."){
+            setError("Upload failed.");
+            setLoading(false);
+        } else {
+            setSuccess("File uploaded.");
+            setLoading(false);
+            switch (fileType.toLowerCase()) {
+                case "image/png" :
+                    console.log(fileToUpload.name);
+                    console.log("png uploaded");
+                    setPngUploaded(true);
+                    setSuccess("PNG File uploaded.");
+                    setMapData({...mapData, pngFile: "/maps/" + fileToUpload.name, imageHeight: fileToUpload.height, imageWidth: fileToUpload.imageWidth});
+                    setLoading(false);
+                    break;
+                case "application/vnd.google-earth.kml+xml" :
+                    console.log("kml uploaded");
+                    setKmlUploaded(true);
+                    setSuccess("KML File uploaded.");
+                    setMapData({...mapData, kmlFile: "/maps/" + fileToUpload.name});
+                    setLoading(false);
+                    //sendMapInfo("update");
+                    extractKMLData("/maps/" + fileToUpload.name);
+                    break;
+                default :
+                    setSuccess("");
+                    setLoading(false);
+                    setError("Wrong filetype upload.");
+                    break;
+            }
+        }
+    }
+
+    async function extractKMLData(fileName){
+        let response = await fetchKMLFile(fileName);
+        let kml = response.data;
+        let kmlArrayData = putKMLDataInArray(kml);
+        let latlonBox = kmlArrayData[0];
+        setMapData({...mapData, north: latlonBox.north, west: latlonBox.west, south: latlonBox.south, east: latlonBox.east, rotation: latlonBox.rotation });
+        console.log(latlonBox);
+        console.log(kml);
+        sendMapInfo("update");
+    }
+
+    function putKMLDataInArray(kmlData){
+        const parser = new XMLParser();
+        const options = {
+            attributeNamePrefix: '',
+            ignoreAttributes: false,
+            ignoreNameSpace: false,
+            parseNodeValue: true,
+            parseAttributeValue: true,
+            trimValues: true
+        };
+
+        const result = parser.parse(kmlData, options);
+        console.log(result);
+        const latLonBox = result.kml.GroundOverlay.LatLonBox;
+        const href = result.kml.GroundOverlay.Icon.href;
+        return [latLonBox, href];
+    };
+
+    async function sendMapInfo(type){
+        console.log(mapData);
+        let response = "";
         let serverHost = getServerHost();
-        let json = JSON.stringify({id: mapData.id, name: mapData.name, country: mapData.country, area: mapData.area});
+        let json = JSON.stringify({id: mapData.id, name: mapData.name, country: mapData.country, area: mapData.area, pngFile: mapData.pngFile, imageWidth: mapData.imageWidth, imageHeight: mapData.imageHeight,
+                                    kmlFile: mapData.kmlFile, realWorldHeight: mapData.realWorldHeight, realWorldWidth: mapData.realWorldWidth, scaleHeight: mapData.scaleHeight, scaleWidth: mapData.scaleWidth,
+                                    north: mapData.north, west: mapData.west, south: mapData.south, east: mapData.east, rotation: mapData.rotation, radius: mapData.radius});
         console.log(json);
         try{
-            const response = await axios.post(serverHost + '/navigation/register-map', json, {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
+            if(type === "registration"){
+                response = await axios.post(serverHost + '/navigation/register-map', json, {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+            } else if (type === "update") {
+                response = await axios.post(serverHost + '/navigation/update-map', json, {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+            }else{
+               response = "error";
+            }
             console.log(response);
             setError("");
             setSuccess("");               
@@ -189,7 +241,7 @@ export default function MapInputForm({map, newMap}) {
 
     function saveChangesSelectedMap(){
         setEditMap(false);
-        sendMapInfo();
+        sendMapInfo("update");
     }
 
     function useMap() {
@@ -209,6 +261,33 @@ export default function MapInputForm({map, newMap}) {
         return true;
     }
 
+    function getPNGDimensions(fileToUpload){
+        let reader = new FileReader();
+
+        //Read the contents of Image File.
+        reader.readAsDataURL(fileToUpload);
+        reader.onload = function (e) {
+
+        //Initiate the JavaScript Image object.
+        let image = new Image();
+
+        //Set the Base64 string return from FileReader as source.
+        image.src = e.target.result;
+
+        //Validate the File Height and Width.
+        image.onload = function () {
+            let height = this.height;
+            let width = this.width;
+            if (height > 100 || width > 100) {
+            alert("Height and Width must not exceed 100px.");
+            return false;
+            }
+            alert("Uploaded image has valid Height and Width.");
+            return true;
+        };
+};
+    }
+
     const handleInputUpdate = (event) => {
         const value = event?.target?.value;
         if (event.target.name === "name") {
@@ -219,6 +298,9 @@ export default function MapInputForm({map, newMap}) {
         }
         if (event.target.name === "area") {
             setMapData({...mapData, area: value});
+        }
+        if (event.target.name === "mapWorldRadius") {
+            setMapData({...mapData, radius: value});
         }
     };
 
@@ -253,6 +335,14 @@ export default function MapInputForm({map, newMap}) {
             ) : (
                 <div className={styles['valueRO-info-button']}>
                 <div id={styles['valueRO-numberplate']}>{mapData.area}</div>
+                </div>
+            )}
+            <label className={styles['info-label']} htmlFor="radius">World Map Radius: </label>
+            {(editMap) ? (
+                <input className={styles['info-input']} name="radius" type="text" id="radius" defaultValue={mapData.radius} onChange={handleInputUpdate}/>
+            ) : (
+                <div className={styles['valueRO-info-button']}>
+                <div id={styles['valueRO-numberplate']}>{mapData.radius}</div>
                 </div>
             )}
             {(!editMap) ? (<></>) : (
@@ -332,3 +422,24 @@ export default function MapInputForm({map, newMap}) {
         </form>
     );
 }
+
+    // void addMaptoDB(String PNGFile, String KMLFile, JsonObject obj){
+    //     int id = obj["id"];
+    //     mapSelector = id;
+    //     String name = obj["name"];
+    //     String area = obj["area"];
+    //     String country = obj["country"];
+    //     PNGFile = mapsDir + "/" + PNGFile;
+    //     int imageWidth = obj["imageWidth"];
+    //     int imageHeight = obj["imageHeight"];
+    //     KMLFile = mapsDir + "/" + KMLFile;
+    //     double realWorldHeight = obj["realWorldHeight"];
+    //     double realWorldWidth = obj["realWorldWidth"];
+    //     float scaleHeight = obj["scaleHeight"];
+    //     float scaleWidth = obj["scaleWidth"];
+    //     double north = obj["north"];
+    //     double west = obj["west"];
+    //     double south = obj["south"];
+    //     double east = obj["east"];
+    //     float rotation = obj["rotation"];
+    //     int radius = obj["radius"];

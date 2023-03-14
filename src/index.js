@@ -1,12 +1,15 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './app/App';
 import {BrowserRouter as Router} from "react-router-dom";
 import StoreContextProvider from './app/contexts/StoreContext';
 import CommsContextProvider from './app/contexts/CommsContext';
 
-ReactDOM.render(
+
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(
     <React.StrictMode>
         <Router>
             <StoreContextProvider>
@@ -15,7 +18,5 @@ ReactDOM.render(
                 </CommsContextProvider>
             </StoreContextProvider>
         </Router>
-    </React.StrictMode>,
-    document.getElementById('root')
-   
+    </React.StrictMode>
 );

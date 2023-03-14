@@ -5,16 +5,19 @@ import styles from '../../styles/pages/InputForm.module.css';
 // import stylesContent from '../../styles/Content.module.css'
 import {CommsContext} from "../../contexts/CommsContext";
 import { CalculationContext } from '../../contexts/CalculationContext';
+import { MapsContext } from '../../contexts/MapsContext';
 import Checkbox from "../components/CheckBox";
 import Button from "../components/Button";
 import { message } from 'antd';
 import { convertLegacyProps } from 'antd/es/button/button';
-
+import parser from 'fast-xml-parser';
 
 export default function DebugInputForm({}) {
+    const { XMLParser, XMLBuilder, XMLValidator} = require("fast-xml-parser");
     const DATEFORMAT = 'yyyy-MM-dd';
     const {storeData, fetchDebugSettings, getServerHost, listFiles} = useContext(CommsContext);
     const {DataConversion, CalculateDistance} = useContext(CalculationContext);
+    const {fetchKMLFile} = useContext(MapsContext);
     const [loading, setLoading] = useState(true);
     const {register, handleSubmit, formState: { errors } } = useForm();
     const [error, setError] = useState("");
@@ -22,17 +25,17 @@ export default function DebugInputForm({}) {
     const [readOnly, setReadOnly] = useState(true);
     const [debugSettingsData, setDebugSettingsData] = useState({});
     const [mapDataDebug, setMapDataDebug] = useState({  id: 1,
-                                                        name: "Test",
-                                                        area: "Test", 
-                                                        country: "Test", 
+                                                        name: "Home",
+                                                        area: "Kaag en Braassem", 
+                                                        country: "Netherlands", 
                                                         pngFile: "/maps/Home.png",
                                                         imageHeight: 1080,
                                                         imageWidth: 1920, 
-                                                        kmlFile: "",
-                                                        realWorldHeight: "",
-                                                        realWorldWidth: "",
-                                                        scaleHeight: "",
-                                                        scaleWidth:"",
+                                                        kmlFile: "/maps/Home.kml",
+                                                        realWorldHeight: 1,
+                                                        realWorldWidth: 1,
+                                                        scaleHeight: 1,
+                                                        scaleWidth: 1,
                                                         north: 50.656633,
                                                         west: 14.657694,
                                                         south: 50.629909,
@@ -41,6 +44,7 @@ export default function DebugInputForm({}) {
                                                         radius: 63713000
                                                     });
     const [outputDebug,setOutputDebug] = useState([{outLegs0 : 1, outlegs1: 1, scaleHeight: 1, scaleWidth: 1}]);
+    const [kmlData, setKmlData] = useState([]);
     let newFaultTemp = {};
     let debugEnabled = 1;
 
@@ -150,20 +154,40 @@ export default function DebugInputForm({}) {
         let output = [];
         output = DataConversion(mapDataDebug.north, mapDataDebug.west, mapDataDebug.south, mapDataDebug.east, mapDataDebug.rotation, mapDataDebug.imageHeight, mapDataDebug.imageWidth);
         setOutputDebug({...outputDebug, outLegs0: output[0], outlegs1: output[1], scaleHeight: output[2], scaleWidth: output[3]});
-        //console.log(mapDataDebug);
         console.log(output);
-        //console.log(CalculateDistance(mapDataDebug.north, mapDataDebug.west, mapDataDebug.south, mapDataDebug.east));
-        //output = [legs[0], legs[1], ScaleHeight, ScaleWidth];
     } 
+
+    async function getKMLFile(){
+        let fileName = "/maps/Home.kml"
+        let response = await fetchKMLFile(fileName);
+        const kml = response.data;
+        putKMLDataInArray(kml);
+    }
+
+    function putKMLDataInArray(kmlData){
+        const parser = new XMLParser();
+        const options = {
+            attributeNamePrefix: '',
+            ignoreAttributes: false,
+            ignoreNameSpace: false,
+            parseNodeValue: true,
+            parseAttributeValue: true,
+            trimValues: true
+        };
+
+        const result = parser.parse(kmlData, options);
+        console.log(result);
+        const latLonBox = result.kml.GroundOverlay.LatLonBox;
+        const href = result.kml.GroundOverlay.Icon.href;
+        // console.log(latLonBox);
+        // console.log(href);
+    };
 
     useEffect( () => {
         fetchDebugSettings().then(r => {
             setDebugSettingsData(r);
             setCheckboxes(r);
         });
-        // return () => {
-        //     mountedRef.current = false
-        //   }
         setLoading(false);
     }, []);
 
@@ -265,6 +289,7 @@ export default function DebugInputForm({}) {
                 <label className={styles['info-label']} htmlFor="ScaleWidth">ScaleWidth</label>
                 <label className={styles['valueRO']} htmlFor="ScaleWidth">{outputDebug.scaleWidth}</label>
                 <button className={styles['apply-button']} onClick={runDataConversion} type="button"> Calculate </button>
+                <button className={styles['apply-button']} onClick={getKMLFile} type="button"> Get KML File </button>
                     {/* //let output = [legs[0], legs[1], ScaleHeight, ScaleWidth]; */}
         </form>
     );

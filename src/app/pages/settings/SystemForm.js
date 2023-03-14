@@ -36,7 +36,7 @@ export default function SystemForm({}) {
         return () => {
             clearInterval(interval);
         };
-      }, []);
+      });
 
     if(loading){
         return <div className={styles['loading-text']}>Loading Data... Please Wait...</div>

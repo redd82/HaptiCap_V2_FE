@@ -33,6 +33,19 @@ export default function MapsContextProvider({ children }) {
         return selectedMap;
     }
 
+    async function fetchKMLFile(fileName) {
+        try {
+            const response = await axios.get(getServerHost() + fileName, {
+                headers: {
+                    "Content-Type": "application/vnd.google-earth.kml+xml",
+                    
+                }, withCredentials: false,
+            });
+            return response;
+        } catch (e) {
+            setTimeout(() => navigate('/'), 1000);
+        }
+    }
 
     useEffect( () => {
 
@@ -42,6 +55,7 @@ export default function MapsContextProvider({ children }) {
         fetchMapList:fetchMapList,
         setSelelectedMap:setSelelectedMap,
         getSelectedMap:getSelectedMap,
+        fetchKMLFile:fetchKMLFile,
     };
 
     return (
