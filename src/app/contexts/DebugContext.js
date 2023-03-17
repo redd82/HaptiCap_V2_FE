@@ -1,8 +1,13 @@
-import React, {createContext} from 'react';
+import React, {createContext, useState} from 'react';
 
 export const DebugContext = createContext({});
 export default function DebugContextProvider({ children }) {
-    const Debug = 1; 
+    const [debug, setDebug] = useState()
+
+    function debugLevel(level){
+        setDebug(level);
+    }
+
 
     // New Debug
     // message and values are both arrays, where the message value is the string (the log message) and the values array item holds the data value at the same index.
@@ -15,7 +20,7 @@ export default function DebugContextProvider({ children }) {
     
         try{        // use try-catch to be safe.....
     
-        if(Debug === 1) // this level of debug dumps the message AND the values to the console log; sorted if possible, unsorted if needed.
+        if(debug === 1) // this level of debug dumps the message AND the values to the console log; sorted if possible, unsorted if needed.
         {
             // check if the arrays have an equal length
             if(mi === vi) //the are equal, its safe to proceed with the entire list!!!
@@ -35,7 +40,7 @@ export default function DebugContextProvider({ children }) {
             }
     
         }
-        if(Debug === 2) // this debug level dumps only the values to the console.log
+        if(debug === 2) // this debug level dumps only the values to the console.log
         {
             for (let i=0;i< debugvalues.length; i++)
             {
@@ -57,6 +62,7 @@ export default function DebugContextProvider({ children }) {
     const contextData = 
     {
         SystemDebug:SystemDebug,
+        debugLevel:debugLevel,
     }
     
     return (
