@@ -11,11 +11,13 @@ import Button from "../components/Button";
 import { message } from 'antd';
 import { convertLegacyProps } from 'antd/es/button/button';
 import parser from 'fast-xml-parser';
+import { DebugContext } from '../../contexts/DebugContext';
 
 export default function DebugInputForm({}) {
     const { XMLParser, XMLBuilder, XMLValidator} = require("fast-xml-parser");
     const DATEFORMAT = 'yyyy-MM-dd';
     const {storeData, fetchDebugSettings, getServerHost, listFiles} = useContext(CommsContext);
+    const {SystemDebug} = useContext(DebugContext);
     const {DataConversion, CalculateDistance} = useContext(CalculationContext);
     const {fetchKMLFile} = useContext(MapsContext);
     const [loading, setLoading] = useState(true);
@@ -24,33 +26,15 @@ export default function DebugInputForm({}) {
     const [success, setSuccess] = useState("");
     const [readOnly, setReadOnly] = useState(true);
     const [debugSettingsData, setDebugSettingsData] = useState({});
-    const [mapDataDebug, setMapDataDebug] = useState({  id: 1,
-                                                        name: "Home",
-                                                        area: "Kaag en Braassem", 
-                                                        country: "Netherlands", 
-                                                        pngFile: "/maps/Home.png",
-                                                        imageHeight: 1080,
-                                                        imageWidth: 1920, 
-                                                        kmlFile: "/maps/Home.kml",
-                                                        realWorldHeight: 1,
-                                                        realWorldWidth: 1,
-                                                        scaleHeight: 1,
-                                                        scaleWidth: 1,
-                                                        north: 50.656633,
-                                                        west: 14.657694,
-                                                        south: 50.629909,
-                                                        east: 14.717431,
-                                                        rotation: 0.3858,
-                                                        radius: 63713000
-                                                    });
+    const [mapDataDebug, setMapDataDebug] = useState({});
     const [outputDebug,setOutputDebug] = useState([{outLegs0 : 1, outlegs1: 1, scaleHeight: 1, scaleWidth: 1}]);
     const [kmlData, setKmlData] = useState([]);
     let newFaultTemp = {};
     let debugEnabled = 1;
 
-    async function onSubmit(data){
+    async function applyChanges(){
         let serverHost = getServerHost();
-            console.log(data);
+            console.log(debugSettingsData);
             let json = JSON.stringify({debug2Serial: debugSettingsData.debug2Serial, debugGPS2Serial: debugSettingsData.debugGPS2Serial, debugHaptic: debugSettingsData.debugHaptic});
                 console.log(json);
             try{
@@ -83,14 +67,15 @@ export default function DebugInputForm({}) {
     };
 
     const handleCheckBoxChange = (checkBoxValue) => {
+        console.log(checkBoxValue.checked);
         if(checkBoxValue.name === 'debug2Serial') {
-            setDebugSettingsData({...debugSettingsData, debug2Serial: checkBoxValue});
+            setDebugSettingsData({...debugSettingsData, debug2Serial: checkBoxValue.checked});
         }
         if(checkBoxValue.name === 'debugGPS2Serial') {
-            setDebugSettingsData({...debugSettingsData, debugGPS2Serial: checkBoxValue});
+            setDebugSettingsData({...debugSettingsData, debugGPS2Serial: checkBoxValue.checked});
         }
         if(checkBoxValue.name === 'debugHaptic') {
-            setDebugSettingsData({...debugSettingsData, debugHaptic: checkBoxValue});
+            setDebugSettingsData({...debugSettingsData, debugHaptic: checkBoxValue.checked});
         }
     };
 
@@ -217,16 +202,16 @@ export default function DebugInputForm({}) {
     }
 
     return (
-        <form className={styles['info-form']} onSubmit={handleSubmit(onSubmit)}>
+        <form className={styles['info-form']}>
                 <label className={styles['info-label']} htmlFor="debug2Serial">Serial</label>
                 <Checkbox id='1' parentCallback={handleCheckBoxChange} disabled={false} name="debug2Serial" labelname="" defaultChecked={debugSettingsData.debug2Serial}/>
                 <label className={styles['info-label']} htmlFor="debugGPS2Serial">GPS2Serial</label>  
-                <Checkbox id='3' parentCallback={handleCheckBoxChange} disabled={false} name="debugGPS2Serial" labelname="" defaultChecked={debugSettingsData.debugGPS2Serial}/>
+                <Checkbox id='2' parentCallback={handleCheckBoxChange} disabled={false} name="debugGPS2Serial" labelname="" defaultChecked={debugSettingsData.debugGPS2Serial}/>
                 <label className={styles['info-label']} htmlFor="debugHaptic">Haptic</label> 
-                <Checkbox id='4' parentCallback={handleCheckBoxChange} disabled={false} name="debugHaptic" labelname="" defaultChecked={debugSettingsData.debugHaptic}/>
+                <Checkbox id='3' parentCallback={handleCheckBoxChange} disabled={false} name="debugHaptic" labelname="" defaultChecked={debugSettingsData.debugHaptic}/>
                 <label className={styles['info-label']} htmlFor="fileList">Files:</label>
                 <button className={styles['apply-button']} onClick={listFilesButton} type="button"> List files </button>
-                <input type="submit" id="submit-button" className={styles['apply-button']} value="Apply Changes"/>
+                <button className={styles['apply-button']} onClick={applyChanges} type="button"> Apply Changes </button>
             <div className={styles['empty-grid-space-4']}/>
             <div className={styles['error-message']}>
                 {(error !== "") ? (

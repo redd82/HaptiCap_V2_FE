@@ -16,7 +16,7 @@ export default function MapInputForm({map, newMap}) {
     const navigate = useNavigate();
     const DATEFORMAT = 'yyyy-MM-dd';
     const {storeData, fetchData, getServerHost} = useContext(CommsContext);
-    const {fetchKMLFile} = useContext(MapsContext);
+    const {fetchKMLFile, requestMap, sendMapInfoToESP} = useContext(MapsContext);
     const {setHomeToUseMap} = useContext(StoreContext);
     const [loading, setLoading] = useState(true);
     const { formState: { errors } } = useForm();
@@ -147,80 +147,7 @@ export default function MapInputForm({map, newMap}) {
         let json = JSON.stringify({id: mapData.id, name: mapData.name, country: mapData.country, area: mapData.area, pngFile: mapData.pngFile, imageWidth: mapData.imageWidth, imageHeight: mapData.imageHeight,
                                     kmlFile: mapData.kmlFile, realWorldHeight: mapData.realWorldHeight, realWorldWidth: mapData.realWorldWidth, scaleHeight: mapData.scaleHeight, scaleWidth: mapData.scaleWidth,
                                     north: mapData.north, west: mapData.west, south: mapData.south, east: mapData.east, rotation: mapData.rotation, radius: mapData.radius});
-        console.log(json);
-        try{
-            if(type === "registration"){
-                response = await axios.post(serverHost + '/navigation/register-map', json, {
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                });
-            } else if (type === "update") {
-                response = await axios.post(serverHost + '/navigation/update-map', json, {
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                });
-            }else{
-               response = "error";
-            }
-            console.log(response);
-            setError("");
-            setSuccess("");               
-            if(response.status === 200){
-                setTimeout(500);
-                setSuccess("Map registered.");
-                setError("");
-            }else{
-                setError("Error");
-            }
-        }   catch (e){
-            setError(e.response.data.message);
-            if(e.response.status >= 401) {
-
-            }else if(e.response.status === 400){
-                setError(e.response.data.message);
-            }
-        }
-    }
-
-    async function requestMap(){
-        let serverHost = getServerHost();
-        let json;
-        if(kmlUploaded){
-        json = JSON.stringify({id: mapData.id, name: mapData.name, country: mapData.country, area: mapData.area, pngFile: "/maps/" + mapData.pngFile,  kmlFile: "/maps/" + mapData.kmlFile});
-        console.log(kmlUploaded);
-        } else {
-        json = JSON.stringify({id: mapData.id, name: mapData.name, country: mapData.country, area: mapData.area, pngFile: mapData.pngFile, kmlFile: mapData.kmlFile});
-        console.log(kmlUploaded);
-        }
-        console.log(json);
-        try{
-            const response = await axios.post(serverHost + '/navigation/request-map', json, {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-            console.log(response);
-            setError("");
-            setSuccess("");               
-            if(response.status === 200){
-                setTimeout(500);
-                setSuccess("Map request recieved.");
-                setError("");
-                setMapData(response.data);
-            }else{
-                setError("Error");
-            }
-            return response;
-        }   catch (e){
-            setError(e.response.data.message);
-            if(e.response.status >= 401) {
-
-            }else if(e.response.status === 400){
-                setError(e.response.data.message);
-            }
-        }
+        return await sendMapInfoToESP(json,type);
     }
 
     async function clearMap(){
@@ -258,15 +185,20 @@ export default function MapInputForm({map, newMap}) {
         setEditMap(true);
     }
 
-    function saveChangesSelectedMap(){
+    async function saveChangesSelectedMap(){
         setEditMap(false);
-        sendMapInfo("update");
+        const response = await sendMapInfo("update");
+        console.log(response[0]);
+        setSuccess(response[1]);
+        setError(response[2]);
     }
 
     async function useSelectedMap() {
-        const response = await requestMap();
-        console.log(response.data);
-        setHomeToUseMap(response.data);
+        const response = await requestMap(mapData, kmlUploaded);
+        console.log(response[0].data);
+        setHomeToUseMap(response[0].data);
+        setSuccess(response[1]);
+        setError(response[2]);
         setUseMap(true);
     }
 
@@ -311,7 +243,7 @@ export default function MapInputForm({map, newMap}) {
             console.log("navigate to usemap");
             navigate("../use-map", { state: {mapData} });   //id: map.id, name: map.name, country: map.country
         }
-      }, [mapData]);
+      }, [useMap]);
 
     return (
         <form className={styles['info-form']} >
@@ -392,6 +324,8 @@ export default function MapInputForm({map, newMap}) {
                 (!kmlUploaded) ? 
                     ((loading) ? (<></>): (
                         <>
+                            <button className={styles['apply-button']} onClick={saveChangesSelectedMap} type="button"> Save Changes</button>
+                            <div className={styles['empty-grid-space-4']}/>
                             <button className={styles['apply-button']} onClick={setEditMapToFalse} type="button"> Cancel</button>
                         </>
                     )

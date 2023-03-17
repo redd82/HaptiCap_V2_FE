@@ -1,48 +1,57 @@
-import React, {createContext} from 'react';
-import axios from 'axios';
+import React, {createContext, useContext} from 'react';
 import { message } from 'antd';
+import { DebugContext } from './DebugContext';
 
 export const CalculationContext = createContext({});
 export default function CalculationContextProvider({ children }) {
+const {SystemDebug} = useContext(DebugContext);
 
 const Debug = 1;       // debug mode, 1 is on, 0 is off
 const RoundingDecimals = 6; // round to x decimals
 
-// HTML Sources
+const HtmlSources =["https://www.movable-type.co.uk/scripts/latlong.html",
+                    "https://www.calculatorsoup.com/calculators/conversions/convert-decimal-degrees-to-degrees-minutes-seconds.php",
+                    "https://www.latlong.net/degrees-minutes-seconds-to-decimal-degrees",
+                    "https://developers.google.com/kml/documentation/kmlreference#groundoverlay",
+                    "https://www.omnicalculator.com/math/right-triangle-side-angle",
+                    "https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_event_mouse_clientxy",
+                    "https://codepen.io/pen/",
+                    "https://pganssle.github.io/HaptiCap/"];
 
-//Source: https://www.movable-type.co.uk/scripts/latlong.html
-//Source: https://www.calculatorsoup.com/calculators/conversions/convert-decimal-degrees-to-degrees-minutes-seconds.php
-//Source: https://www.latlong.net/degrees-minutes-seconds-to-decimal-degrees
-//Source: https://developers.google.com/kml/documentation/kmlreference#groundoverlay
-//Source: https://www.omnicalculator.com/math/right-triangle-side-angle
-//Source: https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_event_mouse_clientxy
 
+const Radius = 6371e3; //radius of planet we are on (Earth)
 
-// where:
-//          φ is latitude, 
-//          λ is longitude,
-//          Radius is earth’s radius (mean radius = 6,371km);
-//
-// note that angles need to be in radians to pass to trig functions!
+let LatLonNorthWest = [0,0];    // latitude Degrees, longitude Degrees
+let LatLonSouthEast = [0,0];
+let LatLonMidPoint  = [0,0]; 
 
-// variables needed for calculations
-let Radius = 6371e3; //radius of planet Earth
+let ImageSize = [1920,1080];    // pixels
+let RealWorld = [0,0];          // real world distance Leg A and B (triangle)
+let Scales    = [1,1];          // Scale from pixels to meters (0/A width, 1/B Height)
 
-let North = 50.656633;  // Latitude
-let West  = 14.657694;  // Longitude  
-let South = 50.629909;  // Latitude
-let East  = 14.717431;  // Longitude
-let Rotation = 0.3858;  // Rotation in Decimal Degrees
+let Rotation = [0,0];           // Rotation is in DecimalDegrees / Radians
+let MapSouth = 0;               // the map south is a bearing (degrees)  based on the rotation value.
 
-let ScaleHeight = 1; // scale of pixel to meter; default, one pixel height is one meter
-let ScaleWidth = 1;  // scale of pixel to meter; default, one pixel width  is one meter
-let MapSouth = 180;  // asume the map north is equal to the true north
-
-// debug function; logs to console, input/output to/from functions if global debug has been set to 1
-function debug(message)
+function getSources() // function that reutns a array of html pages used as project sources
 {
-    if(Debug == 1){console.log(message);}
+    return HtmlSources;
 }
+
+function getGlobals() // function returns the global values, should not be needed other then a debug-ish type call
+{
+    let output = [  Radius,
+                    LatLonNorthWest[0],LatLonNorthWest[1],
+                    LatLonSouthEast[0],LatLonSouthEast[1],
+                    LatLonMidPoint[0],LatLonMidPoint[1],
+                    ImageSize[0], ImageSize[1],
+                    RealWorld[0], RealWorld[1],
+                    Scales[0],Scales[1],
+                    Rotation[0],Rotation[1],
+                    MapSouth];
+    return output;
+}
+
+
 
 //    {   KML
 //          kmlfilenaam:0 R, 
@@ -76,63 +85,80 @@ let Rotation = 0.3858;  // Rotation in Decimal Degrees
 triangle legs should aproximate
 A           2971 M
 B           4211 M
-Hypotoneuse 5154 M
+Hypotoneuse 5248.246354 M
 Angle Alpha 35.2
 Angle Beta  54.8
 
 */
-function ReturnGlobals()
-{
-    let output = [  Radius,North, West, South, East, Rotation,
-                    ScaleHeight, ScaleWidth, MapSouth];
-    debug("ReturnGlobals; Output: Radius:       " + output[0]);
-    debug("ReturnGlobals; Output: North:        " + output[1]);
-    debug("ReturnGlobals; Output: West:         " + output[2]);
-    debug("ReturnGlobals; Output: South:        " + output[3]);
-    debug("ReturnGlobals; Output: East:         " + output[4]);
-    debug("ReturnGlobals; Output: Rotation:     " + output[5]);
-    debug("ReturnGlobals; Output: ScaleHeight:  " + output[6]);
-    debug("ReturnGlobals; Output: ScaleWidth:   " + output[7]);
-    debug("ReturnGlobals; Output: MapSouth:     " + output[8]);
 
-    return output;
+function OnLoad(north, west, south, east, rotation, imageHeight, imageWidth) // theese are inputs from kml//json file
+{
+    try
+    {
+        // okay, set the latitude/longitude points up for use
+        CalculateMapPoints(north, west, south, east);
+        // setup the map south for usage
+        CalculateMapSouth(rotation);
+        // Setup Rotation in Degrees and Radians
+        Rotation[0] = rotation;
+        Rotation[1] = ConvertDDToRadians(rotation);
+        // setup the image width/height array
+        ImageSize[0] = imageWidth;
+        ImageSize[1] = imageHeight;
+        // calculate real world hypotenuse
+        let RealWorldHypotenuse = CalculateDistance(north, west, south, east);
+        // calculate inner angle beta
+        let angleBeta = MapSouth - CalculateBearing(LatLonNorthWest[0],LatLonNorthWest[1],LatLonSouthEast[0],LatLonSouthEast[1]);
+        // calculate real world legs A and B
+        let temp = CalculateTriangle(RealWorldHypotenuse,angleBeta);
+        RealWorld[0] = temp[0];
+        RealWorld[1] = temp[1];
+        // scale real world legs to pixels 
+        Scales[0] = RealWorld[0] / ImageSize[0];
+        Scales[1] = RealWorld[1] / ImageSize[1];
+        // TODO debug stuff
+
+
+
+        return 0;
+    }
+    catch(exception)
+    {
+        console.log("the function OnLoad failed with an exception.");
+        console.log(exception);
+        return 1;
+    }
 }
 
-function CalculateMapSouth(rotation)
+
+function CalculateMapSouth(rotation) //Rotation is in Decimal Degrees
 {
-    // calculate bearing and substract rotation to get map south
-    let output = 0;
-    // logic for rotation positive
-    if ((rotation >= 0) && (rotation <= 180)) {output = (180 - Math.abs(rotation))%360;}
-    // logic for rotation negative
-    if((rotation < 0)   && (rotation <= -180)){output = (180 + Math.abs(rotation))%360;}
-    debug("CalculateMapSouth; Input:  " + rotation);
-    debug("CalculateMapSouth; Output: " + output);
-    MapSouth = output;
+    let degrees = parseFloat(rotation);
+    let offsetFromNorth = (360 - degrees) % 360;
+    let offsetFromSouth = (offsetFromNorth + 180) % 360;
+    offsetFromSouth.toFixed(2);
+
+    let debugmessage = ["CalculateMapSouth; Input","CalculateMapSouth; Output"];
+    let debugvalues = [rotation,offsetFromSouth];
+    SystemDebug(debugmessage, debugvalues);
+
+    MapSouth = offsetFromSouth;
+}
+function CalculateMapPoints(North, West, South, East)  //Nort West South East are in degrees
+{
+    // function to set the global variables (no return)
+    LatLonNorthWest[0] = North;
+    LatLonNorthWest[1] = West;
+ 
+    LatLonSouthEast[0] = South;
+    LatLonSouthEast[1] = East;
+
+    // use the midpoint function to determine the middle of the map
+    LatLonMidPoint = CalculateMidpoint(North, West, South, East);
+  
+    // todo add debug stuff
 }
 
-function DataConversion(North, West, South, East, Rotation, ImageHeight, ImageWidth)
-{
-    // calculated values
-    let RealWorldHypotoneuse = CalculateDistance(North,West,South,East);
-    CalculateMapSouth(Rotation);
-    let beta = Math.abs(MapSouth - CalculateBearing(North, West, South, East)[1]);
-    // Calculate leg A and B length (real world longitude and latitude)
-    let legs = CalculateTriangleLegs(beta, RealWorldHypotoneuse , false);
-    //let legs = CalculateTriangleLegs(54.95, RealWorldHypotoneuse , false);
-    // scale X = real world leg A / image height
-    // scale Y = real world leg b / image width
-    ScaleHeight = Math.abs(legs[0] / ImageHeight);
-    ScaleWidth  = Math.abs(legs[1] / ImageWidth);
-    let output = [legs[0], legs[1], ScaleHeight, ScaleWidth];
-    // debug messages
-    debug("DataConversion; input: North:" + North + " West:" + West+ " South:" + South + " East:" + East);
-    debug("DataConversion; input: Rotation:" + Rotation + " ImageHeight:" + ImageHeight + " ImageWidth:" + ImageWidth);
-    debug("DataConversion; output: ScaleHeight:" + ScaleHeight + " ScaleWidth:" + ScaleWidth + " MapSouth:"+ MapSouth);
-    debug("DataConversion; internal Values: Realworld Leg A:" + legs[0] + " Realworld Leg B:" + legs[1] );
-    debug("DataConversion; internal Values: β:" + beta + " RealWorldHypotoneuse:" + RealWorldHypotoneuse);
-    return output;
-}
 
 // function to find and return the coordinates (x/y/) 
 //where one clicked on the image.
@@ -142,22 +168,28 @@ function CalculateImageCoords(event, html) {
         let x = event.clientX;
         let y = event.clientY;
         let coordinates = [x,y];
-        debug("CalculateImageCoords; Input: " + event);
-        debug("CalculateImageCoords; Output: X:" + x + " Y:" + y);
+
+        //debug("CalculateImageCoords; Input: " + event);
+        //debug("CalculateImageCoords; Output: X:" + x + " Y:" + y);
+        
         // incase the boolean html is set, output the text to the html element
         // <p id="ClickedCoordinates">Coordinates:</p>
         if(html == true)
         {
             document.getElementById("ClickedCoordinates").innerHTML = "Coordinates X:" + x + " Y:" + y;
         }
+
         // do magic to change the x/y coords into lat/lon
         return coordinates; 
     }
     catch(exception){
+        
         let error = [-99,-99]; // set values to -99 as to denote an error but not return a null value
-        debug("CalculateImageCoords; " + exception);
-        debug("CalculateImageCoords; Input: " + event);
-        debug("CalculateImageCoords; Output: ERROR - X:-99 Y:-99");
+
+        //debug("CalculateImageCoords; " + exception);
+        //debug("CalculateImageCoords; Input: " + event);
+        //debug("CalculateImageCoords; Output: ERROR - X:-99 Y:-99");
+
         return error;
     }
   }
@@ -168,8 +200,11 @@ function CalculateImageCoords(event, html) {
 // that is, the shortest distance over the earth’s surface – giving an ‘as-the-crow-flies’ distance 
 // between the points (ignoring any hills they fly over, of course!).
 function CalculateDistance(lat1,lon1,lat2,lon2){
-
-    let phi1 = lat1 * Math.PI/180; // φ, λ in radians
+    let debugmessage;
+    let debugvalues;
+    // lat lon are given in degrees, convert back to radians
+    
+    let phi1 = lat1 * Math.PI/180; 
     let phi2 = lat2 * Math.PI/180;
     let deltaphi = (lat2-lat1) * Math.PI/180;
     let deltalambda = (lon2-lon1) * Math.PI/180;
@@ -182,9 +217,11 @@ function CalculateDistance(lat1,lon1,lat2,lon2){
     let distance = Radius * c; // in metres
     distance.toFixed(RoundingDecimals);
 
-    debug("CalculateBearing; Input: Latitude1 " + lat1 + " Longitude 1 " + lon1);
-    debug("CalculateBearing; Input: Latitude2 " + lat2 + " Longitude 2 " + lon2);
-    debug("CalculateBearing; Output: Distance " + distance);
+    debugmessage = ["CalculateDistance; Input; Lat1","CalculateDistance; Input; Lon1","CalculateDistance; Input; Lat2","CalculateDistance; Input; Lon2",
+                    "CalculateDistance; Output; Distance"];
+    debugvalues = [lat1,lon1,lat2,lon2,distance];
+    SystemDebug(debugmessage,debugvalues);
+
     return distance;
 }
 
@@ -198,107 +235,166 @@ function CalculateDistance(lat1,lon1,lat2,lon2){
 // along a great-circle arc will take you from the start point to the end point:1
 function CalculateBearing(lat1,lon1,lat2,lon2)
 {
-    let y = Math.sin(lon2-lon1) * Math.cos(lat2);
-    let x = Math.cos(lat1)*Math.sin(lat2) - Math.sin(lat1)*Math.cos(lat2)*Math.cos(lon2-lon1);
-    //let z = Math.atan2(y, x);  // in 180/-180 degrees
-    let bearing = [0,0];
+    let debugmessage;
+    let debugvalues;
 
-    bearing[0] = (Math.atan2(y, x)).toFixed(RoundingDecimals);
-    bearing[1] = ((Math.atan2(y, x)*180/Math.PI + 360) % 360).toFixed(RoundingDecimals);
+    let phi1 = lat1;
+    let phi2 = lat2;
+    let deltaLambda = lon2 - lon1;
+  
+    let y = Math.sin(deltaLambda) * Math.cos(phi2);
+    let x = Math.cos(phi1) * Math.sin(phi2) -
+            Math.sin(phi1) * Math.cos(phi2) * Math.cos(deltaLambda);
+    let theta = Math.atan2(y, x);
+    let bearing = (theta * 180 / Math.PI + 360) % 360; // in degrees
+  
+    //debug stuff
+    debugmessage = ["CalculateBearing; Input; Lat1","CalculateBearing; Input; Lon1","CalculateBearing; Input; Lat2","CalculateBearing; Input; Lon2","CalculateBearing; Output; Bearing"];
+    debugvalues = [lat1, lon1, lat2, lon2, bearing];
+    SystemDebug(debugmessage, debugvalues);
 
-    debug("CalculateBearing; Input: Latitude1 " + lat1 + " Longitude 1 " +lon1);
-    debug("CalculateBearing; Input: Latitude2 " + lat2 + " Longitude 2 " +lon2);
-    debug("CalculateBearing; Output: 180/-180 heading:" + bearing[0]);
-    debug("CalculateBearing; Output: 360 heading:" + bearing[1]);
-    return bearing;
+    return bearing;  // NOTE bearing is returned in DEGREES!
 }
 
 // Destination
 // Given a start point and a distance d along constant bearing θ, this will calculate the destina­tion point. 
 // If you maintain a constant bearing along a rhumb line, you will gradually spiral in towards one of the poles. 
-function CalculateDestination(lat1,lon1,distance,bearing)
+function CalculateDestination(lat1,lon1,distance,bearing, convertToRadians)
 {
-    let lat2 = Math.asin( Math.sin(lat1)*Math.cos(distance/Radius) +
-                            Math.cos(lat1)*Math.sin(distance/Radius)*Math.cos(bearing) );
-    let lon2 = lon1 + Math.atan2( Math.sin(bearing)*Math.sin(distance/Radius)*Math.cos(lat1),
-                                    Math.cos(distance/Radius)-Math.sin(lat1)*Math.sin(lat2));
+    let debugmessage;
+    let debugvalues;
+
+    // if bearing is given in degrees, and the ConverToRaidian boolean is set to true convert it too radians
+    if(convertToRadians == true ){bearing = ToRadians(bearing); }
+    //NOTE BEARING MUST BE IN RADIANS!!!!
+    let lat2 =  Math.asin(Math.sin(lat1) * Math.cos(distance / Radius) +
+                Math.cos(lat1) * Math.sin(distance / Radius) * Math.cos(bearing));
+    let lon2 =  lon1 + Math.atan2(Math.sin(bearing) * Math.sin(distance / Radius) * Math.cos(lat1),
+                Math.cos(distance / Radius) - Math.sin(lat1) * Math.sin(lat2));
+
     // debug messages
-    debug("CalculateDestination; Output: Latitude " + lat1 + " Longitude " + lon2);
-    debug("CalculateDestination; Output: Distance " + distance  + " Bearing "+ bearing);
-    debug("CalculateDestination; Output: Latitude " + lat2 + " Longitude " + lon2 );
-    
+    debugmessage = ["CalculateDestination; Input; Lat1","CalculateDestination; Input; Lon1",
+                    "CalculateDestination; Input; distance","CalculateDestination; Input; bearing",
+                    "CalculateDestination; Input; ConvertToRadians",
+                    "CalculateDestination; Output; Lat2","CalculateDestination; Output; Lon2",];
+
+    debugvalues = [lat1, lon1, distance, bearing, lat2, lon2];
+    SystemDebug(debugmessage,debugvalues);
+
     let destination = [lat2,lon2];
     return destination;
 }
 
-// A and B would usually be given in pixels, therefore scale is almost always true
-// if A and B are given in meters then you do not need to scale it.
-function CalculateTriangleHypotoneuse(A,B, Scale)
+function CalculateMidpoint(lat1,lon1,lat2,lon2, Compass)
 {
-        //Source: https://www.omnicalculator.com/math/right-triangle-side-angle
-        // leg A == Vertical
-        // leg B == Horizontal
-        // α ==  angle α/Hypotoneuse
-        // β == angle β/Hypotoneuse
+    // chatgpt generated (partially)
+    let x1 = lat1 * Math.PI / 180;
+    let x2 = lat2 * Math.PI / 180;
+    let dx = (lat2 - lat1) * Math.PI / 180;
+    let dy = (lon2 - lon1) * Math.PI / 180;
+  
+    let Bx = Math.cos(x2) * Math.cos(dy);
+    let By = Math.cos(x2) * Math.sin(dy);
+  
+    let x3 = Math.atan2(Math.sin(x1) + Math.sin(x2),
+                          Math.sqrt((Math.cos(x1) + Bx) * (Math.cos(x1) + Bx) + By * By));
+    let y3 = lon1 + Math.atan2(By, Math.cos(x1) + Bx);
+  
+    let lat3 = x3 * 180 / Math.PI;
+    let lon3 = y3 * 180 / Math.PI;
 
-        if(Scale == true) // A and B are given in pixels
-        {
-            A = A * ScaleHeight;
-            B = B * ScaleWidth;
-        } //A and be have now been set in meters
-
-        let hypotoneuse = Math.sqrt(Math.pow(A,2) + Math.pow(B,2));
-        hypotoneuse = hypotoneuse.toFixed(RoundingDecimals);
-
-        debug("CalculateTriangleHypotoneuse; Input: A " + A + " B " + B + " Scale " + Scale);
-        debug("CalculateTriangleHypotoneuse; Output: hypotoneuse " + hypotoneuse);
-
-        return hypotoneuse; // in meters
-}
-
-// of boolean 'scale' is true, then recalculate the leg lengths from pixels to meters
-// input hypotoneuse is in meters, β is in degrees. 
-function CalculateTriangleLegs(Beta, Hypotoneuse, Scale)
-{
-    let A = Hypotoneuse * Math.cos(Beta);
-    let B = Hypotoneuse * Math.sin(Beta);
-
-
-    if(Scale == true )
+    if(Compass = false)
     {
-        A = A * ScaleHeight;    // convert from pixels to meters
-        B = B * ScaleWidth;     // convert from pixels to meters
-    } // output is now in meters
+        //The longitude can be normalised to −180…+180 using (lon+540)%360-180
+        lon3  =(lon3 +540)%360-180;
+    }
+    // create an array
+    let midpoint = [lat3.toFixed(RoundingDecimals),lon3.toFixed(RoundingDecimals)];
+    // debug messages
+    let debugmessage =[ "CalulateMidpoint; Input: Lat1","CalulateMidpoint; Input: Lon1","CalulateMidpoint; Input: Lat2",
+                        "CalulateMidpoint; Input: Lon2","CalulateMidpoint; Input: Compass"];
+    let debugvalues = [lat1, lon1, lat2, lon2, Compass];
+    SystemDebug(debugmessage,debugvalues);
 
-    debug("CalculateTriangleLegs; Input: β " + Beta +" Hypotoneuse " + Hypotoneuse + " Scale "+ Scale );
-    debug("CalculateTriangleLegs; Output: A "+ A + " B " + B );
-    
-    let legs = [A,B];
-    //let legs = [A.toFixed(RoundingDecimals),B.toFixed(RoundingDecimals)];
-    return legs;
-
-    /* when using North, West, South, East
-    let North = 50.656633;  // Latitude
-    let West  = 14.657694;  // Longitude  
-    let South = 50.629909;  // Latitude
-    let East  = 14.717431;  // Longitude
-    let Rotation = 0.3858;  // Rotation in Decimal Degrees
-
-    triangle legs should aproximate
-        A           2971 M
-        B           4211 M
-        Hypotoneuse 5154 M
-        Angle Alpha 35.2
-        Angle Beta  54.8
-
-*/
+    return midpoint;
 }
 
 
+// convert decimal degrees to radians, cauz.. we need that
+function ToRadians(degrees)
+{
+    let debugmessage;
+    let debugvalues;
+
+    let radians = (degrees* Math.PI)/ 180;
+    radians = Number(radians.toFixed(RoundingDecimals));
+    // debug values
+    debugmessage = ["ConvertToRadians; Input; DD","ConvertToRadians; Output; radians"]
+    debugvalues = [degrees,radians];
+    SystemDebug(debugmessage,debugvalues);
+
+    return radians;
+}
+
+
+function CalculateTriangle(hypotenuse, betaAngle) {
+    let debugmessage;
+    let debugvalues;
+
+    // Convert beta angle to radians
+    let betaRadians = (betaAngle * Math.PI) / 180;
+    // Calculate length of leg A and B using trigonometric functions
+    let lengthA = hypotenuse * Math.sin(betaRadians);
+    let lengthB = hypotenuse * Math.cos(betaRadians);
+    // Calculate angle alpha
+    let alphaAngle = 90 - betaAngle;
+
+    // debug stuff
+    debugmessage = ["CalculateTriangle; Input; Hypotenuse","CalculateTriangle; Input; betaAngle", 
+                    "CalculateTriangle; Output; lengthA", "CalculateTriangle; Output; lengthB", "CalculateTriangle; Output; Hypotenuse", 
+                    "CalculateTriangle; Output; betaAngle", "CalculateTriangle; Output; alphaAngle"]
+    debugvalues = [hypotenuse, betaAngle, lengthA, lengthB, hypotenuse, betaAngle, alphaAngle];
+    SystemDebug(debugmessage,debugvalues);
+   
+    // Return array with all values
+    return [lengthA, lengthB, hypotenuse, betaAngle, alphaAngle];
+}
+
+function calculateTriangleFromLegs(lengthA, lengthB) {
+    let debugmessage;
+    let debugvalues;
+
+    // Calculate length of hypotenuse using Pythagorean theorem
+    let lengthHypotenuse = Math.sqrt(lengthA ** 2 + lengthB ** 2);
+    // Calculate angle beta
+    let betaRadians = Math.atan(lengthA / lengthB);
+    let betaAngle = (betaRadians * 180) / Math.PI;
+    // Calculate angle alpha
+    let alphaAngle = 90 - betaAngle;
+
+    // debugging
+    debugmessage = ["CalculateTriangleFromLegs; Input; lengthA","CalculateTriangleFromLegs; Input; lengthB", 
+                    "CalculateTriangleFromLegs; Output; lengthA", "CalculateTriangleFromLegs; Output; lengthB", 
+                    "CalculateTriangleFromLegs; Output; lengthHypotenuse", "CalculateTriangleFromLegs; Output; betaAngle", 
+                    "CalculateTriangleFromLegs; Output; alphaAngle"]
+    debugvalues = [lengthA,lengthB,lengthA, lengthB, lengthHypotenuse, betaAngle, alphaAngle];
+    SystemDebug(debugmessage,debugvalues);
+
+    // Return array with all values
+    return [lengthA, lengthB, lengthHypotenuse, betaAngle, alphaAngle];
+}
+
+function ConvertDDToRadians(DD)
+{
+    let radians = (DD* Math.PI)/ 180;
+    radians = Number(radians.toFixed(RoundingDecimals));
+    return radians;
+}
 
 const contextData = 
 {
-    DataConversion:DataConversion,
+    
+    OnLoad:OnLoad,
     //CalculateDistance:CalculateDistance,
     //CalculateDestination:CalculateDestination,
     //CalculateMidpoint:CalculateMidpoint,

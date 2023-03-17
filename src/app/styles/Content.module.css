@@ -131,10 +131,9 @@ article{
     background-color: var(--color-0);
 }
 
-/* .map{
-     width:4197.0px;
-    height:2998.0px; 
-} */
+.map{
+    z-index: 1;
+}
 
 /* .settings{
     
