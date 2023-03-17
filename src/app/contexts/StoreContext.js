@@ -9,21 +9,21 @@ export default function StoreContextProvider({ children }) {
     let storedData = [];
 
     function storeData(data, index){
-        console.log(data + ' at index ' + index);
+        //console.log(data + ' at index ' + index);
         storedData[index] = data;
     }
 
     function getLoadedMapData(){
-        console.log("Get loaded map called");
-        console.log(loadedMap);
+        //console.log("Get loaded map called");
+        //console.log(loadedMap);
         return loadedMap;
     }
 
     function setHomeToUseMap(data){
         console.log("setHomeToUseMap called");
         loadedMap = data;
-        console.log(data);
-        console.log(loadedMap);
+        //console.log(data);
+        //console.log(loadedMap);
     }
 
     const contextData = {

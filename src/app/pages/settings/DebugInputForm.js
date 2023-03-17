@@ -158,10 +158,29 @@ export default function DebugInputForm({}) {
     } 
 
     async function getKMLFile(){
-        let fileName = "/maps/Home.kml"
+        let fileName = "/maps/BW12.kml"
         let response = await fetchKMLFile(fileName);
         const kml = response.data;
-        putKMLDataInArray(kml);
+        //putKMLDataInArray(kml);
+        extractKMLData(kml);
+    }
+
+    async function extractKMLData(kml){
+        //console.log(kml);
+        //let response = await fetchKMLFile(fileName);
+        //let kml = response.data;
+        let kmlArrayData = putKMLDataInArray(kml);
+        console.log(kmlArrayData);
+        let latlonBox = kmlArrayData[0];
+        let rotation = 0;
+        console.log(latlonBox);
+        if (typeof latlonBox.rotation !== 'undefined'){
+            rotation = latlonBox.rotation;
+        }
+        setMapDataDebug({...mapDataDebug, north: latlonBox.north, west: latlonBox.west, south: latlonBox.south, east: latlonBox.east, rotation: rotation });
+        console.log("setMapDataDebug");
+        console.log(mapDataDebug);
+        //sendMapInfo("update");
     }
 
     function putKMLDataInArray(kmlData){
@@ -177,10 +196,12 @@ export default function DebugInputForm({}) {
 
         const result = parser.parse(kmlData, options);
         console.log(result);
-        const latLonBox = result.kml.GroundOverlay.LatLonBox;
-        const href = result.kml.GroundOverlay.Icon.href;
-        // console.log(latLonBox);
-        // console.log(href);
+        let latLonBox = result.kml.Document.Folder.GroundOverlay.LatLonBox;
+        let href = result.kml.Document.Folder.GroundOverlay.Icon.href;
+        console.log(latLonBox.rotation);
+        console.log(latLonBox);
+        console.log(href);
+        return [latLonBox, href];
     };
 
     useEffect( () => {
@@ -249,7 +270,7 @@ export default function DebugInputForm({}) {
                 
                 */}
             <br/>
-                <label className={styles['info-label']} htmlFor="Radius">Radius</label>
+                <label className={styles['info-label']} htmlFor="Radius">Radius (m)</label>
                 <input className={styles['info-input']} name="Radius" type="text" id="Radius" defaultValue={mapDataDebug.radius} onChange={handleInputUpdate} />           
                 
                 <label className={styles['info-label']} htmlFor="North">North</label>

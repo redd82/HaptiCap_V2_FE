@@ -23,7 +23,7 @@ export default function MapList({title}){
             setTimeout(() => {
                 setLoading(false);
               }, 1000);
-            console.log(r);
+            //console.log(r);
         });
         
     }, []);

@@ -10,11 +10,11 @@ export default function CommsContextProvider({ children }) {
     const [defaultPositionData, setDefaultPositionData] = useState({GPSLat:"", GPSLon: ""});
     const [defaultData, setDefaultData] = useState({});
     const [defaultDeviceName, setDefaultDeviceName] = useState("Hapticap Default Name")
-    let storedData = [];
+    const [storedData, updateStoredData] = useState([]);
 
     function storeData(data, index){
         console.log(data + ' at index ' + index);
-        storedData[index] = data;
+        updateStoredData( arr => [...arr, `${arr.length}`]);
     }
 
     async function fetchSettings() {

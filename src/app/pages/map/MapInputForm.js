@@ -10,16 +10,16 @@ import { MapsContext } from '../../contexts/MapsContext';
 import styles from '../../styles/pages/InputForm.module.css';
 import stylesContent from '../../styles/Content.module.css';
 import Button from "../components/Button";
-import XMLParser from 'fast-xml-parser';
 
 export default function MapInputForm({map, newMap}) {
+    const { XMLParser, XMLBuilder, XMLValidator} = require("fast-xml-parser");
     const navigate = useNavigate();
     const DATEFORMAT = 'yyyy-MM-dd';
     const {storeData, fetchData, getServerHost} = useContext(CommsContext);
     const {fetchKMLFile} = useContext(MapsContext);
     const {setHomeToUseMap} = useContext(StoreContext);
     const [loading, setLoading] = useState(true);
-    const {register, handleSubmit, formState: { errors } } = useForm();
+    const { formState: { errors } } = useForm();
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [uploading, setUploading] = useState(false);
@@ -29,9 +29,14 @@ export default function MapInputForm({map, newMap}) {
     const [pngUploaded, setPngUploaded] = useState(false);
     const [kmlUploaded, setKmlUploaded] = useState(false);
     const [kmlData, setKmlData] = useState(null);
+    const [file, setFile] = useState(null);
+    const [size, setSize] = useState();
+    const [width, setWidth] = useState(null);
+    const [height, setHeight] = useState(null);
+    const [useMap, setUseMap] = useState (false);
     let maxFileSize = 1.7;
     let newFaultTemp = {};
-
+    let mapDataTemp = {};
 
     async function uploadMapFile(fileToUpload) {
         setError("");
@@ -52,8 +57,7 @@ export default function MapInputForm({map, newMap}) {
                     maxContentLength: Infinity,
                 });
                 console.log(response);
-                processFileData(fileToUpload, response);
-                return response;
+                return [fileToUpload, response];
             } catch (e) {
                 setError(e.response.data.message);
                 if (e.response.status >= 401) {
@@ -66,31 +70,38 @@ export default function MapInputForm({map, newMap}) {
         }
     }
 
-    async function processFileData(fileToUpload, response){
+    async function processFileData(fileToUpload, uploadResponse){
+        let serverHost = getServerHost();
+        console.log(fileToUpload.name);
         let fileType = fileToUpload.type;
-        if(response.data === "Wrong filetype."){
+        if(uploadResponse.data === "Wrong filetype."){
             setError("Upload failed.");
             setLoading(false);
         } else {
-            setSuccess("File uploaded.");
-            setLoading(false);
             switch (fileType.toLowerCase()) {
                 case "image/png" :
+                    const response = await axios.get(serverHost + "/maps/" + fileToUpload.name , { responseType: 'blob' });
+                    console.log(response);
+                    const blob = response.data;
+                    const image = new Image();
+                    image.src = URL.createObjectURL(blob);
+                    image.onload = function() {
+                        setMapData({...mapData, pngFile: fileToUpload.name, imageHeight: this.height, imageWidth: this.width});
+                    }
                     console.log(fileToUpload.name);
                     console.log("png uploaded");
                     setPngUploaded(true);
                     setSuccess("PNG File uploaded.");
-                    setMapData({...mapData, pngFile: "/maps/" + fileToUpload.name, imageHeight: fileToUpload.height, imageWidth: fileToUpload.imageWidth});
                     setLoading(false);
                     break;
                 case "application/vnd.google-earth.kml+xml" :
                     console.log("kml uploaded");
+                    let kmlDataArray = await extractKMLData("/maps/" + fileToUpload.name);
+                    console.log(kmlDataArray);
+                    setMapData({...mapData, kmlFile: fileToUpload.name, north: kmlDataArray[0].north, west: kmlDataArray[0].west, south: kmlDataArray[0].south, east: kmlDataArray[0].east, rotation: kmlDataArray[0].rotation });
                     setKmlUploaded(true);
                     setSuccess("KML File uploaded.");
-                    setMapData({...mapData, kmlFile: "/maps/" + fileToUpload.name});
                     setLoading(false);
-                    //sendMapInfo("update");
-                    extractKMLData("/maps/" + fileToUpload.name);
                     break;
                 default :
                     setSuccess("");
@@ -99,17 +110,6 @@ export default function MapInputForm({map, newMap}) {
                     break;
             }
         }
-    }
-
-    async function extractKMLData(fileName){
-        let response = await fetchKMLFile(fileName);
-        let kml = response.data;
-        let kmlArrayData = putKMLDataInArray(kml);
-        let latlonBox = kmlArrayData[0];
-        setMapData({...mapData, north: latlonBox.north, west: latlonBox.west, south: latlonBox.south, east: latlonBox.east, rotation: latlonBox.rotation });
-        console.log(latlonBox);
-        console.log(kml);
-        sendMapInfo("update");
     }
 
     function putKMLDataInArray(kmlData){
@@ -129,6 +129,16 @@ export default function MapInputForm({map, newMap}) {
         const href = result.kml.GroundOverlay.Icon.href;
         return [latLonBox, href];
     };
+
+    async function extractKMLData(fileName){
+        let response = await fetchKMLFile(fileName);
+        console.log(response);
+        let kml = response.data;
+        let kmlDataArray = putKMLDataInArray(kml);
+        console.log(kmlDataArray);
+        console.log(kmlDataArray[0]);
+        return kmlDataArray;
+    }
 
     async function sendMapInfo(type){
         console.log(mapData);
@@ -176,7 +186,14 @@ export default function MapInputForm({map, newMap}) {
 
     async function requestMap(){
         let serverHost = getServerHost();
-        let json = JSON.stringify({id: mapData.id, name: mapData.name, country: mapData.country, area: mapData.area, pngFile: mapData.pngFile, kmlFile: mapData.kmlFile});
+        let json;
+        if(kmlUploaded){
+        json = JSON.stringify({id: mapData.id, name: mapData.name, country: mapData.country, area: mapData.area, pngFile: "/maps/" + mapData.pngFile,  kmlFile: "/maps/" + mapData.kmlFile});
+        console.log(kmlUploaded);
+        } else {
+        json = JSON.stringify({id: mapData.id, name: mapData.name, country: mapData.country, area: mapData.area, pngFile: mapData.pngFile, kmlFile: mapData.kmlFile});
+        console.log(kmlUploaded);
+        }
         console.log(json);
         try{
             const response = await axios.post(serverHost + '/navigation/request-map', json, {
@@ -189,11 +206,13 @@ export default function MapInputForm({map, newMap}) {
             setSuccess("");               
             if(response.status === 200){
                 setTimeout(500);
-                setSuccess("Map request sent.");
+                setSuccess("Map request recieved.");
                 setError("");
+                setMapData(response.data);
             }else{
                 setError("Error");
             }
+            return response;
         }   catch (e){
             setError(e.response.data.message);
             if(e.response.status >= 401) {
@@ -206,8 +225,8 @@ export default function MapInputForm({map, newMap}) {
 
     async function clearMap(){
         let serverHost = getServerHost();
-        setMapData({...mapData, id: mapData.id, name: "NoMap", country: "NoMap", area: "NoMap", pngFile: "NoMap.png", kmlFile: "NoMap.kml"});
-        let json = JSON.stringify({id: mapData.id, name: "NoMap", country: "NoMap", area: "NoMap", pngFile: mapData.pngFile, kmlFile: mapData.kmlFile});
+        setMapData({...mapData, id: mapData.id, name: "NoMap", country: "NoMap", area: "NoMap", pngFile: "NoMap.png", kmlFile: "NoMap.kml", radius: 63713000});
+        let json = JSON.stringify({id: mapData.id, name: "NoMap", country: "NoMap", area: "NoMap", pngFile: mapData.pngFile, kmlFile: mapData.kmlFile, radius: mapData.radius});
         console.log(json);
         try{
             const response = await axios.post(serverHost + '/navigation/clear-map', json, {
@@ -244,11 +263,11 @@ export default function MapInputForm({map, newMap}) {
         sendMapInfo("update");
     }
 
-    function useMap() {
-        requestMap();
-        setHomeToUseMap(mapData);
-        console.log("navigate to usemap");
-        navigate("../use-map", { state: {mapData} });   //id: map.id, name: map.name, country: map.country
+    async function useSelectedMap() {
+        const response = await requestMap();
+        console.log(response.data);
+        setHomeToUseMap(response.data);
+        setUseMap(true);
     }
 
     function checkFields(fileToUpload) {
@@ -261,35 +280,9 @@ export default function MapInputForm({map, newMap}) {
         return true;
     }
 
-    function getPNGDimensions(fileToUpload){
-        let reader = new FileReader();
-
-        //Read the contents of Image File.
-        reader.readAsDataURL(fileToUpload);
-        reader.onload = function (e) {
-
-        //Initiate the JavaScript Image object.
-        let image = new Image();
-
-        //Set the Base64 string return from FileReader as source.
-        image.src = e.target.result;
-
-        //Validate the File Height and Width.
-        image.onload = function () {
-            let height = this.height;
-            let width = this.width;
-            if (height > 100 || width > 100) {
-            alert("Height and Width must not exceed 100px.");
-            return false;
-            }
-            alert("Uploaded image has valid Height and Width.");
-            return true;
-        };
-};
-    }
-
     const handleInputUpdate = (event) => {
         const value = event?.target?.value;
+        console.log(event?.target?.value);
         if (event.target.name === "name") {
             setMapData({...mapData, name: value});
         }
@@ -299,15 +292,26 @@ export default function MapInputForm({map, newMap}) {
         if (event.target.name === "area") {
             setMapData({...mapData, area: value});
         }
-        if (event.target.name === "mapWorldRadius") {
+        if (event.target.name === "radius") {
             setMapData({...mapData, radius: value});
         }
     };
 
+    function setEditMapToFalse(){
+        setEditMap(false);
+    }
+
     useEffect( () => {
         setMapData(map);
         setLoading(false);
-    }, []);
+    },[]);
+
+    useEffect(() => {
+        if (useMap) {
+            console.log("navigate to usemap");
+            navigate("../use-map", { state: {mapData} });   //id: map.id, name: map.name, country: map.country
+        }
+      }, [mapData]);
 
     return (
         <form className={styles['info-form']} >
@@ -337,7 +341,7 @@ export default function MapInputForm({map, newMap}) {
                 <div id={styles['valueRO-numberplate']}>{mapData.area}</div>
                 </div>
             )}
-            <label className={styles['info-label']} htmlFor="radius">World Map Radius: </label>
+            <label className={styles['info-label']} htmlFor="radius">World Map Radius (m): </label>
             {(editMap) ? (
                 <input className={styles['info-input']} name="radius" type="text" id="radius" defaultValue={mapData.radius} onChange={handleInputUpdate}/>
             ) : (
@@ -345,54 +349,66 @@ export default function MapInputForm({map, newMap}) {
                 <div id={styles['valueRO-numberplate']}>{mapData.radius}</div>
                 </div>
             )}
-            {(!editMap) ? (<></>) : (
+            {(!editMap) ? (<>
+                            <label className={styles['info-label']} htmlFor="mapPNGFile">Map (.png): </label>
+                            <label className={styles['numberRO']} htmlFor="mapPNGFile">{mapData.pngFile} </label>
+                          </>
+                ) : ((loading) ? (<></>) : (
                 <>
-                <label className={styles['info-label']} htmlFor="mapPNGFile">Map (PNG): </label>
-                <FilePicker maxSize={maxFileSize}
-                            extensions={['png']}
-                            onChange={FileObject => (uploadMapFile(FileObject))}
-                            onError={errMsg => (setError(errMsg))}>
-                    <button type="button">
-                        Upload PNG map file
-                    </button>
-                </FilePicker>
+                    <label className={styles['info-label']} htmlFor="mapPNGFile">Map PNG({mapData.pngFile}) </label>
+                    <FilePicker maxSize={maxFileSize}
+                                extensions={['png']}
+                                onChange={FileObject => (uploadMapFile(FileObject)).then(r => {
+                                    processFileData(r[0], r[1]);})}
+                                onError={errMsg => (setError(errMsg))}>
+                        <button type="button">
+                            Upload PNG map file
+                        </button>
+                    </FilePicker>
                 </>
-                )
+                ))
             }
-            {(!editMap) ? (<></>) : (
-                    (!pngUploaded) ? (<></>) : (
-                <>
-                <label className={styles['info-label']} htmlFor="kmlFile">KML map: </label>
-                <FilePicker extensions={['kml']}
-                            onChange={FileObject => (uploadMapFile(FileObject))}
-                            onError={errMsg => (setError(errMsg))}>
-                    <button type="button">
-                        Upload KML map file
-                    </button>
-                </FilePicker>
-                </>
+            {(!editMap) ? (<>
+                            <label className={styles['info-label']} htmlFor="kmlFile">KML map: </label>
+                            <label className={styles['numberRO']} htmlFor="mapPNGFile">{mapData.kmlFile} </label>
+                            </>) : (
+                    (!pngUploaded) ? (<></>) : ((loading)? (<></>): (
+                        <>
+                        <label className={styles['info-label']} htmlFor="kmlFile">KML map {mapData.kmlFile} </label>
+                        <FilePicker extensions={['kml']}
+                                    onChange={FileObject => (uploadMapFile(FileObject)).then(r => {
+                                        processFileData(r[0], r[1]);})}
+                                    onError={errMsg => (setError(errMsg))}>
+                            <button type="button">
+                                Upload KML map file
+                            </button>
+                        </FilePicker>
+                        </>
+                        )
                     )
                 )
             }
             {(editMap) ? ( 
                 (!kmlUploaded) ? 
-                    (
-                        <button className={styles['apply-button']} onClick={saveChangesSelectedMap} type="button"> Save Changes</button>
-                    ):(
+                    ((loading) ? (<></>): (
+                        <>
+                            <button className={styles['apply-button']} onClick={setEditMapToFalse} type="button"> Cancel</button>
+                        </>
+                    )
+                    ):( (loading)? (<></>): (
                         <>
                             <button className={styles['apply-button']} onClick={saveChangesSelectedMap} type="button"> Save Changes</button>
-                        </>
+                        </>)
                     )
             ): (
                 (mapData.name === "NoMap") ? (        
                     <>
                         <button className={styles['apply-button']} onClick={editSelectedMap} type="button"> Edit Map</button>
-                        <button className={styles['apply-button']} onClick={useMap} type="button"> Use Map</button>
                     </>            
                 ) : (
                     <>
                         <button className={styles['apply-button']} onClick={editSelectedMap} type="button"> Edit Map</button>
-                        <button className={styles['apply-button']} onClick={useMap} type="button"> Use Map</button>
+                        <button className={styles['apply-button']} onClick={useSelectedMap} type="button"> Use Selected Map</button>
                         <button className={styles['apply-button']} onClick={clearMap} type="button"> Delete Map</button>
                     </>
                 )
@@ -423,23 +439,27 @@ export default function MapInputForm({map, newMap}) {
     );
 }
 
-    // void addMaptoDB(String PNGFile, String KMLFile, JsonObject obj){
-    //     int id = obj["id"];
-    //     mapSelector = id;
-    //     String name = obj["name"];
-    //     String area = obj["area"];
-    //     String country = obj["country"];
-    //     PNGFile = mapsDir + "/" + PNGFile;
-    //     int imageWidth = obj["imageWidth"];
-    //     int imageHeight = obj["imageHeight"];
-    //     KMLFile = mapsDir + "/" + KMLFile;
-    //     double realWorldHeight = obj["realWorldHeight"];
-    //     double realWorldWidth = obj["realWorldWidth"];
-    //     float scaleHeight = obj["scaleHeight"];
-    //     float scaleWidth = obj["scaleWidth"];
-    //     double north = obj["north"];
-    //     double west = obj["west"];
-    //     double south = obj["south"];
-    //     double east = obj["east"];
-    //     float rotation = obj["rotation"];
-    //     int radius = obj["radius"];
+// import React, { useState } from 'react';
+
+// function ImageInfo() {
+//   const [file, setFile] = useState(null);
+//   const [size, setSize] = useState(null);
+//   const [width, setWidth] = useState(null);
+//   const [height, setHeight] = useState(null);
+
+//   const handleFileChange = event => {
+//     const file = event.target.files[0];
+//     setFile(file);
+
+//     const reader = new FileReader();
+//     reader.onload = function(event) {
+//       const image = new Image();
+//       image.src = event.target.result;
+//       image.onload = function() {
+//         setSize(file.size);
+//         setWidth(this.width);
+//         setHeight(this.height);
+//       }
+//     }
+//     reader.readAsDataURL(file);
+//   }
