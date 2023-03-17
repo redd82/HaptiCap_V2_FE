@@ -19,8 +19,10 @@ export default function UseMap(){
         let dim = e.getBoundingClientRect();
         let x = event.clientX - dim.left;
         let y = event.clientY - dim.top;
+        let xOffset = x - (mapData.imageWidth/2);
+        let yOffset = (mapData.imageHeight/2) - y;
         let temp = [0,0];
-        temp = getLatLongFromXY(x, y,mapData);
+        temp = getLatLongFromXY(xOffset, yOffset, mapData);
         console.log("temp: " + temp);
         console.log("getClickCoords; Output: X:" + x + " Y:" + y);
         let coordinates = [0,0,0,0];
