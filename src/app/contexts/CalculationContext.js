@@ -151,8 +151,8 @@ function getLatLongFromXY(x, y,mapData)
     console.log("ImageSize[1](height): " + ImageSize[1]);
     
     // Calculate the distance between the center of the hypotenuse and the input pixel
-    const dx = x - ImageSize[0] / 2;
-    const dy = ImageSize[1] / 2 - y;
+    const dx = x - (ImageSize[0] / 2);
+    const dy = (ImageSize[1] / 2) - y;
     const distanceFromCenter = Math.sqrt(dx ** 2 + dy ** 2);
     
     // Calculate the angle between the input pixel and the center of the hypotenuse
