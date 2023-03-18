@@ -21,7 +21,7 @@ const HtmlSources =["https://stackoverflow.com/a/29296049/14198287",
                     "https://pganssle.github.io/HaptiCap/"];
 
 
-let Radius = 6371e3;          //radius of planet we are on (Earth)
+let Radius = 6371000;          //radius of planet we are on (Earth)
 
 let LatLonNorthWest = [0,0];    // latitude Degrees, longitude Degrees
 let LatLonSouthEast = [0,0];
@@ -55,6 +55,7 @@ function getGlobals() // function returns the global values, should not be neede
 function onLoad(mapData)
 {
     // set the basic values we need
+        haversine(Radius, mapData.north, mapData.west, mapData.south, mapData.east);
     try{
         setMapData(mapData);
         LatLonNorthWest[0] = mapData.north;
@@ -65,10 +66,11 @@ function onLoad(mapData)
         ImageSize[1] = mapData.imageHeight;
         Rotation = mapData.rotation;
         ImageName = mapData.pngFile;
-        console.log("OnLoad NorthWest: " + LatLonNorthWest);
-        console.log("OnLoad SouthEast: " + LatLonSouthEast);
-        console.log("ImageSize: " + ImageSize);
         Radius = mapData.radius;
+
+        let debugmessages = ["mapData: ","OnLoad NorthWest: ","OnLoad SouthEast: ", "ImageSize: "]
+        let debugvalues = [mapData, LatLonNorthWest,LatLonSouthEast, ImageSize];
+        SystemDebug(debugmessages,debugvalues);
         return 0;
     }
     catch(exception){
@@ -116,25 +118,39 @@ function calculateImageCoords(event, html)
     }
   }
 
+function haversine(R, lat1, lon1, lat2, lon2){
+    // Haversine
+    // formula: 	a = sin²(Δφ/2) + cos φ1 ⋅ cos φ2 ⋅ sin²(Δλ/2)
+    // c = 2 ⋅ atan2( √a, √(1−a) )
+    // d = R ⋅ c
+    // where 	φ is latitude, λ is longitude, R is earth’s radius (mean radius = 6,371km);
+    // note that angles need to be in radians to pass to trig functions!
+    // JavaScript: 	
+
+    const φ1 = lat1 * Math.PI/180; // φ, λ in radians
+    const φ2 = lat2 * Math.PI/180;
+    const Δφ = (lat2-lat1) * Math.PI/180;
+    const Δλ = (lon2-lon1) * Math.PI/180;
+    
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    
+    const d = R * c; // in metres
+    console.log(d);
+}
+
+
 function getLatLongFromXY(x, y,mapData)
 {
     // Calculate the distance between LatLonNorthWest and LatLonSouthEast
+    // Load the map data from the function call into the 'global' values in this context.
     onLoad(mapData);
-    console.log("x: " + x);
-    console.log("y: " + y);
-    console.log("LatLonNorthWest[0]: " + LatLonNorthWest[0]);
-    console.log("LatLonSouthEast[0]: " + LatLonSouthEast[0]);
-    console.log("LatLonNorthWest[1]: " + LatLonNorthWest[1]);
-    console.log("LatLonSouthEast[1]: " + LatLonSouthEast[1]);
-
     const dLat = LatLonNorthWest[0] - LatLonSouthEast[0];
     const dLon = LatLonNorthWest[1] - LatLonSouthEast[1];
     const hypotenuseLength = Math.sqrt(dLat ** 2 + dLon ** 2);
-    
-    console.log("dLat: " + dLat);
-    console.log("dLon: " + dLon);
-    console.log("hypotenuseLength: " + hypotenuseLength);
-    
+  
     // Calculate the angle of rotation in radians
     const rotationRadians = ToRadians(Rotation);
       
@@ -142,15 +158,9 @@ function getLatLongFromXY(x, y,mapData)
     LatLonMidPoint[0] = (LatLonNorthWest[0] + LatLonSouthEast[0]) / 2;
     LatLonMidPoint[1] = (LatLonNorthWest[1] + LatLonSouthEast[1]) / 2;
     
-    console.log("LatLonMidPoint[0]: ");
-    console.log("LatLonMidPoint[1]: ");
-
-    console.log("ImageSize[0](width): " + ImageSize[0]);
-    console.log("ImageSize[1](height): " + ImageSize[1]);
-    
     // Calculate the distance between the center of the hypotenuse and the input pixel
-    const dx = x - (ImageSize[0] / 2);
-    const dy = (ImageSize[1] / 2) - y;
+    const dx = x - ImageSize[0] / 2;
+    const dy = ImageSize[1] / 2 - y;
     const distanceFromCenter = Math.sqrt(dx ** 2 + dy ** 2);
     
     // Calculate the angle between the input pixel and the center of the hypotenuse
@@ -163,6 +173,10 @@ function getLatLongFromXY(x, y,mapData)
     const lat = LatLonMidPoint[0] + (distanceFromCenter / hypotenuseLength) * Math.cos(hypotenuseAngleRadians + angleFromCenterRadians);
     const lon = LatLonMidPoint[1] + (distanceFromCenter / hypotenuseLength) * Math.sin(hypotenuseAngleRadians + angleFromCenterRadians);
       
+    let debugmessages = ["(Click)x: ","(Click)y: ", "LatLonNorthWest[0]: ", "LatLonSouthEast[0]: ", "LatLonNorthWest[1]: ", "LatLonSouthEast[1]: ",
+     "LatLonMidPoint[0]: ", "LatLonMidPoint[1]: ",  "ImageSize[0](width): ", "ImageSize[1](height): ", "dLat: ", "dLon: ", "hypotenuseLength: "]
+    let debugvalues = [x, y, LatLonNorthWest[0], LatLonSouthEast[0], LatLonNorthWest[1], LatLonSouthEast[1], LatLonMidPoint[0], LatLonMidPoint[1], ImageSize[0], ImageSize[1], dLat, dLon, hypotenuseLength];
+    SystemDebug(debugmessages,debugvalues);
      return [lat, lon];
 }
 

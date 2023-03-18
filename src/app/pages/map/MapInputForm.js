@@ -125,8 +125,8 @@ export default function MapInputForm({map, newMap}) {
 
         const result = parser.parse(kmlData, options);
         console.log(result);
-        const latLonBox = result.kml.GroundOverlay.LatLonBox;
-        const href = result.kml.GroundOverlay.Icon.href;
+        const latLonBox = result.kml.Document.Folder.GroundOverlay.LatLonBox;
+        const href = result.kml.Document.Folder.GroundOverlay.Icon.href;
         return [latLonBox, href];
     };
 

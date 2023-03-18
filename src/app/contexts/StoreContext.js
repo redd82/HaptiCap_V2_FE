@@ -1,29 +1,28 @@
-import React, {createContext} from 'react';
+import React, {createContext, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 
 export const StoreContext = createContext({});
 export default function StoreContextProvider({ children }) {
     const navigate = useNavigate();
-    let loadedMap = {};
-    let storedData = [];
+    const [loadedMap, setLoadedMap] = useState();
+    const [storedData, setStoredData] = useState([]);
 
     function storeData(data, index){
-        //console.log(data + ' at index ' + index);
-        storedData[index] = data;
+        // for(let i = 0;  )
+
+
+
+        setStoredData({...storedData, data});
     }
 
     function getLoadedMapData(){
-        //console.log("Get loaded map called");
-        //console.log(loadedMap);
         return loadedMap;
     }
 
     function setHomeToUseMap(data){
         console.log("setHomeToUseMap called");
-        loadedMap = data;
-        //console.log(data);
-        //console.log(loadedMap);
+        setLoadedMap(data);
     }
 
     const contextData = {
