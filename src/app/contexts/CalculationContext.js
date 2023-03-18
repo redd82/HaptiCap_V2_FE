@@ -54,10 +54,8 @@ function getGlobals() // function returns the global values, should not be neede
 // function onLoad(north, west, south, east, rotation, imagename ,imageheight, imagewidth, mapData)
 function onLoad(mapData)
 {
-    //console.log(mapData);
     // set the basic values we need
     try{
-        console.log(mapData);
         setMapData(mapData);
         LatLonNorthWest[0] = mapData.north;
         LatLonNorthWest[1] = mapData.west;

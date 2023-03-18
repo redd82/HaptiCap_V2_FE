@@ -8,7 +8,6 @@ export default function DebugContextProvider({ children }) {
         setDebug(level);
     }
 
-
     // New Debug
     // message and values are both arrays, where the message value is the string (the log message) and the values array item holds the data value at the same index.
     // i.e. message[1]  has the string value "Function weather report; Output; the temperature in degrees celcius is" 
