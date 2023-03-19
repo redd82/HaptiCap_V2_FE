@@ -21,7 +21,7 @@ article{
 }
 
 .outlet-maps{
-    margin: 10px;
+    margin: 0px;
 }
 
 .outlet-settings{
@@ -129,33 +129,6 @@ article{
 .standard-tr:hover{
     vertical-align: middle;
     background-color: var(--color-0);
-}
-
-.map{
-    z-index: -2;
-}
-
-/* .settings{
-    
-}  */
-
-.reset-marker-button {
-    border: none;
-    font: inherit;
-    cursor: pointer;
-    outline: inherit;
-    /* background-color: #6F5E5C; */
-    padding: 4px;
-    font-size: 16px;
-    border-radius: 0px;
-    height:100%;
-    width:10%;
-    color: white;
-    /* background-image: linear-gradient(to bottom right, #A28497 50%, #A28497 50%, #6F5E5C); */
-    background-size: 400%;
-    background-position: 0;
-    transition: 0.4s;
-    z-index: 1;
 }
 
 .loader-container {

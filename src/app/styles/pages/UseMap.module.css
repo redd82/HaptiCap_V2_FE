@@ -1,0 +1,97 @@
+.map{
+    z-index: -2;
+}
+
+.image-marker {
+      position: relative;
+      margin: 0 auto;
+    }
+.image-marker__image {
+      margin: 0 auto;
+      width: 100%;
+    }
+
+.image-marker__marker {
+      position: absolute;
+    }
+
+.image-marker__marker--default {
+      width: 25px;
+      height: 25px;
+      background-color: brown;
+      border-radius: 50%;
+      color: white;
+      text-align: center;
+    }
+
+.image-marking__marker {
+    position: absolute;
+}
+
+.image-marking__image {
+    margin: 0 auto;
+    width: 100%;
+}
+
+.image-marking-small {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    margin: 7px 0px 0px 7px;
+    font-size: 8px;
+    background-color: rgb(54, 42, 165);
+    border-radius: 50%;
+    color: white;
+    text-align: center;
+}
+
+.small-marker{
+    width: 15px;
+    height: 15px;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: row;
+    align-content: stretch;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    position: sticky;
+    top: 0;
+    bottom: 0;
+    background-color: #663F46;
+}
+
+.marker-button {
+    border: none;
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
+    padding: 4px;
+    margin: 0px 2px 2px 0px;
+    font-size: 16px;
+    border-radius: 0px;
+    height:100%;
+    color: white;
+    background-size: 400%;
+    background-position: 0;
+    transition: 0.4s;
+}
+
+.zoom-control-button {
+    border: none;
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
+    padding: 4px;
+    margin: 0px 2px 2px 0px;
+    font-size: 16px;
+    border-radius: 0px;
+    height:100%;
+    color: white;
+    background-size: 400%;
+    background-position: 0;
+    transition: 0.4s;
+}

@@ -52,8 +52,8 @@ function getGlobals() // function returns the global values, should not be neede
 // function onLoad(north, west, south, east, rotation, imagename ,imageheight, imagewidth, mapData)
 function onLoad(mapData)
 {
+    haversine(Radius, mapData.north, mapData.west, mapData.south, mapData.east);
     // set the basic values we need
-        haversine(Radius, mapData.north, mapData.west, mapData.south, mapData.east);
     try{
         setMapData(mapData);
         LatLonNorthWest[0] = mapData.north;
@@ -81,33 +81,25 @@ function onLoad(mapData)
 // function to find and return the coordinates (x/y/) 
 //where one clicked on the image.
 // if html is set to true, return html string
-function calculateImageCoords(event, html) 
+function calculateImageCoords(event) 
 {
     try{
-        let x = event.clientX;
-        let y = event.clientY;
-        //let coordinates = [x,y];
+        let e = event.target;
+        let dim = e.getBoundingClientRect();
+        let x = event.clientX - dim.left;
+        let y = event.clientY - dim.top;
+        let xOffset = x - (mapData.imageWidth/2);
+        let yOffset = (mapData.imageHeight/2) - y;
         let temp = [0,0];
-        temp = getLatLongFromXY(x, y);
-        
+        temp = getLatLongFromXY(xOffset, yOffset, mapData);
+        console.log("temp: " + temp);
+        console.log("getClickCoords; Output: X:" + x + " Y:" + y);
         let coordinates = [0,0,0,0];
         coordinates[0] = x;
         coordinates[1] = y;
         coordinates[2] = temp[0];
         coordinates[3] = temp[1];
-        
-        // incase the boolean html is set, output the text to the html element
-        // <p id="ClickedCoordinates">Coordinates:</p>
-        if(html == true)
-        {
-            document.getElementById("ClickedCoordinates").innerHTML = "Coordinates X:" + coordinates[0] + "/" + coordinates[2]+" Y:" + coordinates[1] + "/" + coordinates[3];
-        }
-
-        // return the coordinates and the X/Y position
         return coordinates; 
-
-        // optional return only latlon;
-        // return temp;
     }
     catch(exception){
         // well something went blah.
