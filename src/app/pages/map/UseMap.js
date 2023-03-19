@@ -4,10 +4,8 @@ import {useLocation} from "react-router-dom";
 import {CommsContext} from "../../contexts/CommsContext";
 import { CalculationContext } from '../../contexts/CalculationContext';
 import ImageMarker from "react-image-marker";
-
 // info:
 //https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_event_mouse_clientxy
-
 
 export default function UseMap(){
     const {getServerHost} = useContext(CommsContext);
@@ -17,15 +15,13 @@ export default function UseMap(){
     let [markers, setMarkers] = useState([]);
 
     const CustomMarker = () => {
-        
         return (
           <div
-            className="image-marker__marker image-marker__marker--default"
+            className="image-marker__marker image-marker__marker--small"
             data-testid="marker" onClick={getClickCoords}
           ></div>
         );
       };
-
 
     const getClickCoords = (event) => {
         let e = event.target;

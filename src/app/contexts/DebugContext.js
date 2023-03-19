@@ -2,7 +2,7 @@ import React, {createContext, useState} from 'react';
 
 export const DebugContext = createContext({});
 export default function DebugContextProvider({ children }) {
-    const [debug, setDebug] = useState()
+    const [debug, setDebug] = useState(1)               // Set debug level
 
     function debugLevel(level){
         setDebug(level);

@@ -6,8 +6,6 @@ export const CalculationContext = createContext({});
 export default function CalculationContextProvider({ children }) {
 const {SystemDebug, debugLevel} = useContext(DebugContext);
 const [mapData, setMapData] = useState({});
-debugLevel(1);
-
 const RoundingDecimals = 8; // round to x decimals
 
 const HtmlSources =["https://stackoverflow.com/a/29296049/14198287",
