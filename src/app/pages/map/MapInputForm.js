@@ -196,6 +196,7 @@ export default function MapInputForm({map, newMap}) {
     async function useSelectedMap() {
         const response = await requestMap(mapData, kmlUploaded);
         console.log(response[0].data);
+        setMapData(response[0].data);
         setHomeToUseMap(response[0].data);
         setSuccess(response[1]);
         setError(response[2]);
@@ -372,28 +373,3 @@ export default function MapInputForm({map, newMap}) {
         </form>
     );
 }
-
-// import React, { useState } from 'react';
-
-// function ImageInfo() {
-//   const [file, setFile] = useState(null);
-//   const [size, setSize] = useState(null);
-//   const [width, setWidth] = useState(null);
-//   const [height, setHeight] = useState(null);
-
-//   const handleFileChange = event => {
-//     const file = event.target.files[0];
-//     setFile(file);
-
-//     const reader = new FileReader();
-//     reader.onload = function(event) {
-//       const image = new Image();
-//       image.src = event.target.result;
-//       image.onload = function() {
-//         setSize(file.size);
-//         setWidth(this.width);
-//         setHeight(this.height);
-//       }
-//     }
-//     reader.readAsDataURL(file);
-//   }

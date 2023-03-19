@@ -138,7 +138,7 @@ function haversine(R, lat1, lon1, lat2, lon2){
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     
     const d = R * c; // in metres
-    console.log(d);
+    SystemDebug(["haversine"],[d]);
 }
 
 
@@ -147,10 +147,24 @@ function getLatLongFromXY(x, y,mapData)
     // Calculate the distance between LatLonNorthWest and LatLonSouthEast
     // Load the map data from the function call into the 'global' values in this context.
     onLoad(mapData);
-    const dLat = LatLonNorthWest[0] - LatLonSouthEast[0];
-    const dLon = LatLonNorthWest[1] - LatLonSouthEast[1];
+    let dLat = 0;
+    let dLon = 0;
+    if(LatLonNorthWest[0] > LatLonSouthEast[0]){
+        dLat = LatLonNorthWest[0] - LatLonSouthEast[0];
+    }else{
+        dLat = LatLonSouthEast[0] - LatLonNorthWest[0];
+    }
+    if(LatLonNorthWest[1] > LatLonSouthEast[1]){
+        dLon = LatLonNorthWest[1] - LatLonSouthEast[1];
+    }else{
+        dLon = LatLonSouthEast[1] - LatLonNorthWest[1];
+    }
+    const latPerPx = dLat/mapData.imageHeight;
+    const lonPerPx = dLat/mapData.imageWidth;
+    SystemDebug(["latPerPx: ", "lonPerPx: "],[latPerPx, lonPerPx]);
+
     const hypotenuseLength = Math.sqrt(dLat ** 2 + dLon ** 2);
-  
+    SystemDebug(["hypotenuseLength: "],[hypotenuseLength]);
     // Calculate the angle of rotation in radians
     const rotationRadians = ToRadians(Rotation);
       

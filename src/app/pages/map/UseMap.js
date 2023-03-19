@@ -3,6 +3,7 @@ import styles from '../../styles/Content.module.css';
 import {useLocation} from "react-router-dom";
 import {CommsContext} from "../../contexts/CommsContext";
 import { CalculationContext } from '../../contexts/CalculationContext';
+import ImageMarker from "react-image-marker";
 
 // info:
 //https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_event_mouse_clientxy
@@ -13,6 +14,18 @@ export default function UseMap(){
     const {onLoad, getLatLongFromXY} = useContext(CalculationContext);
     const location = useLocation();
     const { mapData } = location.state;
+    let [markers, setMarkers] = useState([]);
+
+    const CustomMarker = () => {
+        
+        return (
+          <div
+            className="image-marker__marker image-marker__marker--default"
+            data-testid="marker" onClick={getClickCoords}
+          ></div>
+        );
+      };
+
 
     const getClickCoords = (event) => {
         let e = event.target;
@@ -30,8 +43,14 @@ export default function UseMap(){
         coordinates[1] = y;
         coordinates[2] = temp[0];
         coordinates[3] = temp[1];
+
+
         return coordinates; 
       };
+
+      async function saveChangesSelectedMap(){
+
+    }
 
       useEffect( () => {
         onLoad(mapData);
@@ -41,7 +60,14 @@ export default function UseMap(){
 
     return(
         <div>
-            <img className={styles['map']} src={getServerHost() + mapData.pngFile} alt="" onClick={getClickCoords}></img>
+            <button className={styles['reset-marker-button']} disabled={!markers.length > 0} onClick={() => setMarkers((prev) => prev.slice(0, -1))}> Remove Marker </button>
+            {/* <img className={styles['map']} src={getServerHost() + mapData.pngFile} alt="" onClick={getClickCoords}></img> */}
+            <ImageMarker
+                src={getServerHost() + mapData.pngFile}
+                markers={markers}
+                onAddMarker={(marker) => setMarkers((prev) => [...prev, marker])}
+                markerComponent={CustomMarker}
+            />
         </div>
     );
 }

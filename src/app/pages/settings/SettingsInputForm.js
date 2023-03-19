@@ -19,7 +19,7 @@ export default function SettingsInputForm({}) {
     async function onSubmit(){
         let serverHost = getServerHost();
             let json = JSON.stringify({asAP: settingsData.asAP, clientSSID: settingsData.clientSSID, clientPasswd: settingsData.clientPasswd, connectionTimeOut: settingsData.connectionTimeOut,
-                deviceName: settingsData.deviceName, apPasswd: settingsData.apPasswd, gpsPollSec: settingsData.gpsPollSec, targetReached: settingsData.targetReached, 
+                deviceName: settingsData.deviceName, apPasswd: settingsData.apPasswd, httpPort: settingsData.httpPort, gpsPollSec: settingsData.gpsPollSec, targetReached: settingsData.targetReached, 
                 compPollMs: settingsData.compPollMs, compOffset: settingsData.compOffset, HOME_LAT: settingsData.HOME_LAT, HOME_LON: settingsData.HOME_LON, WAYPOINT_LAT: settingsData.WAYPOINT_LAT, 
                 WAYPOINT_LON: settingsData.WAYPOINT_LON, declAngleRad: settingsData.declAngleRad, sleepMins: settingsData.sleepMins, touchThreshold: settingsData.touchThreshold,
                 touchEnabled: settingsData.touchEnabled, maxDistance:settingsData.maxDistance, maxDelay:settingsData.maxDelay, timeZoneOffset:settingsData.timeZoneOffset, 
@@ -70,6 +70,9 @@ export default function SettingsInputForm({}) {
         }
         if (event.target.name === "apPasswd") {
             setSettingsData({...settingsData, apPasswd: value});
+        }
+        if (event.target.name === "httpPort") {
+            setSettingsData({...settingsData, httpPort: value});
         }
         if (event.target.name === "gpsPollSec") {
             setSettingsData({...settingsData, gpsPollSec: value});
@@ -168,6 +171,8 @@ export default function SettingsInputForm({}) {
             <input className={styles['info-input']} name="deviceName" type="text" id="deviceName" defaultValue={settingsData.deviceName} onChange={handleInputUpdate} />
             <label className={styles['info-label']} htmlFor="apPasswd">AP Password:</label>
             <input className={styles['info-input']} name="apPasswd" type="text" id="apPasswd" defaultValue={settingsData.apPasswd} onChange={handleInputUpdate} />
+            <label className={styles['info-label']} htmlFor="httpPort">HTTP Port:</label>
+            <input className={styles['info-input']} name="httpPort" type="text" id="httpPort" defaultValue={settingsData.httpPort} onChange={handleInputUpdate} />
             <label className={styles['info-label']} htmlFor="gpsPollSec">GPS Polling time (s):</label>
             <input className={styles['info-input']} name="gpsPollSec" type="text" id="gpsPollSec" defaultValue={settingsData.gpsPollSec} onChange={handleInputUpdate} />
             <label className={styles['info-label']} htmlFor="maxDistance">Max Distance (m):</label>
@@ -190,7 +195,6 @@ export default function SettingsInputForm({}) {
             <input className={styles['info-input']} name="touchThreshold" type="text" id="touchThreshold" defaultValue={settingsData.touchThreshold} onChange={handleInputUpdate} />
             <label className={styles['info-label']} htmlFor="timeZoneOffset">Timezone Offset (h):</label>
             <input className={styles['info-input']} name="timeZoneOffset" type="text" id="timeZoneOffset" defaultValue={settingsData.timeZoneOffset} onChange={handleInputUpdate} />            
-            {/* <input type="submit" id="submit-button" className={styles['apply-button']} value="Apply Changes"/> */}
             <button className={styles['apply-button']} onClick={onSubmit} type="button"> Apply Changes</button>
             <Button buttonText='Restart HaptiCap' parentCallback={handleButton} buttonName="restart" styleName='add-button'/>
             <div className={styles['error-message']}>

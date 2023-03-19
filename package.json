@@ -21,6 +21,7 @@
     "react-dual-listbox": "^5.0.2",
     "react-file-picker": "^0.0.6",
     "react-hook-form": "^7.43.5",
+    "react-image-marker": "^1.2.0",
     "react-localization": "^1.0.19",
     "react-router": "^6.9.0",
     "react-router-dom": "^6.9.0",
