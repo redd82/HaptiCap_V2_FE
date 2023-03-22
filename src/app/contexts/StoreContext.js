@@ -17,7 +17,8 @@ export default function StoreContextProvider({ children }) {
                         "https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_event_mouse_clientxy",
                         "https://codepen.io/pen/",
                         "https://pganssle.github.io/HaptiCap/",
-                        "https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_event_mouse_clientxy"];
+                        "https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_event_mouse_clientxy",
+                        "https://en.wikipedia.org/wiki/NATO_Joint_Military_Symbology"];
 
     function getSources() // function that reutns a array of html pages used as project sources
     {
