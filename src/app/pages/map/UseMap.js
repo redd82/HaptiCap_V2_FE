@@ -7,8 +7,7 @@ import {CommsContext} from "../../contexts/CommsContext";
 import { CalculationContext } from '../../contexts/CalculationContext';
 import ImageMarker from "react-image-marker";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-// info:
-//https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_event_mouse_clientxy
+
 
 export default function UseMap(){
     const {getServerHost} = useContext(CommsContext);

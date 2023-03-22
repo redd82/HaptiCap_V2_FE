@@ -8,16 +8,6 @@ const {SystemDebug, debugLevel} = useContext(DebugContext);
 const [mapData, setMapData] = useState({});
 const RoundingDecimals = 8; // round to x decimals
 
-const HtmlSources =["https://stackoverflow.com/a/29296049/14198287",
-                    "https://www.movable-type.co.uk/scripts/latlong.html",
-                    "https://www.calculatorsoup.com/calculators/conversions/convert-decimal-degrees-to-degrees-minutes-seconds.php",
-                    "https://www.latlong.net/degrees-minutes-seconds-to-decimal-degrees",
-                    "https://developers.google.com/kml/documentation/kmlreference#groundoverlay",
-                    "https://www.omnicalculator.com/math/right-triangle-side-angle",
-                    "https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_event_mouse_clientxy",
-                    "https://codepen.io/pen/",
-                    "https://pganssle.github.io/HaptiCap/"];
-
 
 let Radius = 6371000;          //radius of planet we are on (Earth)
 
@@ -30,11 +20,6 @@ let ImageName = "";             // the name of the image. i.e.  "map.jpg"
 let ImageSize = [1920,1080];    // pixels
 
 let Rotation = 0;               // Rotation is in DecimalDegrees
-
-function getSources() // function that reutns a array of html pages used as project sources
-{
-    return HtmlSources;
-}
 
 function getGlobals() // function returns the global values, should not be needed other then a debug-ish type call
 {
@@ -212,7 +197,6 @@ const contextData =
 {
     getGlobals:getGlobals,
     getLatLongFromXY:getLatLongFromXY,
-    getSources:getSources,
     onLoad:onLoad,
     calculateImageCoords:calculateImageCoords,
 }
