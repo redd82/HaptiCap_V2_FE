@@ -126,8 +126,10 @@ export default function MapInputForm({map, newMap}) {
         const result = parser.parse(kmlData, options);
         console.log(result);
         const latLonBox = result.kml.Document.Folder.GroundOverlay.LatLonBox;
-        const href = result.kml.Document.Folder.GroundOverlay.Icon.href;
-        return [latLonBox, href];
+
+        const waypoints = result.kml.Document.Folder.Folder.Placemark;
+        
+        return [latLonBox, waypoints];
     };
 
     async function extractKMLData(fileName){
