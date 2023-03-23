@@ -12,6 +12,7 @@ export default function MapList({title}){
     const [mapList, setMapList] = useState([]);
     const [searchValue, setSearchValue] = useState("");
     const [loading, setLoading] = useState(true);
+    let noMapDisplayed = false;
 
     useEffect( () => {
         fetchMapList().then(r => {
@@ -57,11 +58,19 @@ export default function MapList({title}){
                     </thead>
                     {mapList
                         .filter(map => map.country.match(new RegExp(searchValue, "i")))
-                        .map((map) => (
-                        <React.Fragment key={map.id}>
-                            <MapData id={map.id} map={map}/>
-                        </React.Fragment>
-                    ))}
+                        .map(map => {
+                        if (map.name === "Click here to add map") {
+                            if (noMapDisplayed) {
+                            return null;
+                            }
+                            noMapDisplayed = true;
+                        }
+                        return (
+                            <React.Fragment key={map.id}>
+                                <MapData id={map.id} map={map}/>
+                            </React.Fragment>
+                        );
+                        })}
                 </table>
             </>
             )
@@ -69,3 +78,4 @@ export default function MapList({title}){
         </>
     );
 }
+

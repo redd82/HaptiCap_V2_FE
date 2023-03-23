@@ -29,10 +29,6 @@ export default function MapInputForm({map, newMap}) {
     const [pngUploaded, setPngUploaded] = useState(false);
     const [kmlUploaded, setKmlUploaded] = useState(false);
     const [kmlData, setKmlData] = useState(null);
-    const [file, setFile] = useState(null);
-    const [size, setSize] = useState();
-    const [width, setWidth] = useState(null);
-    const [height, setHeight] = useState(null);
     const [useMap, setUseMap] = useState (false);
     let maxFileSize = 1.7;
     let newFaultTemp = {};
@@ -154,8 +150,8 @@ export default function MapInputForm({map, newMap}) {
 
     async function clearMap(){
         let serverHost = getServerHost();
-        setMapData({...mapData, id: mapData.id, name: "NoMap", country: "NoMap", area: "NoMap", pngFile: "NoMap.png", kmlFile: "NoMap.kml", radius: 63713000});
-        let json = JSON.stringify({id: mapData.id, name: "NoMap", country: "NoMap", area: "NoMap", pngFile: mapData.pngFile, kmlFile: mapData.kmlFile, radius: mapData.radius});
+        setMapData({...mapData, id: mapData.id, name: "Click here to add map", country: "NoMap", area: "NoMap", pngFile: "NoMap.png", kmlFile: "NoMap.kml", radius: 63713000});
+        let json = JSON.stringify({id: mapData.id, name: "Click here to add map", country: "NoMap", area: "NoMap", pngFile: mapData.pngFile, kmlFile: mapData.kmlFile, radius: mapData.radius});
         console.log(json);
         try{
             const response = await axios.post(serverHost + '/navigation/clear-map', json, {
@@ -217,7 +213,7 @@ export default function MapInputForm({map, newMap}) {
 
     const handleInputUpdate = (event) => {
         const value = event?.target?.value;
-        console.log(event?.target?.value);
+        // console.log(event?.target?.value);
         if (event.target.name === "name") {
             setMapData({...mapData, name: value});
         }
@@ -243,7 +239,7 @@ export default function MapInputForm({map, newMap}) {
 
     useEffect(() => {
         if (useMap) {
-            console.log("navigate to usemap");
+            // console.log("navigate to usemap");
             navigate("../use-map", { state: {mapData} });   //id: map.id, name: map.name, country: map.country
         }
       }, [useMap]);
@@ -338,7 +334,7 @@ export default function MapInputForm({map, newMap}) {
                         </>)
                     )
             ): (
-                (mapData.name === "NoMap") ? (        
+                (mapData.area === "NoMap") ? (        
                     <>
                         <button className={styles['apply-button']} onClick={editSelectedMap} type="button"> Edit Map</button>
                     </>            
