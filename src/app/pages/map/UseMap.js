@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState, useRef} from 'react';
+ import React, {useContext, useEffect, useState, useRef} from 'react';
 import styles from '../../styles/Content.module.css';
 import stylesMenuBar from '../../styles/Menubar.module.css';
 import stylesMap from '../../styles/pages/UseMap.module.css';

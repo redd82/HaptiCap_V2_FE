@@ -307,8 +307,7 @@ export default function MapInputForm({map, newMap}) {
                         <>
                         <label className={styles['info-label']} htmlFor="kmlFile">KML map {mapData.kmlFile} </label>
                         <FilePicker extensions={['kml']}
-                                    onChange={FileObject => (uploadMapFile(FileObject)).then(r => {
-                                        processFileData(r[0], r[1]);})}
+                                    onChange={FileObject => (uploadMapFile(FileObject)).then(r => {processFileData(r[0], r[1]);})}
                                     onError={errMsg => (setError(errMsg))}>
                             <button type="button">
                                 Upload KML map file
