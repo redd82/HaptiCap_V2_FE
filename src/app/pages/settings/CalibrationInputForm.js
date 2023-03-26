@@ -14,13 +14,13 @@ export default function CalibrationInputForm({}) {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [readOnly, setReadOnly] = useState(true);
-    const [calibrationData, setCalibrationData ] = useState({magBiasX:""});
+    const [calibrationData, setCalibrationData ] = useState({compassOffset:""});
     let newFaultTemp = {};
 
 
     async function onSubmit(){
         let serverHost = getServerHost();
-            let json = JSON.stringify({magBiasX: calibrationData.magBiasX, magBiasY: calibrationData.magBiasY, magBiasZ: calibrationData.magBiasZ, magScaleFacX: calibrationData.magScaleFacX,
+            let json = JSON.stringify({compassOffset: calibrationData.compassOffset, magBiasX: calibrationData.magBiasX, magBiasY: calibrationData.magBiasY, magBiasZ: calibrationData.magBiasZ, magScaleFacX: calibrationData.magScaleFacX,
                 magScaleFacY: calibrationData.magScaleFacY, magScaleFacZ: calibrationData.magScaleFacZ, gyroBiasX: calibrationData.gyroBiasX, gyroBiasY: calibrationData.gyroBiasY, 
                 gyroBiasZ: calibrationData.gyroBiasZ, accelBiasX: calibrationData.accelBiasX, accelBiasY: calibrationData.accelBiasY, accelBiasZ: calibrationData.accelBiasZ, 
                 accelScaleX: calibrationData.accelScaleX, accelScaleY: calibrationData.accelScaleY, accelScaleZ: calibrationData.accelScaleZ});
@@ -53,6 +53,9 @@ export default function CalibrationInputForm({}) {
 
     const handleInputUpdate = (event) => {
         const value = event?.target?.value;
+        if (event.target.name === "compassOffset") {
+            setCalibrationData({...calibrationData, compassOffset: value});
+        }
         if (event.target.name === "magBiasX") {
             setCalibrationData({...calibrationData, magBiasX: value});
         }
@@ -102,7 +105,7 @@ export default function CalibrationInputForm({}) {
 
     const handleButton = (event) => {
         console.log(event);
-        if (event === "calibrate") {
+        if (event === "calibrateCompass") {
             
         }
     }
@@ -122,6 +125,8 @@ export default function CalibrationInputForm({}) {
 
     return (
         <form className={styles['info-form']} onSubmit={handleSubmit(onSubmit)}>
+            <label className={styles['info-label']} htmlFor="compassOffset">Compass Offset:</label>
+            <input className={styles['info-input']} name="compassOffset" type="text" id="compassOffset" defaultValue={calibrationData.compassOffset} onChange={handleInputUpdate} />
             <label className={styles['info-label']} htmlFor="magBiasX">Magnometer Bias X:</label>
             <input className={styles['info-input']} name="magBiasX" type="text" id="magBiasX" defaultValue={calibrationData.magBiasX} onChange={handleInputUpdate} />
             <label className={styles['info-label']} htmlFor="magBiasY">Magnometer Bias Y:</label>
@@ -153,7 +158,7 @@ export default function CalibrationInputForm({}) {
             <label className={styles['info-label']} htmlFor="accelScaleZ">Accel. Scale Z:</label>
             <input className={styles['info-input']} name="accelScaleZ" type="text" id="accelScaleZ" defaultValue={calibrationData.accelScaleZ} onChange={handleInputUpdate} />            
             <input type="submit" id="submit-button" className={styles['apply-button']} value="Apply Changes"/>
-            <Button buttonText='Calibrate Compass' parentCallback={handleButton} buttonName="calibrate" styleName='add-button'/>
+            <Button buttonText='Calibrate Compass' parentCallback={handleButton} buttonName="calibrateCompass" styleName='add-button'/>
             <div className={styles['error-message']}>
                 {(error !== "") ? (
                     <div className={styles['error']}>{error}</div>

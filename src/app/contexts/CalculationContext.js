@@ -6,6 +6,7 @@ export const CalculationContext = createContext({});
 export default function CalculationContextProvider({ children }) {
 const {SystemDebug, debugLevel} = useContext(DebugContext);
 const [mapData, setMapData] = useState({});
+const [boundingBoxMap, setBoundingBoxMap] = useState({})
 const RoundingDecimals = 8; // round to x decimals
 
 
@@ -66,24 +67,27 @@ function onLoad(mapData)
 // function to find and return the coordinates (x/y/) 
 //where one clicked on the image.
 // if html is set to true, return html string
-function calculateImageCoords(event) 
+function calculateImageCoords(event, boundingBox) 
 {
     try{
         let e = event.target;
         let dim = e.getBoundingClientRect();
         let x = event.clientX - dim.left;
         let y = event.clientY - dim.top;
+        console.log(x);
+        console.log(y);
         let xOffset = x - (mapData.imageWidth/2);
         let yOffset = (mapData.imageHeight/2) - y;
-        let temp = [0,0];
-        temp = getLatLongFromXY(xOffset, yOffset, mapData);
-        console.log("temp: " + temp);
+        //temp = calculateBoundingBox(mapData.north, mapData.west, mapData.south, mapData.east, mapData.rotation)
+        let clicked = convertXYtoLatLon(x,y,boundingBox, mapData.imageWidth, mapData.imageHeight)
+        // temp = getLatLongFromXY(xOffset, yOffset, mapData);
+        console.log(boundingBox);
         console.log("getClickCoords; Output: X:" + x + " Y:" + y);
         let coordinates = [0,0,0,0];
         coordinates[0] = x;
         coordinates[1] = y;
-        coordinates[2] = temp[0];
-        coordinates[3] = temp[1];
+        coordinates[2] = boundingBox;
+        coordinates[3] = clicked;
         return coordinates; 
     }
     catch(exception){
@@ -93,30 +97,132 @@ function calculateImageCoords(event)
     }
   }
 
-function haversine(R, lat1, lon1, lat2, lon2){
-    // Haversine
-    // formula: 	a = sin²(Δφ/2) + cos φ1 ⋅ cos φ2 ⋅ sin²(Δλ/2)
-    // c = 2 ⋅ atan2( √a, √(1−a) )
-    // d = R ⋅ c
-    // where 	φ is latitude, λ is longitude, R is earth’s radius (mean radius = 6,371km);
-    // note that angles need to be in radians to pass to trig functions!
-    // JavaScript: 	
+// function haversine(R, lat1, lon1, lat2, lon2){
+//     // Haversine
+//     // formula: 	a = sin²(Δφ/2) + cos φ1 ⋅ cos φ2 ⋅ sin²(Δλ/2)
+//     // c = 2 ⋅ atan2( √a, √(1−a) )
+//     // d = R ⋅ c
+//     // where 	φ is latitude, λ is longitude, R is earth’s radius (mean radius = 6,371km);
+//     // note that angles need to be in radians to pass to trig functions!
+//     // JavaScript: 	
 
-    const φ1 = lat1 * Math.PI/180; // φ, λ in radians
-    const φ2 = lat2 * Math.PI/180;
-    const Δφ = (lat2-lat1) * Math.PI/180;
-    const Δλ = (lon2-lon1) * Math.PI/180;
+//     const φ1 = lat1 * Math.PI/180; // φ, λ in radians
+//     const φ2 = lat2 * Math.PI/180;
+//     const Δφ = (lat2-lat1) * Math.PI/180;
+//     const Δλ = (lon2-lon1) * Math.PI/180;
     
-    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-              Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+//     const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+//               Math.cos(φ1) * Math.cos(φ2) *
+//               Math.sin(Δλ/2) * Math.sin(Δλ/2);
+//     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     
-    const d = R * c; // in metres
-    SystemDebug(["haversine"],[d]);
+//     const d = R * c; // in metres
+//     SystemDebug(["haversine"],[d]);
+// }
+
+function haversine(lat1, lng1, lat2, lng2) {
+    const R = 6371e3; // earth radius in meters
+    const phi1 = lat1 * Math.PI / 180;
+    const phi2 = lat2 * Math.PI / 180;
+    const deltaPhi = (lat2 - lat1) * Math.PI / 180;
+    const deltaLambda = (lng2 - lng1) * Math.PI / 180;
+  
+    const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+      Math.cos(phi1) * Math.cos(phi2) *
+      Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+  
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  
+    const distance = R * c;
+  
+    return distance;
+  }
+
+function calculateBoundingBox(north, west, south, east, rotation) {
+    console.log(rotation);
+    const NWLat = north;
+    const NWLng = west;
+    const SELat = south;
+    const SELng = east;
+
+    const R = 6371; // Radius of the earth in m
+    
+    // Calculate center point of bounding box
+    const lat = (NWLat + SELat) / 2;
+    const lng = (NWLng + SELng) / 2;
+    
+    // Calculate distance to SW and NE points
+    const dLat = (NWLat - SELat) * Math.PI / 180;
+    const dLng = (NWLng - SELng) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(NWLat * Math.PI / 180) * Math.cos(SELat * Math.PI / 180) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c;
+    
+    const bearing = (Math.atan2(NWLat - SELat, NWLng - SELng) * 180 / Math.PI + 360 + rotation) % 360;
+    
+    const SWLat = lat - Math.sin(bearing * Math.PI / 180) * d / (2 * Math.PI * R) * 360;
+    const SWLng = lng - Math.cos(lat * Math.PI / 180) * Math.cos(bearing * Math.PI / 180) * d / (2 * Math.PI * R) * 360;
+    
+    const NELat = lat + Math.sin(bearing * Math.PI / 180) * d / (2 * Math.PI * R) * 360;
+    const NELng = lng + Math.cos(lat * Math.PI / 180) * Math.cos(bearing * Math.PI / 180) * d / (2 * Math.PI * R) * 360;
+    
+    console.log(`South West point: (${SWLat}, ${SWLng})`);
+    console.log(`North East point: (${NELat}, ${NELng})`);
+
+    let boundingBox = 
+    {
+        latLonNW: {lat: NWLat, lng: NWLng},
+        latLonSE: {lat: SELat, lng: SELng},
+        latLonSW: { lat: SWLat, lng: SWLng },
+        latLonNE: { lat: NELat, lng: NELng }
+    };
+    return boundingBox;
 }
 
+function convertXYtoLatLon(x,y,boundingBox, imageWidth, imageHeight){
+    // const imageWidth = 1000; // Width of the image in pixels
+    // const imageHeight = 700; // Height of the image in pixels
+    // Convert pixel coordinates to percentage coordinates
+    const xPercent = x / imageWidth;
+    const yPercent = y / imageHeight;
+    console.log(x);
+    console.log(y);
+    console.log(imageWidth);
+    console.log(imageHeight);
 
+    // Convert percentage coordinates to latitude and longitude coordinates
+    console.log(boundingBox.latLonNW.lat - boundingBox.latLonSW.lat);
+    console.log(boundingBox.latLonNW.lng - boundingBox.latLonSW.lng);
+    const latPercent = (boundingBox.latLonSW.lat + (boundingBox.latLonNW.lat - boundingBox.latLonSW.lat)) * yPercent;
+    const lngPercent = (boundingBox.latLonSW.lng + (boundingBox.latLonSE.lng - boundingBox.latLonSW.lng)) * xPercent;
+    const lat = (boundingBox.latLonSW.lat + (boundingBox.latLonNW.lat - boundingBox.latLonSW.lat));
+    const lng = (boundingBox.latLonSW.lng + (boundingBox.latLonSE.lng - boundingBox.latLonSW.lng));
+
+
+    console.log(boundingBox);
+    console.log(xPercent);
+    console.log(yPercent);
+    // Print the latitude and longitude coordinates to the console
+    console.log("LatitudePercent:", latPercent * 100);
+    console.log("LongitudePercent:", lngPercent * 100);
+    console.log("Latitude:", lat);
+    console.log("Longitude:", lng);
+}
+
+function convertLatLonToXY(lat, lon, boundingBox, imageWidth, imageHeight, topLeftPosition){
+    console.log({imageWidth, imageHeight});
+    console.log(topLeftPosition.top);
+    const NWLng = boundingBox.latLonNW.lng;
+    const SELng = boundingBox.latLonSE.lng;
+    const NWLat = boundingBox.latLonNW.lat;
+    const SELat = boundingBox.latLonSE.lat;
+
+    const x = (((lon - NWLng) / (SELng - NWLng)) * imageWidth) + topLeftPosition.left;
+    const y = (((NWLat - lat) / (NWLat - SELat)) * imageHeight) + topLeftPosition.top;
+    return { x, y };
+}
+  
+// ArStuff
 function getLatLongFromXY(x, y,mapData)
 {
     // Calculate the distance between LatLonNorthWest and LatLonSouthEast
@@ -195,10 +301,13 @@ function ToDegrees(radians)
 
 const contextData = 
 {
+    calculateBoundingBox:calculateBoundingBox,
+    convertXYtoLatLon:convertXYtoLatLon,
+    convertLatLonToXY:convertLatLonToXY,
     getGlobals:getGlobals,
-    getLatLongFromXY:getLatLongFromXY,
     onLoad:onLoad,
     calculateImageCoords:calculateImageCoords,
+    getLatLongFromXY:getLatLongFromXY,
 }
 
 return (

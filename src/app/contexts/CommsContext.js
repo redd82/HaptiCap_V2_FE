@@ -7,9 +7,14 @@ export default function CommsContextProvider({ children }) {
     let serverHost = '';
     const navigate = useNavigate();
     const [defaultTimeDateData, setDefaultTimeDateData] = useState({GPSTime: '00:00', GPSDate: '00-00-00'});
-    const [defaultPositionData, setDefaultPositionData] = useState({GPSLat:"", GPSLon: ""});
+    const [defaultPositionData, setDefaultPositionData] = useState({GPSLat: 0.00000000, GPSLon: 0.00000000});
+    const [defaultHeadingData, setDefaultheadingData] = useState({CompassHeading: 0.0});
+    const [defaultPositionHeadingData, setDefaultPositionHeadingData] = useState({GPSLat: 0.00000000, GPSLon: 0.00000000, CompassHeading: 0.0});
     const [defaultData, setDefaultData] = useState({});
-    const [defaultDeviceName, setDefaultDeviceName] = useState("Hapticap Default Name")
+    const [defaultDeviceName, setDefaultDeviceName] = useState("Hapticap Default Name");
+    const [currentPosition, setCurrentPosition] = useState({GPSLat: 0.00000000, GPSLon: 0.00000000});
+    const [currentPositionHeadingData, setCurrentPositionHeadingData] = useState({GPSLat: 0.00000000, GPSLon: 0.00000000, CompassHeading: 0.0});
+    const [currentHeading, setCurrentHeading] = useState({CompassHeading: 0.0});
     const [storedData, updateStoredData] = useState([]);
 
     function storeData(data, index){
@@ -123,10 +128,48 @@ export default function CommsContextProvider({ children }) {
                     
                 }, withCredentials: false,
             });
+            setCurrentPosition(response.data);
+            console.log(response.data);
             return response.data;
         } catch (e) {
             return defaultPositionData;
         }
+    }
+
+    async function fetchCompassHeading() {
+        try {
+            const response = await axios.get(serverHost + '/getCompassHeading', {
+                headers: {
+                    "Content-Type": "application/json",
+                    
+                }, withCredentials: false,
+            });
+            setCurrentHeading(response.data);
+            console.log(response.data);
+            return response.data;
+        } catch (e) {
+            return defaultHeadingData;
+        }
+    }
+
+    async function fetchPositionCompassHeading() {
+        try {
+            const response = await axios.get(serverHost + '/getGPSPositionCompassHeading', {
+                headers: {
+                    "Content-Type": "application/json",
+                    
+                }, withCredentials: false,
+            });
+            setCurrentPositionHeadingData(response.data);
+            console.log(response.data);
+            return response.data;
+        } catch (e) {
+            return defaultPositionHeadingData;
+        }
+    }
+
+    function getCurrentPosition(){
+        return currentPosition;
     }
 
     async function fetchDeviceName() {
@@ -221,6 +264,9 @@ export default function CommsContextProvider({ children }) {
         fetchTime:fetchTime,
         fetchDate:fetchDate,
         fetchPosition:fetchPosition,
+        getCurrentPosition:getCurrentPosition,
+        fetchCompassHeading:fetchCompassHeading,
+        fetchPositionCompassHeading:fetchPositionCompassHeading,
         fetchDeviceName:fetchDeviceName,
         fetchData:fetchData,
         fetchSensorData:fetchSensorData,

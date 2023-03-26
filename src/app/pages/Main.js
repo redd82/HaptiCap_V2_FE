@@ -1,4 +1,5 @@
 import React, {useContext, useEffect, useState} from 'react';
+import { IconContext } from "react-icons";
 import styles from "../styles/Main.module.css";
 import Menubar from "./Menubar";
 import Routing from "../router/Routing";
