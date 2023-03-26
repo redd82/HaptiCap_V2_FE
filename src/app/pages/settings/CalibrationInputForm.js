@@ -17,14 +17,12 @@ export default function CalibrationInputForm({}) {
     const [calibrationData, setCalibrationData ] = useState({compassOffset:""});
     let newFaultTemp = {};
 
-
     async function onSubmit(){
         let serverHost = getServerHost();
             let json = JSON.stringify({compassOffset: calibrationData.compassOffset, magBiasX: calibrationData.magBiasX, magBiasY: calibrationData.magBiasY, magBiasZ: calibrationData.magBiasZ, magScaleFacX: calibrationData.magScaleFacX,
                 magScaleFacY: calibrationData.magScaleFacY, magScaleFacZ: calibrationData.magScaleFacZ, gyroBiasX: calibrationData.gyroBiasX, gyroBiasY: calibrationData.gyroBiasY, 
                 gyroBiasZ: calibrationData.gyroBiasZ, accelBiasX: calibrationData.accelBiasX, accelBiasY: calibrationData.accelBiasY, accelBiasZ: calibrationData.accelBiasZ, 
                 accelScaleX: calibrationData.accelScaleX, accelScaleY: calibrationData.accelScaleY, accelScaleZ: calibrationData.accelScaleZ});
-            console.log(json);
             try{
                 const response = await axios.post(serverHost + '/settings/calibration_form', json, {
                     headers: {

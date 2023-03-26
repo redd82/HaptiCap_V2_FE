@@ -129,7 +129,7 @@ export default function CommsContextProvider({ children }) {
                 }, withCredentials: false,
             });
             setCurrentPosition(response.data);
-            console.log(response.data);
+            // console.log(response.data);
             return response.data;
         } catch (e) {
             return defaultPositionData;
@@ -145,7 +145,7 @@ export default function CommsContextProvider({ children }) {
                 }, withCredentials: false,
             });
             setCurrentHeading(response.data);
-            console.log(response.data);
+            // console.log(response.data);
             return response.data;
         } catch (e) {
             return defaultHeadingData;
@@ -161,7 +161,7 @@ export default function CommsContextProvider({ children }) {
                 }, withCredentials: false,
             });
             setCurrentPositionHeadingData(response.data);
-            console.log(response.data);
+            // console.log(response.data);
             return response.data;
         } catch (e) {
             return defaultPositionHeadingData;

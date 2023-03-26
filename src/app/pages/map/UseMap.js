@@ -34,7 +34,7 @@ export default function UseMap(){
     }
 
     const CustomMarker = (props) => {
-      console.log(props);
+      // console.log(props);
         return (
           <div
             // className="image-marker__marker image-marker__marker--default"
@@ -62,12 +62,12 @@ export default function UseMap(){
           let dim = e.getBoundingClientRect();
           let x = event.clientX - dim.left;
           let y = event.clientY - dim.top;
-          console.log(dim);
-          console.log(x);
-          console.log(y);
-          console.log(event);
-          //console.log(coordinates);
-          console.log(markers);
+          // console.log(dim);
+          // console.log(x);
+          // console.log(y);
+          // console.log(event);
+          // //console.log(coordinates);
+          // console.log(markers);
         }else{
           console.log(event.detail);
         }
@@ -80,21 +80,21 @@ export default function UseMap(){
       }
 
       function setOwnPositionIcon(data){
-        console.log(data);
+        // console.log(data);
         let boundingBox = calculateBoundingBox(mapData.north, mapData.west, mapData.south, mapData.east, mapData.rotation);
         setBoundingBox(boundingBox);
-        console.log("Bounding Box:");
-        console.log(boundingBox);
-        console.log(topLeftPosition.current);
+        // console.log("Bounding Box:");
+        // console.log(boundingBox);
+        // console.log(topLeftPosition.current);
         const topLeftOfMap = topLeftPosition.current;
         //let XY = convertLatLonToXY(52.19087, 4.670616, boundingBox, rect.width, rect.height);
         let XY = convertLatLonToXY(data.GPSLat, data.GPSLon, boundingBox, topLeftOfMap.width, topLeftOfMap.height, topLeftOfMap);
-        console.log(XY);
+        // console.log(XY);
         let scale = topLeftOfMap.height/mapData.imageHeight;
         let iconSize = Math.round(scale * 25);
-        console.log(scale);
-        console.log(iconSize);
-        console.log((Math.round((convertIconRotation(data.CompassHeading))) + "deg"));
+        // console.log(scale);
+        // console.log(iconSize);
+        // console.log((Math.round((convertIconRotation(data.CompassHeading))) + "deg"));
         document.documentElement.style.setProperty('--own-pos-icon-rotation', (Math.round((convertIconRotation(data.CompassHeading))) + "deg"));
         document.documentElement.style.setProperty('--own-pos-icon-size', iconSize + "px");
         document.documentElement.style.setProperty('--own-pos-top', (XY.y-10) + "px");
@@ -108,7 +108,7 @@ export default function UseMap(){
         }else{
           rotation = heading;
         }
-        console.log(rotation);
+        // console.log(rotation);
         return rotation;
       }
 
@@ -120,7 +120,7 @@ export default function UseMap(){
           setOwnPositionIcon(r)
       });
         
-        console.log(mapData);
+        // console.log(mapData);
     }, []);
 
     useEffect(() => {
@@ -167,7 +167,7 @@ export default function UseMap(){
             </div>
           )}
           </div>
-          <IconContext.Provider value={{ color: "blue", className: "global-class-name", size: "0.5em"}}>
+          <IconContext.Provider value={{ color: "blue", className: "global-class-name", size: "0.4em"}}>
             <div className={stylesMap['own-position-icon-custom']}>
               <SiArchlinux />
             </div>

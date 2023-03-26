@@ -187,8 +187,6 @@ export default function SettingsInputForm({}) {
             <input className={styles['info-input']} name="sleepMins" type="text" id="sleepMins" defaultValue={settingsData.sleepMins} onChange={handleInputUpdate} />
             <label className={styles['info-label']} htmlFor="compPollMs">Compass polling time (ms):</label>
             <input className={styles['info-input']} name="compPollMs" type="text" id="compPollMs" defaultValue={settingsData.compPollMs} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="compOffset">Compass Offset (deg):</label>
-            <input className={styles['info-input']} name="compOffset" type="text" id="compOffset" defaultValue={settingsData.compOffset} onChange={handleInputUpdate} />
             <label className={styles['info-label']} htmlFor="touchEnabled">Touch enabled</label>
             <Checkbox id='2' parentCallback={handleCheckBoxChange} defaultChecked={settingsData.touchEnabled} disabled={false} name="touchEnabled" labelname=""/>
             <label className={styles['info-label']} htmlFor="touchThreshold">Touch threshold:</label>

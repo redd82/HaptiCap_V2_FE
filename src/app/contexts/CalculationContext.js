@@ -74,8 +74,8 @@ function calculateImageCoords(event, boundingBox)
         let dim = e.getBoundingClientRect();
         let x = event.clientX - dim.left;
         let y = event.clientY - dim.top;
-        console.log(x);
-        console.log(y);
+        // console.log(x);
+        // console.log(y);
         let xOffset = x - (mapData.imageWidth/2);
         let yOffset = (mapData.imageHeight/2) - y;
         //temp = calculateBoundingBox(mapData.north, mapData.west, mapData.south, mapData.east, mapData.rotation)
@@ -139,7 +139,7 @@ function haversine(lat1, lng1, lat2, lng2) {
   }
 
 function calculateBoundingBox(north, west, south, east, rotation) {
-    console.log(rotation);
+    // console.log(rotation);
     const NWLat = north;
     const NWLng = west;
     const SELat = south;
@@ -166,8 +166,8 @@ function calculateBoundingBox(north, west, south, east, rotation) {
     const NELat = lat + Math.sin(bearing * Math.PI / 180) * d / (2 * Math.PI * R) * 360;
     const NELng = lng + Math.cos(lat * Math.PI / 180) * Math.cos(bearing * Math.PI / 180) * d / (2 * Math.PI * R) * 360;
     
-    console.log(`South West point: (${SWLat}, ${SWLng})`);
-    console.log(`North East point: (${NELat}, ${NELng})`);
+    // console.log(`South West point: (${SWLat}, ${SWLng})`);
+    // console.log(`North East point: (${NELat}, ${NELng})`);
 
     let boundingBox = 
     {
@@ -210,8 +210,8 @@ function convertXYtoLatLon(x,y,boundingBox, imageWidth, imageHeight){
 }
 
 function convertLatLonToXY(lat, lon, boundingBox, imageWidth, imageHeight, topLeftPosition){
-    console.log({imageWidth, imageHeight});
-    console.log(topLeftPosition.top);
+    // console.log({imageWidth, imageHeight});
+    // console.log(topLeftPosition.top);
     const NWLng = boundingBox.latLonNW.lng;
     const SELng = boundingBox.latLonSE.lng;
     const NWLat = boundingBox.latLonNW.lat;
