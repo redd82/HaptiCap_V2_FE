@@ -62,21 +62,14 @@ export default function UseMap(){
       console.log(topLeftOfMap);
         if(event.detail === 1){
           console.log(event);
-          let x = event.clientX - topLeftOfMap.left;
-          let y = event.clientY - topLeftOfMap.top;
+          let x = event.pageX - topLeftOfMap.left;
+          let y = event.pageY - topLeftOfMap.top;
           console.log(x);
           console.log(y);
           let temp = [0,0];
           temp = getLatLongFromXY(x, y, mapData);
           console.log("temp: " + temp);
           console.log("getClickCoords; Output: X:" + x + " Y:" + y);
-					// <latitude>52.19112854086129</latitude>
-          // <longitude>4.671433079944491</longitude>
-          // 52.19201003,4.67096507
-
-          // Latitude: 52.19302302
-          // Longitude: 4.67769684
-
         }else{
           console.log(event.detail);
         }
