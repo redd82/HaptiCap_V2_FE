@@ -38,7 +38,6 @@ function getGlobals() // function returns the global values, should not be neede
 // function onLoad(north, west, south, east, rotation, imagename ,imageheight, imagewidth, mapData)
 function onLoad(mapData)
 {
-    haversine(Radius, mapData.north, mapData.west, mapData.south, mapData.east);
     // set the basic values we need
     try{
         setMapData(mapData);
@@ -54,7 +53,7 @@ function onLoad(mapData)
 
         let debugmessages = ["mapData: ","OnLoad NorthWest: ","OnLoad SouthEast: ", "ImageSize: "]
         let debugvalues = [mapData, LatLonNorthWest,LatLonSouthEast, ImageSize];
-        SystemDebug(debugmessages,debugvalues);
+        //SystemDebug(debugmessages,debugvalues);
         return 0;
     }
     catch(exception){
@@ -76,12 +75,7 @@ function calculateImageCoords(event, boundingBox)
         let y = event.clientY - dim.top;
         // console.log(x);
         // console.log(y);
-        let xOffset = x - (mapData.imageWidth/2);
-        let yOffset = (mapData.imageHeight/2) - y;
-        //temp = calculateBoundingBox(mapData.north, mapData.west, mapData.south, mapData.east, mapData.rotation)
-        let clicked = convertXYtoLatLon(x,y,boundingBox, mapData.imageWidth, mapData.imageHeight)
-        // temp = getLatLongFromXY(xOffset, yOffset, mapData);
-        console.log(boundingBox);
+        let clicked = getLatLongFromXY(x, y, mapData);
         console.log("getClickCoords; Output: X:" + x + " Y:" + y);
         let coordinates = [0,0,0,0];
         coordinates[0] = x;
@@ -96,214 +90,269 @@ function calculateImageCoords(event, boundingBox)
         return 1;
     }
   }
-
-// function haversine(R, lat1, lon1, lat2, lon2){
-//     // Haversine
-//     // formula: 	a = sin²(Δφ/2) + cos φ1 ⋅ cos φ2 ⋅ sin²(Δλ/2)
-//     // c = 2 ⋅ atan2( √a, √(1−a) )
-//     // d = R ⋅ c
-//     // where 	φ is latitude, λ is longitude, R is earth’s radius (mean radius = 6,371km);
-//     // note that angles need to be in radians to pass to trig functions!
-//     // JavaScript: 	
-
-//     const φ1 = lat1 * Math.PI/180; // φ, λ in radians
-//     const φ2 = lat2 * Math.PI/180;
-//     const Δφ = (lat2-lat1) * Math.PI/180;
-//     const Δλ = (lon2-lon1) * Math.PI/180;
-    
-//     const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
-//               Math.cos(φ1) * Math.cos(φ2) *
-//               Math.sin(Δλ/2) * Math.sin(Δλ/2);
-//     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    
-//     const d = R * c; // in metres
-//     SystemDebug(["haversine"],[d]);
-// }
-
-function haversine(lat1, lng1, lat2, lng2) {
-    const R = 6371e3; // earth radius in meters
-    const phi1 = lat1 * Math.PI / 180;
-    const phi2 = lat2 * Math.PI / 180;
-    const deltaPhi = (lat2 - lat1) * Math.PI / 180;
-    const deltaLambda = (lng2 - lng1) * Math.PI / 180;
   
-    const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
-      Math.cos(phi1) * Math.cos(phi2) *
-      Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
-  
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  
-    const distance = R * c;
-  
-    return distance;
-  }
+// ArStuff
+function getLatLongFromXY(x, y,mapData)
+{
+    // Calculate the distance between LatLonNorthWest and LatLonSouthEast
+    onLoad(mapData);
 
-function calculateBoundingBox(north, west, south, east, rotation) {
-    // console.log(rotation);
-    const NWLat = north;
-    const NWLng = west;
-    const SELat = south;
-    const SELng = east;
+    // the middle point
+    LatLonMidPoint[0] = (LatLonNorthWest[0] + LatLonSouthEast[0]) / 2;
+    LatLonMidPoint[1] = (LatLonNorthWest[1] + LatLonSouthEast[1]) / 2;
 
-    const R = 6371; // Radius of the earth in m
+    // calculate the real world sizes by getting the hypotenuse in meters and the Beta angle in degrees
+    let realWorldHypotenuse = CalculateDistance(LatLonNorthWest[0], LatLonNorthWest[1], LatLonSouthEast[0], LatLonSouthEast[1]);
+    let realWorldBeta = Math.abs(CalculateBearing(LatLonNorthWest[0], LatLonNorthWest[1], LatLonSouthEast[0], LatLonSouthEast[1]) - (180 - Rotation));
+    // the triangle values of the real life triangle    //[lengthA, lengthB, hypotenuse, betaAngle, alphaAngle];
+    let realWorldTriangle = CalculateTriangleFromHypotenuse(realWorldHypotenuse,realWorldBeta);
     
-    // Calculate center point of bounding box
-    const lat = (NWLat + SELat) / 2;
-    const lng = (NWLng + SELng) / 2;
+    // set the offset X/Y based on the 0.0 being the center of the for quadrants.
+    const centeredX = x -(ImageSize[0] /2);
+    const centeredY = (ImageSize[1] /2) - y;
     
-    // Calculate distance to SW and NE points
-    const dLat = (NWLat - SELat) * Math.PI / 180;
-    const dLng = (NWLng - SELng) * Math.PI / 180;
-    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(NWLat * Math.PI / 180) * Math.cos(SELat * Math.PI / 180) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const d = R * c;
+    // compass offset bearings
+    const compass = ToAdjustedCompass();    //[north, east, south, west] with rotation added/substracted
+    // scale x/y and add half a pixel for centering
+    const realX = (Math.abs(centeredX) * (realWorldTriangle[1]/ImageSize[0])) + ( (realWorldTriangle[1]/ImageSize[0]) / 2 ); // calculate the distance in meters from the X pixel count, also add half an X length to get the center of the pixel
+    const realY = (Math.abs(centeredY) * (realWorldTriangle[0]/ImageSize[1])) + ( (realWorldTriangle[0]/ImageSize[1]) / 2 ); // the same with Y
     
-    const bearing = (Math.atan2(NWLat - SELat, NWLng - SELng) * 180 / Math.PI + 360 + rotation) % 360;
-    
-    const SWLat = lat - Math.sin(bearing * Math.PI / 180) * d / (2 * Math.PI * R) * 360;
-    const SWLng = lng - Math.cos(lat * Math.PI / 180) * Math.cos(bearing * Math.PI / 180) * d / (2 * Math.PI * R) * 360;
-    
-    const NELat = lat + Math.sin(bearing * Math.PI / 180) * d / (2 * Math.PI * R) * 360;
-    const NELng = lng + Math.cos(lat * Math.PI / 180) * Math.cos(bearing * Math.PI / 180) * d / (2 * Math.PI * R) * 360;
-    
-    // console.log(`South West point: (${SWLat}, ${SWLng})`);
-    // console.log(`North East point: (${NELat}, ${NELng})`);
-
-    let boundingBox = 
+    // temp data
+    let latlonDlon =[0,0];
+    let latlonDlat =[0,0];
+    // quadrant logic>
+    if((centeredX  < 0) && (centeredY > 0))      // -x +y
     {
-        latLonNW: {lat: NWLat, lng: NWLng},
-        latLonSE: {lat: SELat, lng: SELng},
-        latLonSW: { lat: SWLat, lng: SWLng },
-        latLonNE: { lat: NELat, lng: NELng }
-    };
-    return boundingBox;
+        latlonDlon  = CalculateDestination(LatLonMidPoint[0], LatLonMidPoint[1], realX, compass[3]);
+        latlonDlat = CalculateDestination(latlonDlon[0], latlonDlon[1], realY, compass[0]);
+    }    
+    if((centeredX > 0) && (centeredY < 0))    // +x -y
+    {
+        latlonDlon  = CalculateDestination(LatLonMidPoint[0], LatLonMidPoint[1], realX, compass[1]);
+        latlonDlat = CalculateDestination(latlonDlon[0], latlonDlon[1], realY, compass[2]);
+    }
+    if((centeredX < 0) && (centeredY < 0)) //-x -y
+    {
+        latlonDlon  = CalculateDestination(LatLonMidPoint[0], LatLonMidPoint[1], realX, compass[3]);
+        latlonDlat = CalculateDestination(latlonDlon[0], latlonDlon[1], realY, compass[2]);
+    }
+    if((centeredX > 0) && (centeredY > 0)) //+x +y
+    {
+        latlonDlon = CalculateDestination(LatLonMidPoint[0], LatLonMidPoint[1], realX, compass[1]);
+        latlonDlat = CalculateDestination(latlonDlon[0], latlonDlon[1], realY, compass[0]);
+    }
+
+    if((centeredX === 0) && (centeredY === 0)) // dead center
+    {
+        latlonDlon  = LatLonMidPoint;
+        latlonDlat = LatLonMidPoint;
+    }
+    // alrighty then, create a latlon point and send it back
+    const latlonDestination = [latlonDlat[0].toFixed(RoundingDecimals), latlonDlon[1].toFixed(RoundingDecimals)];
+    return latlonDestination;
+
 }
 
-function convertXYtoLatLon(x,y,boundingBox, imageWidth, imageHeight){
-    // const imageWidth = 1000; // Width of the image in pixels
-    // const imageHeight = 700; // Height of the image in pixels
-    // Convert pixel coordinates to percentage coordinates
-    const xPercent = x / imageWidth;
-    const yPercent = y / imageHeight;
-    console.log(x);
-    console.log(y);
-    console.log(imageWidth);
-    console.log(imageHeight);
-
-    // Convert percentage coordinates to latitude and longitude coordinates
-    console.log(boundingBox.latLonNW.lat - boundingBox.latLonSW.lat);
-    console.log(boundingBox.latLonNW.lng - boundingBox.latLonSW.lng);
-    const latPercent = (boundingBox.latLonSW.lat + (boundingBox.latLonNW.lat - boundingBox.latLonSW.lat)) * yPercent;
-    const lngPercent = (boundingBox.latLonSW.lng + (boundingBox.latLonSE.lng - boundingBox.latLonSW.lng)) * xPercent;
-    const lat = (boundingBox.latLonSW.lat + (boundingBox.latLonNW.lat - boundingBox.latLonSW.lat));
-    const lng = (boundingBox.latLonSW.lng + (boundingBox.latLonSE.lng - boundingBox.latLonSW.lng));
-
-
-    console.log(boundingBox);
-    console.log(xPercent);
-    console.log(yPercent);
-    // Print the latitude and longitude coordinates to the console
-    console.log("LatitudePercent:", latPercent);
-    console.log("LongitudePercent:", lngPercent);
-    console.log("Latitude:", lat);
-    console.log("Longitude:", lng);
-}
-
-function convertLatLonToXY(lat, lon, boundingBox, imageWidth, imageHeight, topLeftPosition){
+function getXYFromLatLon(lat, lon, mapData, imageWidth, imageHeight, topLeftPosition){
+    onLoad(mapData);
     // console.log({imageWidth, imageHeight});
-    // console.log(topLeftPosition.top);
-    const NWLng = boundingBox.latLonNW.lng;
-    const SELng = boundingBox.latLonSE.lng;
-    const NWLat = boundingBox.latLonNW.lat;
-    const SELat = boundingBox.latLonSE.lat;
+    // console.log(topLeftPosition.top);      
+    const NWLat = LatLonNorthWest[0];
+    const NWLng = LatLonNorthWest[1];
+    const SELat = LatLonSouthEast[0];
+    const SELng = LatLonSouthEast[1];
 
     const x = (((lon - NWLng) / (SELng - NWLng)) * imageWidth) + topLeftPosition.left;
     const y = (((NWLat - lat) / (NWLat - SELat)) * imageHeight) + topLeftPosition.top;
     return { x, y };
 }
   
-// ArStuff
-function getLatLongFromXY(x, y,mapData)
-{
-    // Calculate the distance between LatLonNorthWest and LatLonSouthEast
-    // Load the map data from the function call into the 'global' values in this context.
-    onLoad(mapData);
-    let dLat = 0;
-    let dLon = 0;
-    if(LatLonNorthWest[0] > LatLonSouthEast[0]){
-        dLat = LatLonNorthWest[0] - LatLonSouthEast[0];
-    }else{
-        dLat = LatLonSouthEast[0] - LatLonNorthWest[0];
-    }
-    if(LatLonNorthWest[1] > LatLonSouthEast[1]){
-        dLon = LatLonNorthWest[1] - LatLonSouthEast[1];
-    }else{
-        dLon = LatLonSouthEast[1] - LatLonNorthWest[1];
-    }
-    const latPerPx = dLat/mapData.imageHeight;
-    const lonPerPx = dLat/mapData.imageWidth;
-    SystemDebug(["latPerPx: ", "lonPerPx: "],[latPerPx, lonPerPx]);
 
-    const hypotenuseLength = Math.sqrt(dLat ** 2 + dLon ** 2);
-    SystemDebug(["hypotenuseLength: "],[hypotenuseLength]);
-    // Calculate the angle of rotation in radians
-    const rotationRadians = ToRadians(Rotation);
+function CalculateTriangleFromHypotenuse(hypotenuse, betaAngle) {
+    // Convert beta angle to radians
+    let betaRadians = ToRadians(betaAngle);
+    // Calculate length of leg A and B using trigonometric functions
+    let lengthB = hypotenuse * Math.sin(betaRadians);
+    let lengthA = hypotenuse * Math.cos(betaRadians);
+    // Calculate angle alpha
+    let alphaAngle = 90 - betaAngle; 
+    // Return array with all values
+    return [lengthA, lengthB, hypotenuse, betaAngle, alphaAngle];
+}
+function calculateTriangleFromLegs(lengthA, lengthB) {
+    // Calculate length of hypotenuse using Pythagorean theorem
+    let lengthHypotenuse = Math.sqrt(lengthA ** 2 + lengthB ** 2);
+    // Calculate angle beta
+    let betaRadians = Math.atan(lengthA / lengthB);
+    let betaAngle = (betaRadians * 180) / Math.PI;
+    // Calculate angle alpha
+    let alphaAngle = 90 - betaAngle;
+    // Return array with all values
+    return [lengthA, lengthB, lengthHypotenuse, betaAngle, alphaAngle];
+}
+  function CalculateBearing(lat1, lon1, lat2, lon2) {
+    // convert lat/lon to radians
+    lat1 = ToRadians(lat1);
+    lon1 = ToRadians(lon1);
+    lat2 = ToRadians(lat2);
+    lon2 = ToRadians(lon2);
+  
+    let deltaLambda = lon2 - lon1;
+    let dPhi = Math.log(Math.tan(lat2/2.0+Math.PI/4.0)/Math.tan(lat1/2.0+Math.PI/4.0));
+  
+    if (Math.abs(deltaLambda) > Math.PI) {
+      if (deltaLambda > 0.0) {
+        deltaLambda = -(2.0 * Math.PI - deltaLambda);
+      } else {
+        deltaLambda = (2.0 * Math.PI + deltaLambda);
+      }
+    }
+    // calculate bearing in radians
+    let bearing = Math.atan2(deltaLambda, dPhi);
+    // convert bearing to degrees and make sure it's positive
+    bearing = (ToDegrees(bearing) + 360) % 360;
+    // debug
+    //let debugmessage = ["CalculateBearing; Input; Lat1","CalculateBearing; Input; Lon1","CalculateBearing; Input; Lat2","CalculateBearing; Input; Lon2","CalculateBearing; Output; Bearing"];
+    //let debugvalues = [lat1, lon1, lat2, lon2, bearing];
+    //SystemDebug(debugmessage, debugvalues);
+    return bearing;
+  }
+  
+function CalculateDistance(lat1,lon1,lat2,lon2){
+
+    // convert to radians
+    const phi1 = ToRadians(lat1);
+    const phi2 = ToRadians(lat2);
+    const deltaPhi = ToRadians((lat2 - lat1));
+    const deltaLambda = ToRadians((lon2 - lon1));
       
-    // Calculate the coordinates of the center of the hypotenuse
-    LatLonMidPoint[0] = (LatLonNorthWest[0] + LatLonSouthEast[0]) / 2;
-    LatLonMidPoint[1] = (LatLonNorthWest[1] + LatLonSouthEast[1]) / 2;
-    
-    // Calculate the distance between the center of the hypotenuse and the input pixel
-    const dx = x - ImageSize[0] / 2;
-    const dy = ImageSize[1] / 2 - y;
-    const distanceFromCenter = Math.sqrt(dx ** 2 + dy ** 2);
-    
-    // Calculate the angle between the input pixel and the center of the hypotenuse
-    const angleFromCenterRadians = Math.atan2(dy, dx);
-      
-    // Calculate the angle of the hypotenuse with respect to North
-    const hypotenuseAngleRadians = Math.atan2(dLon, dLat) + rotationRadians - Math.PI / 2;
-      
-    // Calculate the latitude and longitude of the input pixel
-    const lat = LatLonMidPoint[0] + (distanceFromCenter / hypotenuseLength) * Math.cos(hypotenuseAngleRadians + angleFromCenterRadians);
-    const lon = LatLonMidPoint[1] + (distanceFromCenter / hypotenuseLength) * Math.sin(hypotenuseAngleRadians + angleFromCenterRadians);
-      
-    let debugmessages = ["(Click)x: ","(Click)y: ", "LatLonNorthWest[0]: ", "LatLonSouthEast[0]: ", "LatLonNorthWest[1]: ", "LatLonSouthEast[1]: ",
-     "LatLonMidPoint[0]: ", "LatLonMidPoint[1]: ",  "ImageSize[0](width): ", "ImageSize[1](height): ", "dLat: ", "dLon: ", "hypotenuseLength: "]
-    let debugvalues = [x, y, LatLonNorthWest[0], LatLonSouthEast[0], LatLonNorthWest[1], LatLonSouthEast[1], LatLonMidPoint[0], LatLonMidPoint[1], ImageSize[0], ImageSize[1], dLat, dLon, hypotenuseLength];
-    SystemDebug(debugmessages,debugvalues);
-     return [lat, lon];
+    const a = Math.sin(deltaPhi / 2) ** 2
+            + Math.cos(phi1) * Math.cos(phi2)
+            * Math.sin(deltaLambda / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = Radius * c;
+
+    // debug stuff
+    let debugmessage = ["CalculateDistance; Input; Lat1","CalculateDistance; Input; Lon1","CalculateDistance; Input; Lat2","CalculateDistance; Input; Lon2",
+                    "CalculateDistance; Output; Distance"];
+    let debugvalues = [lat1,lon1,lat2,lon2,distance];
+    SystemDebug(debugmessage,debugvalues);
+
+    return distance;
+}
+
+function CalculateDestination(lat1, lon1, distance, bearing)
+{
+    // commented values are achieved when inputs are:
+    // let latlon = CalculateDestination(50.664001, 14.665833, 1000, 35)
+    const lat1Radians = ToRadians(lat1); // 0.884863026166094
+    const lon1Radians = ToRadians(lon1); // 0.2559699262718819
+    const bearingRadians = ToRadians(bearing); // 0.6108652381980153
+    const dR = distance / Radius; // 0.0001569880806451613
+    const lat2 = Math.asin(Math.sin(lat1Radians) * Math.cos(dR) + Math.cos(lat1Radians) * Math.sin(dR) * Math.cos(bearingRadians)); // 0.8848749385940086
+    const lon2 = lon1Radians + Math.atan2(Math.sin(bearingRadians) * Math.sin(dR) * Math.cos(lat1Radians), Math.cos(dR) - Math.sin(lat1Radians) * Math.sin(lat2)); // 0.2559777519360667
+    const lat2Degrees = ToDegrees(lat2);  // 50.6640011262601
+    const lon2Degrees = ToDegrees(lon2);; // 14.665832972723158
+
+    console.log("lat1Radians:"+ lat1Radians);
+    console.log("lon1Radians:"+ lon1Radians);
+    console.log("bearingradians:"+ bearingRadians);
+    console.log("dR:"+ dR);
+    console.log("lat2:"+ lat2);
+    console.log("lon2:"+ lon2);
+    console.log("lat2degrees:"+lat2Degrees);
+    console.log("lon2degrees"+ lon2Degrees);
+
+    return [lat2Degrees, lon2Degrees];
+}
+function CalculateMidpoint(lat1,lon1,lat2,lon2)
+{
+    //Compass = true;
+    // chatgpt generated (partially)
+    let x1 = ToRadians(lat1);
+    let x2 = ToRadians(lat2);
+    let dx = ToRadians((lat2 - lat1));
+    let dy = ToRadians((lon2 - lon1));
+  
+    let Bx = Math.cos(x2) * Math.cos(dy);
+    let By = Math.cos(x2) * Math.sin(dy);
+  
+    let x3 = Math.atan2(Math.sin(x1) + Math.sin(x2),
+                        Math.sqrt((Math.cos(x1) + Bx) * (Math.cos(x1) + Bx) + By * By));
+    let y3 = lon1 + Math.atan2(By, Math.cos(x1) + Bx);
+  //fix this function
+    let lat3 = ToDegrees(x3);
+    let lon3 = ToDegrees(y3);
+
+   // if(Compass = false)
+   // {
+        //The longitude can be normalised to −180…+180 using (lon+540)%360-180
+    //    lon3  =(lon3 +540)%360-180;
+   // }
+    // create an array
+    let midpoint = [lat3.toFixed(RoundingDecimals),lon3.toFixed(RoundingDecimals)];
+    // debug messages
+    //let debugmessage =[ "CalulateMidpoint; Input: Lat1","CalulateMidpoint; Input: Lon1","CalulateMidpoint; Input: Lat2",
+    //                    "CalulateMidpoint; Input: Lon2","CalulateMidpoint; Input: Compass"];
+    //let debugvalues = [lat1, lon1, lat2, lon2, Compass];
+    //SystemDebug(debugmessage,debugvalues);
+
+    return midpoint;
 }
 
 // convert degrees to radians, cauz.. we need that
 function ToRadians(degrees)
 {
-    let radians = (degrees* Math.PI)/ 180;
-    radians = Number(radians.toFixed(RoundingDecimals));
+    let radians = degrees * Math.PI / 180;
+    // radians = Number(radians.toFixed(RoundingDecimals));
     // debug values
-    let debugmessage = ["ToRadians; Input; degrees","ToRadians; Output; radians"]
-    let debugvalues = [degrees,radians];
-    SystemDebug(debugmessage,debugvalues);
+    //let debugmessage = ["ToRadians; Input; degrees","ToRadians; Output; radians"]
+    //let debugvalues = [degrees,radians];
+    //SystemDebug(debugmessage,debugvalues);
 
     return radians;
 }
 // convert radians to degrees, cauz.. we need that
 function ToDegrees(radians)
 {
-    let degrees = radians * (180 / Math.PI);
+    let degrees = radians * 180 / Math.PI;
     // debug stuff
-    let debugmessage = ["ToDegrees; Input; radians","ToDegrees; Output; degrees"]
-    let debugvalues = [radians,degrees];
-    SystemDebug(debugmessage,debugvalues);
+    //let debugmessage = ["ToDegrees; Input; radians","ToDegrees; Output; degrees"]
+    //let debugvalues = [radians,degrees];
+    //SystemDebug(debugmessage,debugvalues);
 
     return degrees;
+  }
+// This function takes a rotation angle in degrees and returns an array of adjusted bearings in degrees.
+function ToAdjustedCompass() {
+    // Check if the input value is within the valid range (-180 to 180 degrees)
+    if (Rotation < -180 || Rotation > 180) {
+      // If the input is out of range, return an error message
+      return "Error: Rotation angle must be between -180 and 180 degrees";
+    }
+  
+    // Convert the rotation angle from degrees to radians
+    var radians = ToRadians(Rotation);
+  
+    // Calculate the adjusted bearings (relative to north)
+    var north = (0 + radians) % (2 * Math.PI);   // Calculate the bearing when facing north
+    var east = (Math.PI / 2 + radians) % (2 * Math.PI);  // Calculate the bearing when facing east
+    var south = (Math.PI + radians) % (2 * Math.PI);  // Calculate the bearing when facing south
+    var west = (3 * Math.PI / 2 + radians) % (2 * Math.PI);  // Calculate the bearing when facing west
+  
+    // Convert the adjusted bearings from radians to degrees
+    north = ToDegrees(north);
+    east  = ToDegrees(east);
+    south = ToDegrees(south);
+    west  = ToDegrees(west);
+  
+    // Return an array with the adjusted bearings
+    return [north, east, south, west];
   }
 
 const contextData = 
 {
-    calculateBoundingBox:calculateBoundingBox,
-    convertXYtoLatLon:convertXYtoLatLon,
-    convertLatLonToXY:convertLatLonToXY,
+    getXYFromLatLon:getXYFromLatLon,
     getGlobals:getGlobals,
     onLoad:onLoad,
     calculateImageCoords:calculateImageCoords,

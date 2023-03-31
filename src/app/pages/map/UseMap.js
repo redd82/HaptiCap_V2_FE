@@ -12,7 +12,7 @@ import ImageMarker from "react-image-marker";
 
 export default function UseMap(){
     const {getServerHost, fetchPosition, fetchPositionCompassHeading} = useContext(CommsContext);
-    const {onLoad, calculateImageCoords, calculateBoundingBox, convertLatLonToXY, convertXYtoLatLon} = useContext(CalculationContext);
+    const {onLoad, calculateImageCoords, getLatLongFromXY,getXYFromLatLon} = useContext(CalculationContext);
     const location = useLocation();
     const { mapData } = location.state;
     const [boundingBox, setBoundingBox] = useState({})
@@ -64,9 +64,19 @@ export default function UseMap(){
           console.log(event);
           let x = event.clientX - topLeftOfMap.left;
           let y = event.clientY - topLeftOfMap.top;
-          convertXYtoLatLon(x,y,boundingBox, topLeftOfMap.width, topLeftOfMap.height);
           console.log(x);
           console.log(y);
+          let temp = [0,0];
+          temp = getLatLongFromXY(x, y, mapData);
+          console.log("temp: " + temp);
+          console.log("getClickCoords; Output: X:" + x + " Y:" + y);
+					// <latitude>52.19112854086129</latitude>
+          // <longitude>4.671433079944491</longitude>
+          // 52.19201003,4.67096507
+
+          // Latitude: 52.19302302
+          // Longitude: 4.67769684
+
         }else{
           console.log(event.detail);
         }
@@ -79,10 +89,8 @@ export default function UseMap(){
       }
 
       function setOwnPositionIcon(data){
-        let boundingBox = calculateBoundingBox(mapData.north, mapData.west, mapData.south, mapData.east, mapData.rotation);
-        setBoundingBox(boundingBox);
         const topLeftOfMap = topLeftPosition.current;
-        let XY = convertLatLonToXY(data.GPSLat, data.GPSLon, boundingBox, topLeftOfMap.width, topLeftOfMap.height, topLeftOfMap);
+        let XY = getXYFromLatLon(data.GPSLat, data.GPSLon, mapData, topLeftOfMap.width, topLeftOfMap.height, topLeftOfMap);
         let scale = topLeftOfMap.height/mapData.imageHeight;
         let iconSize = Math.round(scale * 25);
         setIconPos({top: XY.y, left: XY.x});
@@ -157,7 +165,8 @@ export default function UseMap(){
             </button>
         </nav>
         <div id="marker">
-          {(enableAddWaypoints) ? (
+        <img className={stylesMap['map']} src={getServerHost() + mapData.pngFile} alt="" onClick={getClickCoords}></img>
+          {/* {(enableAddWaypoints) ? (
             <ImageMarker
               src={getServerHost() + mapData.pngFile}
               markers={markers}
@@ -173,7 +182,7 @@ export default function UseMap(){
               markerComponent={CustomMarker}
             />
             </div>
-          )}
+          )} */}
           </div>
           <IconContext.Provider value={{ color: "blue", className: "global-class-name", size: "0.4em"}}>
             <div className={stylesMap['own-position-icon-custom']} onClick={clickOwnPos}>
