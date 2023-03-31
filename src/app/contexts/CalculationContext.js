@@ -203,8 +203,8 @@ function convertXYtoLatLon(x,y,boundingBox, imageWidth, imageHeight){
     console.log(xPercent);
     console.log(yPercent);
     // Print the latitude and longitude coordinates to the console
-    console.log("LatitudePercent:", latPercent * 100);
-    console.log("LongitudePercent:", lngPercent * 100);
+    console.log("LatitudePercent:", latPercent);
+    console.log("LongitudePercent:", lngPercent);
     console.log("Latitude:", lat);
     console.log("Longitude:", lng);
 }

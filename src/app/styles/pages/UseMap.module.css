@@ -3,6 +3,8 @@
 }
 
 :root{
+    --modal-pos-top: 0px;
+    --modal-pos-left: 0px;    
     --own-pos-top: 500px;
     --own-pos-left: 300px;
     --own-pos-icon-size: 25px;
@@ -33,7 +35,7 @@
     text-align: center; */
     top: var(--own-pos-top);
     left: var(--own-pos-left);
-    z-index: 2;
+    z-index: 1;
 }
 
 .own-position-icon-arrow{
@@ -147,4 +149,16 @@
     background-size: 400%;
     background-position: 0;
     transition: 0.4s;
+}
+
+.popup-modal{
+    position: absolute;
+    border: 2px;
+    border-color: black;
+    margin: 10px;
+    background-color: beige;
+    border-radius: 5px;
+    top: var(--modal-pos-top);
+    left: var(--modal-pos-left);
+    z-index: 3;
 }

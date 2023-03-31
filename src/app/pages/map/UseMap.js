@@ -5,18 +5,24 @@ import styles from '../../styles/Content.module.css';
 import stylesMenuBar from '../../styles/Menubar.module.css';
 import stylesMap from '../../styles/pages/UseMap.module.css';
 import {NavLink, useLocation} from "react-router-dom";
+import PositionModal from './components/PositionModal';
 import {CommsContext} from "../../contexts/CommsContext";
 import { CalculationContext } from '../../contexts/CalculationContext';
 import ImageMarker from "react-image-marker";
 
 export default function UseMap(){
     const {getServerHost, fetchPosition, fetchPositionCompassHeading} = useContext(CommsContext);
-    const {onLoad, calculateImageCoords, calculateBoundingBox, convertLatLonToXY} = useContext(CalculationContext);
+    const {onLoad, calculateImageCoords, calculateBoundingBox, convertLatLonToXY, convertXYtoLatLon} = useContext(CalculationContext);
     const location = useLocation();
     const { mapData } = location.state;
     const [boundingBox, setBoundingBox] = useState({})
-    const [ enableAddWaypoints, setEnableAddWaypoints] = useState(false);
-    const [ownPosition, setOwnPosition] = useState({GPSLat: 0.00000000, GPSLon: 0.00000000})
+    const [enableAddWaypoints, setEnableAddWaypoints] = useState(false);
+    const [ownPosition, setOwnPosition] = useState({GPSLat: 0.00000000, GPSLon: 0.00000000});
+    const [iconPos, setIconPos] = useState({top: 0, left: 0});
+    const [showModal, setShowModal] = useState(false);
+    const [modalPosition, setModalPosition] = useState({top: 0, left: 0});
+    const [modalHTML, setModalHTML] = useState(<></>);
+
     // const [topLeftPosition, setTopLeftPosition] = useState({});
     const topLeftPosition = useRef(null);
 
@@ -25,11 +31,8 @@ export default function UseMap(){
     let ownPosIconTopLeft = ["150px", "0px"]
 
     window.addEventListener("resize", getSizes, false);
-    // let out = document.querySelector(".output");
 
     function getSizes() {
-      // let zoom = ((window.outerWidth - 10)/ window.innerWidth) * 100;
-      // console.log(zoom);
       topLeftPosition.current = getMapTopLeftPosition();
     }
 
@@ -37,7 +40,6 @@ export default function UseMap(){
       // console.log(props);
         return (
           <div
-            // className="image-marker__marker image-marker__marker--default"
             className={stylesMap['image-marking-small']}
             data-testid={props.itemNumber} 
             onClick={getClickCoords}
@@ -56,18 +58,15 @@ export default function UseMap(){
     }
 
     const getClickCoords = (event) => {
+      const topLeftOfMap = topLeftPosition.current;
+      console.log(topLeftOfMap);
         if(event.detail === 1){
-          //let coordinates = calculateImageCoords(event, boundingBox);
-          let e = event.target;
-          let dim = e.getBoundingClientRect();
-          let x = event.clientX - dim.left;
-          let y = event.clientY - dim.top;
-          // console.log(dim);
-          // console.log(x);
-          // console.log(y);
-          // console.log(event);
-          // //console.log(coordinates);
-          // console.log(markers);
+          console.log(event);
+          let x = event.clientX - topLeftOfMap.left;
+          let y = event.clientY - topLeftOfMap.top;
+          convertXYtoLatLon(x,y,boundingBox, topLeftOfMap.width, topLeftOfMap.height);
+          console.log(x);
+          console.log(y);
         }else{
           console.log(event.detail);
         }
@@ -80,25 +79,21 @@ export default function UseMap(){
       }
 
       function setOwnPositionIcon(data){
-        // console.log(data);
         let boundingBox = calculateBoundingBox(mapData.north, mapData.west, mapData.south, mapData.east, mapData.rotation);
         setBoundingBox(boundingBox);
-        // console.log("Bounding Box:");
-        // console.log(boundingBox);
-        // console.log(topLeftPosition.current);
         const topLeftOfMap = topLeftPosition.current;
-        //let XY = convertLatLonToXY(52.19087, 4.670616, boundingBox, rect.width, rect.height);
         let XY = convertLatLonToXY(data.GPSLat, data.GPSLon, boundingBox, topLeftOfMap.width, topLeftOfMap.height, topLeftOfMap);
-        // console.log(XY);
         let scale = topLeftOfMap.height/mapData.imageHeight;
         let iconSize = Math.round(scale * 25);
-        // console.log(scale);
-        // console.log(iconSize);
-        // console.log((Math.round((convertIconRotation(data.CompassHeading))) + "deg"));
+        setIconPos({top: XY.y, left: XY.x});
         document.documentElement.style.setProperty('--own-pos-icon-rotation', (Math.round((convertIconRotation(data.CompassHeading))) + "deg"));
         document.documentElement.style.setProperty('--own-pos-icon-size', iconSize + "px");
         document.documentElement.style.setProperty('--own-pos-top', (XY.y-10) + "px");
         document.documentElement.style.setProperty('--own-pos-left', (XY.x-3) + "px");
+        if(showModal){
+          setModalPosition(iconPos);
+          setModalHTML([ownPosition.GPSLat, ownPosition.GPSLon]);
+        }
       }
 
       function convertIconRotation(heading){
@@ -108,8 +103,24 @@ export default function UseMap(){
         }else{
           rotation = heading;
         }
-        // console.log(rotation);
         return rotation;
+      }
+
+      function clickOwnPos(){
+        console.log('click');
+        if(showModal) {
+          setShowModal(false);
+        }else{
+          setModalPosition(iconPos);
+          setModalHTML([ownPosition.GPSLat, ownPosition.GPSLon]);
+          setShowModal(true);
+        }
+      }
+
+      function setModal(position, html,enable){
+        setModalPosition(iconPos);
+        setModalHTML([ownPosition.GPSLat, ownPosition.GPSLon]);
+        setShowModal(true);
       }
 
       useEffect( () => {
@@ -119,8 +130,6 @@ export default function UseMap(){
           topLeftPosition.current = getMapTopLeftPosition();
           setOwnPositionIcon(r)
       });
-        
-        // console.log(mapData);
     }, []);
 
     useEffect(() => {
@@ -147,7 +156,6 @@ export default function UseMap(){
             )}
             </button>
         </nav>
-        {/* <img id="marker" className={styles['map']} src={getServerHost() + mapData.pngFile} alt="" onClick={getClickCoords}></img> */}
         <div id="marker">
           {(enableAddWaypoints) ? (
             <ImageMarker
@@ -168,12 +176,11 @@ export default function UseMap(){
           )}
           </div>
           <IconContext.Provider value={{ color: "blue", className: "global-class-name", size: "0.4em"}}>
-            <div className={stylesMap['own-position-icon-custom']}>
+            <div className={stylesMap['own-position-icon-custom']} onClick={clickOwnPos}>
               <SiArchlinux />
             </div>
           </IconContext.Provider>
-          {/* <div className={stylesMap['own-position-icon']}/> */}
+            {(showModal)? (<PositionModal position={modalPosition} text={[ownPosition.GPSLat, ownPosition.GPSLon]}/>) : (<></>)}
       </div>
-
     );
 }
