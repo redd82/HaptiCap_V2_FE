@@ -3,7 +3,7 @@ import Popup from 'reactjs-popup';
 import styles from '../../../styles/pages/UseMap.module.css';
 
 
-export default function PositionModal({position, text}){
+export default function MessageModal({position, text}){
     const [error, setError] = useState("")
     const [open, setOpen] = useState(false);
     const closeModal = () => setOpen(false);
@@ -14,7 +14,7 @@ export default function PositionModal({position, text}){
 
     return(
         <>
-            <Popup  trigger={<div className={styles['popup-modal-own-position']}>
+            <Popup  trigger={<div className={styles['popup-modal']}>
                 <div>
                     {text[0]}
                 </div> 

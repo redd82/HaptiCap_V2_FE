@@ -7,7 +7,7 @@ export default function CalculationContextProvider({ children }) {
 const {SystemDebug, debugLevel} = useContext(DebugContext);
 const [mapData, setMapData] = useState({});
 const [boundingBoxMap, setBoundingBoxMap] = useState({})
-const RoundingDecimals = 8; // round to x decimals
+const RoundingDecimals = 6; // round to x decimals
 
 
 let Radius = 6371000;          //radius of planet we are on (Earth)
@@ -62,34 +62,6 @@ function onLoad(mapData)
         return 1;
     }
 }
-
-// function to find and return the coordinates (x/y/) 
-//where one clicked on the image.
-// if html is set to true, return html string
-function calculateImageCoords(event, boundingBox) 
-{
-    try{
-        let e = event.target;
-        let dim = e.getBoundingClientRect();
-        let x = event.clientX - dim.left;
-        let y = event.clientY - dim.top;
-        // console.log(x);
-        // console.log(y);
-        let clicked = getLatLongFromXY(x, y, mapData);
-        console.log("getClickCoords; Output: X:" + x + " Y:" + y);
-        let coordinates = [0,0,0,0];
-        coordinates[0] = x;
-        coordinates[1] = y;
-        coordinates[2] = boundingBox;
-        coordinates[3] = clicked;
-        return coordinates; 
-    }
-    catch(exception){
-        // well something went blah.
-        console.log(exception);
-        return 1;
-    }
-  }
   
 // ArStuff
 function getLatLongFromXY(x, y,mapData)
@@ -150,7 +122,6 @@ function getLatLongFromXY(x, y,mapData)
     // alrighty then, create a latlon point and send it back
     const latlonDestination = [latlonDlat[0].toFixed(RoundingDecimals), latlonDlon[1].toFixed(RoundingDecimals)];
     return latlonDestination;
-
 }
 
 function getXYFromLatLon(lat, lon, mapData, imageWidth, imageHeight, topLeftPosition){
@@ -355,7 +326,6 @@ const contextData =
     getXYFromLatLon:getXYFromLatLon,
     getGlobals:getGlobals,
     onLoad:onLoad,
-    calculateImageCoords:calculateImageCoords,
     getLatLongFromXY:getLatLongFromXY,
 }
 

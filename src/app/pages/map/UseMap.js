@@ -19,11 +19,10 @@ export default function UseMap(){
     const [enableAddWaypoints, setEnableAddWaypoints] = useState(false);
     const [ownPosition, setOwnPosition] = useState({GPSLat: 0.00000000, GPSLon: 0.00000000});
     const [iconPos, setIconPos] = useState({top: 0, left: 0});
-    const [showModal, setShowModal] = useState(false);
+    const [showModalOwnPosition, setShowModalOwnPosition] = useState(false);
     const [modalPosition, setModalPosition] = useState({top: 0, left: 0});
+    const [noGPSFix, setNoGPSFix] = useState(false);
     const [modalHTML, setModalHTML] = useState(<></>);
-
-    // const [topLeftPosition, setTopLeftPosition] = useState({});
     const topLeftPosition = useRef(null);
 
     let [markers, setMarkers] = useState([]);
@@ -37,7 +36,6 @@ export default function UseMap(){
     }
 
     const CustomMarker = (props) => {
-      // console.log(props);
         return (
           <div
             className={stylesMap['image-marking-small']}
@@ -59,17 +57,12 @@ export default function UseMap(){
 
     const getClickCoords = (event) => {
       const topLeftOfMap = topLeftPosition.current;
-      console.log(topLeftOfMap);
         if(event.detail === 1){
-          console.log(event);
-          let x = event.pageX - topLeftOfMap.left;
-          let y = event.pageY - topLeftOfMap.top;
-          console.log(x);
-          console.log(y);
-          let temp = [0,0];
-          temp = getLatLongFromXY(x, y, mapData);
+          mapData["imageWidth"] = topLeftOfMap.width;
+          mapData["imageHeight"] = topLeftOfMap.height;
+          let temp = getLatLongFromXY(event.pageX - topLeftOfMap.left, event.pageY - topLeftOfMap.top, mapData);
           console.log("temp: " + temp);
-          console.log("getClickCoords; Output: X:" + x + " Y:" + y);
+          console.log("getClickCoords; Output: X:" + (event.pageX - topLeftOfMap.left) + " Y:" + (event.pageY - topLeftOfMap.top));
         }else{
           console.log(event.detail);
         }
@@ -86,12 +79,21 @@ export default function UseMap(){
         let XY = getXYFromLatLon(data.GPSLat, data.GPSLon, mapData, topLeftOfMap.width, topLeftOfMap.height, topLeftOfMap);
         let scale = topLeftOfMap.height/mapData.imageHeight;
         let iconSize = Math.round(scale * 25);
+
+        if(XY.x < 0){
+          XY.x = 0;
+        }
+
+        if(XY.y < 0){
+          XY.y = 0;
+        }
+
         setIconPos({top: XY.y, left: XY.x});
         document.documentElement.style.setProperty('--own-pos-icon-rotation', (Math.round((convertIconRotation(data.CompassHeading))) + "deg"));
         document.documentElement.style.setProperty('--own-pos-icon-size', iconSize + "px");
         document.documentElement.style.setProperty('--own-pos-top', (XY.y-10) + "px");
         document.documentElement.style.setProperty('--own-pos-left', (XY.x-3) + "px");
-        if(showModal){
+        if(showModalOwnPosition){
           setModalPosition(iconPos);
           setModalHTML([ownPosition.GPSLat, ownPosition.GPSLon]);
         }
@@ -109,35 +111,45 @@ export default function UseMap(){
 
       function clickOwnPos(){
         console.log('click');
-        if(showModal) {
-          setShowModal(false);
+        if(showModalOwnPosition) {
+          setShowModalOwnPosition(false);
         }else{
           setModalPosition(iconPos);
           setModalHTML([ownPosition.GPSLat, ownPosition.GPSLon]);
-          setShowModal(true);
+          setShowModalOwnPosition(true);
         }
       }
 
       function setModal(position, html,enable){
         setModalPosition(iconPos);
         setModalHTML([ownPosition.GPSLat, ownPosition.GPSLon]);
-        setShowModal(true);
+        setShowModalOwnPosition(true);
       }
 
       useEffect( () => {
         onLoad(mapData);
         fetchPositionCompassHeading().then(r => {
+          if(r.GPSLat === 0){
+            setNoGPSFix(true);
+          }else{
+            setNoGPSFix(false);
+          }
           setOwnPosition(r);
           topLeftPosition.current = getMapTopLeftPosition();
-          setOwnPositionIcon(r)
+          setOwnPositionIcon(r);
       });
     }, []);
 
     useEffect(() => {
       const interval = setInterval(() => {
         fetchPositionCompassHeading().then(r => {
-            setOwnPosition(r);
-            setOwnPositionIcon(r)
+          if(r.GPSLat === 0){
+            setNoGPSFix(true);
+          }else{
+            setNoGPSFix(false);
+          }
+          setOwnPosition(r);
+          setOwnPositionIcon(r);
         });
       }, timeDelaySec);
       return () => {
@@ -158,8 +170,9 @@ export default function UseMap(){
             </button>
         </nav>
         <div id="marker">
-        <img className={stylesMap['map']} src={getServerHost() + mapData.pngFile} alt="" onClick={getClickCoords}></img>
-          {/* {(enableAddWaypoints) ? (
+        {/* <img className={stylesMap['map']} src={getServerHost() + mapData.pngFile} alt="" onClick={getClickCoords}></img> */}
+        
+          {(enableAddWaypoints) ? (
             <ImageMarker
               src={getServerHost() + mapData.pngFile}
               markers={markers}
@@ -167,22 +180,25 @@ export default function UseMap(){
               markerComponent={CustomMarker}
             />
           ) : (
-            <div  className={stylesMap['map']}>
-            <ImageMarker
-              id="marker"
-              src={getServerHost() + mapData.pngFile}
-              markers={markers}
-              markerComponent={CustomMarker}
-            />
+            <div className={stylesMap['map']}>
+              <div classname={stylesMap['map-overlay']}> 
+                <ImageMarker
+                  id="marker"
+                  src={getServerHost() + mapData.pngFile}
+                  markers={markers}
+                  markerComponent={CustomMarker}
+                />
+              </div>
             </div>
-          )} */}
+          )}
           </div>
           <IconContext.Provider value={{ color: "blue", className: "global-class-name", size: "0.4em"}}>
             <div className={stylesMap['own-position-icon-custom']} onClick={clickOwnPos}>
               <SiArchlinux />
             </div>
           </IconContext.Provider>
-            {(showModal)? (<PositionModal position={modalPosition} text={[ownPosition.GPSLat, ownPosition.GPSLon]}/>) : (<></>)}
+            {(showModalOwnPosition)? (<PositionModal position={modalPosition} text={[ownPosition.GPSLat, ownPosition.GPSLon]}/>) : (<></>)}
+            {(noGPSFix) ? (<PositionModal position={{top: (getMapTopLeftPosition().height/2), left: (getMapTopLeftPosition().width/2)}} text={["No GPS FIX"]}/>) : (<></>)}
       </div>
     );
 }

@@ -38,6 +38,7 @@ export default function StoreContextProvider({ children }) {
 
     function setHomeToUseMap(data){
         console.log("setHomeToUseMap called");
+        console.log(data);
         setLoadedMap(data);
     }
 
