@@ -7,30 +7,20 @@ export default function ErrorMessagesContextProvider({ children }) {
     let serverHost = '';
     const navigate = useNavigate();
     const [defaultData, setDefaultData] = useState({});
-    let storedData = [];
+    const [storedData, setStoredData] = useState({});
 
     function storeData(data, index){
         console.log(data + ' at index ' + index);
-        storedData[index] = data;
+        setStoredData({...storedData, index: data});
     }
 
-    async function fetchSettings() {
-        try {
-            const response = await axios.get(serverHost + '/hapticap.json', {
-                headers: {
-                    "Content-Type": "application/json",
-                    
-                }, withCredentials: false,
-            });
-            return response.data;
-        } catch (e) {
-            return defaultData;
-        }
+    function getStoredData(index){
+        return storedData.index;
     }
 
     const contextData = {
         storeData:storeData,
-        fetchSettings:fetchSettings,
+        getStoredData:getStoredData,
     };
 
 
