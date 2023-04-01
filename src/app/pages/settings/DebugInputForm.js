@@ -189,6 +189,16 @@ export default function DebugInputForm({}) {
         return [latLonBox, href];
     };
 
+    const handleFileUpload = (event) => {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (event) => {
+        const xml = event.target.result;
+            console.log(xml);
+        };
+        reader.readAsText(file);
+      };
+
     useEffect( () => {
         fetchDebugSettings().then(r => {
             setDebugSettingsData(r);
@@ -225,35 +235,6 @@ export default function DebugInputForm({}) {
             </div>
             
             <h3>Debugging input fields for testing functions</h3>
-            {/* const Radius = 6371e3; //radius of planet Earth
-                const North = 50.656633;  // Latitude
-                const West  = 14.657694;  // Longitude  
-                const South = 50.629909;  // Latitude
-                const East  = 14.717431;  // Longitude
-                const Rotation = 0.3858;  // Rotation in Decimal Degrees
-
-                const ScaleHeight = 1; // scale of pixel to meter; default, one pixel height is one meter
-                const ScaleWidth = 1;  // scale of pixel to meter; default, one pixel width  is one meter
-                const MapSouth = 180;  // asume the map north is equal to the true north
-                id: 1,
-                name: "Test",
-                area: "Test", 
-                country: "Test", 
-                pngFile: "/maps/Home.png",
-                pngWidth: "",
-                pngHeight: "", 
-                kmlFile: "",
-                realWorldHeight: "",
-                realWorldWidth: "",
-                scaleHeight: "",
-                scaleWidth:"",
-                north: 50.656633,
-                west: 14.657694,
-                south: 50.629909,
-                east: 14.717431,
-                rotation: 0.3858
-                
-                */}
             <br/>
                 <label className={styles['info-label']} htmlFor="Radius">Radius (m)</label>
                 <input className={styles['info-input']} name="Radius" type="text" id="Radius" defaultValue={mapDataDebug.radius} onChange={handleInputUpdate} />           
@@ -295,7 +276,12 @@ export default function DebugInputForm({}) {
                 <label className={styles['info-label']} htmlFor="ScaleWidth">ScaleWidth</label>
                 <label className={styles['valueRO']} htmlFor="ScaleWidth">{outputDebug.scaleWidth}</label>
                 <button className={styles['apply-button']} onClick={runDataConversion} type="button"> Calculate </button>
-                <button className={styles['apply-button']} onClick={getKMLFile} type="button"> Get KML File </button>
+                <div>
+                <input type="file" onChange={handleFileUpload} />
+                {kmlData && <pre>{JSON.stringify(kmlData, null, 2)}</pre>}
+                </div>
+
+                {/* <button className={styles['apply-button']} onClick={getKMLFile} type="button"> Get KML File </button> */}
                     {/* //let output = [legs[0], legs[1], ScaleHeight, ScaleWidth]; */}
         </form>
     );

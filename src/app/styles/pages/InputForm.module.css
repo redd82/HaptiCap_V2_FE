@@ -8,6 +8,11 @@
     color: #4A5240;
 }
 
+:root {
+    
+
+}
+
 .info-form {
     display: grid;
     grid-template-columns: 0.55fr 0.45fr;

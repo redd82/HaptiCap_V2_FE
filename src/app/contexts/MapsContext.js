@@ -32,19 +32,19 @@ export default function MapsContextProvider({ children }) {
         let successMessage;
         if(kmlUploaded){
         json = JSON.stringify({id: mapData.id, name: mapData.name, country: mapData.country, area: mapData.area, pngFile: "/maps/" + mapData.pngFile,  kmlFile: "/maps/" + mapData.kmlFile});
-        console.log(kmlUploaded);
+        //console.log(kmlUploaded);
         } else {
         json = JSON.stringify({id: mapData.id, name: mapData.name, country: mapData.country, area: mapData.area, pngFile: mapData.pngFile, kmlFile: mapData.kmlFile});
-        console.log(kmlUploaded);
+        //console.log(kmlUploaded);
         }
-        console.log(json);
+        //console.log(json);
         try{
             const response = await axios.post(serverHost + '/navigation/request-map', json, {
                 headers: {
                     "Content-Type": "application/json",
                 },
             });
-            console.log(response);
+            //console.log(response);
             errorMessage = "";
             successMessage = "";            
             if(response.status === 200){

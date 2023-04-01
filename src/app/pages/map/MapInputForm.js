@@ -193,7 +193,7 @@ export default function MapInputForm({map, newMap}) {
 
     async function useSelectedMap() {
         const response = await requestMap(mapData, kmlUploaded);
-        console.log(response[0].data);
+        //console.log(response[0].data);
         setMapData(response[0].data);
         setHomeToUseMap(response[0].data);
         setSuccess(response[1]);
@@ -355,15 +355,15 @@ export default function MapInputForm({map, newMap}) {
                         </div> 
                     </>
                 ): (
-                (error !== "") ? (
-                    <div className={styles['error']}>{error}</div>
-                    ) : (
-                        (success !== "") ? (
-                            <div className={styles['success']}>{success}</div>
+                    (error !== "") ? (
+                        <div className={styles['error']}>{error}</div>
                         ) : (
-                        <div className={styles['no-error']}> <br /> </div>
-                        )
-                )
+                            (success !== "") ? (
+                                <div className={styles['success']}>{success}</div>
+                            ) : (
+                            <div className={styles['no-error']}> <br /> </div>
+                            )
+                    )
                 )
                 }
             </div>
