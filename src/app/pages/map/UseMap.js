@@ -6,17 +6,18 @@ import stylesMenuBar from '../../styles/Menubar.module.css';
 import stylesMap from '../../styles/pages/UseMap.module.css';
 import {NavLink, useLocation} from "react-router-dom";
 import PositionModal from './components/PositionModal';
+import MessageModal from './components/MessageModal';
 import {CommsContext} from "../../contexts/CommsContext";
 import { CalculationContext } from '../../contexts/CalculationContext';
 import ImageMarker from "react-image-marker";
 
 export default function UseMap(){
     const {getServerHost, fetchPosition, fetchPositionCompassHeading} = useContext(CommsContext);
-    const {onLoad, calculateImageCoords, getLatLongFromXY,getXYFromLatLon} = useContext(CalculationContext);
+    const {onLoad, getLatLongFromXY,getXYFromLatLon} = useContext(CalculationContext);
     const location = useLocation();
     const { mapData } = location.state;
-    const [boundingBox, setBoundingBox] = useState({})
     const [enableAddWaypoints, setEnableAddWaypoints] = useState(false);
+    const [enableWaypointOptions, setEnableWaypointOptions] = useState(true);
     const [ownPosition, setOwnPosition] = useState({GPSLat: 0.00000000, GPSLon: 0.00000000});
     const [iconPos, setIconPos] = useState({top: 0, left: 0});
     const [showModalOwnPosition, setShowModalOwnPosition] = useState(false);
@@ -50,8 +51,10 @@ export default function UseMap(){
     function toggleAddWayPoints(){
       if(enableAddWaypoints){
         setEnableAddWaypoints(false);
+        topLeftPosition.current = getMapTopLeftPosition();
       }else{
         setEnableAddWaypoints(true);
+        topLeftPosition.current = getMapTopLeftPosition();
       }
     }
 
@@ -126,6 +129,14 @@ export default function UseMap(){
         setShowModalOwnPosition(true);
       }
 
+      function toggleWayPointOptions(){
+        if(enableWaypointOptions){
+          setEnableWaypointOptions(false);
+        }else{
+          setEnableWaypointOptions(true);
+        }
+      }
+
       useEffect( () => {
         onLoad(mapData);
         fetchPositionCompassHeading().then(r => {
@@ -159,19 +170,21 @@ export default function UseMap(){
 
     return(
       <div id="useMap">
-        <nav className={stylesMap['buttons']}>
-            <button className={stylesMap['marker-button']} disabled={!markers.length > 0} onClick={() => setMarkers([])}> Clear All </button>
-            <button className={stylesMap['marker-button']} onClick={toggleAddWayPoints}> 
+        {(enableWaypointOptions) ? 
+        ( <nav className={stylesMap['buttons']}>
+          <button className={stylesMap['marker-button']} disabled={!markers.length > 0} onClick={() => setMarkers([])}
+          > Clear All </button>
+          <button className={stylesMap['marker-button']} onClick={toggleAddWayPoints}> 
             {(enableAddWaypoints) ? (
                 <>Add waypoints Enabled</>
             ):(
                 <>Add waypoints Disabled</>
             )}
             </button>
-        </nav>
+        </nav>) : (<></>)}
+
         <div id="marker">
-        {/* <img className={stylesMap['map']} src={getServerHost() + mapData.pngFile} alt="" onClick={getClickCoords}></img> */}
-        
+          <div className={stylesMap['waypoint-management-button']} onClick={toggleWayPointOptions} >Waypoint Options</div>
           {(enableAddWaypoints) ? (
             <ImageMarker
               src={getServerHost() + mapData.pngFile}
@@ -180,15 +193,13 @@ export default function UseMap(){
               markerComponent={CustomMarker}
             />
           ) : (
-            <div className={stylesMap['map']}>
-              <div classname={stylesMap['map-overlay']}> 
+            <div className={stylesMap['map-overlay']} onClick={getClickCoords}>
                 <ImageMarker
                   id="marker"
                   src={getServerHost() + mapData.pngFile}
                   markers={markers}
                   markerComponent={CustomMarker}
                 />
-              </div>
             </div>
           )}
           </div>
@@ -198,7 +209,7 @@ export default function UseMap(){
             </div>
           </IconContext.Provider>
             {(showModalOwnPosition)? (<PositionModal position={modalPosition} text={[ownPosition.GPSLat, ownPosition.GPSLon]}/>) : (<></>)}
-            {(noGPSFix) ? (<PositionModal position={{top: (getMapTopLeftPosition().height/2), left: (getMapTopLeftPosition().width/2)}} text={["No GPS FIX"]}/>) : (<></>)}
+            {(noGPSFix) ? (<MessageModal position={{top: (getMapTopLeftPosition().height/2), left: (getMapTopLeftPosition().width/2)}} text={["No GPS FIX"]}/>) : (<></>)}
       </div>
     );
 }

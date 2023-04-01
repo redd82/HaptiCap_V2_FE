@@ -54,7 +54,7 @@
     top: var(--own-pos-top);
     left: var(--own-pos-left);
     transform: rotate(var(--own-pos-icon-rotation));
-    z-index: 2;
+    z-index: 4;
 }
 
 .image-marker {
@@ -106,17 +106,11 @@
 }
 
 .map-overlay{
-    position: absolute;
-    bottom: 0;
+    position: relative;
     background: rgb(0, 0, 0);
-    background: rgba(0, 0, 0, 0.5); /* Black see-through */
+    background: rgba(0, 0, 0, 0.0); /* Black see-through */
     color: #f1f1f1;
     width: 100%;
-    transition: .5s ease;
-    opacity:0;
-    color: white;
-    font-size: 20px;
-    text-align: center;
     z-index: 3;
 }
 
@@ -132,6 +126,7 @@
     top: 0;
     bottom: 0;
     background-color: #663F46;
+    z-index: 10;
 }
 
 .marker-button {
@@ -148,6 +143,30 @@
     background-size: 400%;
     background-position: 0;
     transition: 0.4s;
+    z-index: 5;
+}
+
+.waypoint-management-button {
+    position: absolute;
+    border: none;
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
+    background-color: #6F5E5C;
+    padding: 4px;
+    font-size: 16px;
+    color: white;
+    background-image: linear-gradient(to bottom right, #A28497 50%, #A28497 50%, #6F5E5C);
+    background-size: 400%;
+    background-position: 0;
+    transition: 0.4s;
+    top: 150px;
+    z-index: 5;
+}
+
+.waypoint-management-button:hover{
+    background-color: #4A5240;
+    background-position: 100% 0;
 }
 
 .zoom-control-button {
