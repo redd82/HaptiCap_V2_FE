@@ -19,10 +19,11 @@ export default function CalibrationInputForm({}) {
 
     async function onSubmit(){
         let serverHost = getServerHost();
-            let json = JSON.stringify({compassOffset: calibrationData.compassOffset, magBiasX: calibrationData.magBiasX, magBiasY: calibrationData.magBiasY, magBiasZ: calibrationData.magBiasZ, magScaleFacX: calibrationData.magScaleFacX,
+            let json = JSON.stringify({calibrateMag: calibrationData.calibrateMag, compassOffset: calibrationData.compassOffset, magBiasX: calibrationData.magBiasX, magBiasY: calibrationData.magBiasY, magBiasZ: calibrationData.magBiasZ, magScaleFacX: calibrationData.magScaleFacX,
                 magScaleFacY: calibrationData.magScaleFacY, magScaleFacZ: calibrationData.magScaleFacZ, gyroBiasX: calibrationData.gyroBiasX, gyroBiasY: calibrationData.gyroBiasY, 
                 gyroBiasZ: calibrationData.gyroBiasZ, accelBiasX: calibrationData.accelBiasX, accelBiasY: calibrationData.accelBiasY, accelBiasZ: calibrationData.accelBiasZ, 
                 accelScaleX: calibrationData.accelScaleX, accelScaleY: calibrationData.accelScaleY, accelScaleZ: calibrationData.accelScaleZ});
+                console.log(json);
             try{
                 const response = await axios.post(serverHost + '/settings/calibration_form', json, {
                     headers: {
@@ -101,6 +102,13 @@ export default function CalibrationInputForm({}) {
         }
     };
 
+    const handleCheckBoxChange = (checkBoxValue) => {
+        console.log(checkBoxValue.checked);
+        if(checkBoxValue.name === 'calibrateMag') {
+            setCalibrationData({...calibrationData, calibrateMag: checkBoxValue.checked});
+        }
+    };
+
     const handleButton = (event) => {
         console.log(event);
         if (event === "calibrateCompass") {
@@ -123,6 +131,8 @@ export default function CalibrationInputForm({}) {
 
     return (
         <form className={styles['info-form']} onSubmit={handleSubmit(onSubmit)}>
+            <label className={styles['info-label']} htmlFor="calibrateMag">Enable MagCal on startup:</label>
+            <Checkbox id='1' parentCallback={handleCheckBoxChange} disabled={false} name="calibrateMag" labelname="" defaultChecked={calibrationData.calibrateMag}/>
             <label className={styles['info-label']} htmlFor="compassOffset">Compass Offset:</label>
             <input className={styles['info-input']} name="compassOffset" type="text" id="compassOffset" defaultValue={calibrationData.compassOffset} onChange={handleInputUpdate} />
             <label className={styles['info-label']} htmlFor="magBiasX">Magnometer Bias X:</label>
