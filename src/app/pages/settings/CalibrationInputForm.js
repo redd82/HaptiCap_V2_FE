@@ -19,10 +19,10 @@ export default function CalibrationInputForm({}) {
 
     async function onSubmit(){
         let serverHost = getServerHost();
-            let json = JSON.stringify({calibrateMag: calibrationData.calibrateMag, compassOffset: calibrationData.compassOffset, magBiasX: calibrationData.magBiasX, magBiasY: calibrationData.magBiasY, magBiasZ: calibrationData.magBiasZ, magScaleFacX: calibrationData.magScaleFacX,
+            let json = JSON.stringify({compassCalibrated: calibrationData.compassCalibrated, compassOffset: calibrationData.compassOffset, magOffsetX: calibrationData.magOffsetX, magOffsetY: calibrationData.magOffsetY, magOffsetZ: calibrationData.magOffsetX, magRadius: calibrationData.magRadius,
                 magScaleFacY: calibrationData.magScaleFacY, magScaleFacZ: calibrationData.magScaleFacZ, gyroBiasX: calibrationData.gyroBiasX, gyroBiasY: calibrationData.gyroBiasY, 
-                gyroBiasZ: calibrationData.gyroBiasZ, accelBiasX: calibrationData.accelBiasX, accelBiasY: calibrationData.accelBiasY, accelBiasZ: calibrationData.accelBiasZ, 
-                accelScaleX: calibrationData.accelScaleX, accelScaleY: calibrationData.accelScaleY, accelScaleZ: calibrationData.accelScaleZ});
+                gyroOffsetX: calibrationData.gyroOffsetX, gyroOffsetY: calibrationData.gyroOffsetY, gyroOffsetZ: calibrationData.gyroOffsetZ, accelOffsetX: calibrationData.accelOffsetX, 
+                accelOffsetY: calibrationData.accelOffsetY, accelOffsetZ: calibrationData.accelOffsetZ, accelRadius: calibrationData.accelRadius});
                 console.log(json);
             try{
                 const response = await axios.post(serverHost + '/settings/calibration_form', json, {
@@ -56,63 +56,51 @@ export default function CalibrationInputForm({}) {
             setCalibrationData({...calibrationData, compassOffset: value});
         }
         if (event.target.name === "magBiasX") {
-            setCalibrationData({...calibrationData, magBiasX: value});
+            setCalibrationData({...calibrationData, magOffsetX: value});
         }
         if (event.target.name === "magBiasY") {
-            setCalibrationData({...calibrationData, magBiasY: value});
+            setCalibrationData({...calibrationData, magOffsetY: value});
         }
         if (event.target.name === "magBiasZ") {
-            setCalibrationData({...calibrationData, magBiasZ: value});
+            setCalibrationData({...calibrationData, magOffsetZ: value});
         }
         if (event.target.name === "magScaleFacX") {
-            setCalibrationData({...calibrationData, magScaleFacX: value});
+            setCalibrationData({...calibrationData, magRadius: value});
         }
         if (event.target.name === "magScaleFacX") {
-            setCalibrationData({...calibrationData, magScaleFacX: value});
+            setCalibrationData({...calibrationData, gyroOffsetX: value});
         }
         if (event.target.name === "magScaleFacZ") {
-            setCalibrationData({...calibrationData, magScaleFacZ: value});
+            setCalibrationData({...calibrationData, gyroOffsetY: value});
         }
         if (event.target.name === "gyroBiasX") {
-            setCalibrationData({...calibrationData, gyroBiasX: value});
+            setCalibrationData({...calibrationData, gyroOffsetZ: value});
         }
         if (event.target.name === "gyroBiasY") {
-            setCalibrationData({...calibrationData, gyroBiasY: value});
+            setCalibrationData({...calibrationData, accelOffsetX: value});
         }
         if (event.target.name === "gyroBiasZ") {
-            setCalibrationData({...calibrationData, gyroBiasZ: value});
+            setCalibrationData({...calibrationData, accelOffsetY: value});
         }
         if (event.target.name === "accelBiasX") {
-            setCalibrationData({...calibrationData, accelBiasX: value});
+            setCalibrationData({...calibrationData, accelOffsetZ: value});
         }
         if (event.target.name === "accelBiasY") {
-            setCalibrationData({...calibrationData, accelBiasY: value});
-        }
-        if (event.target.name === "accelBiasZ") {
-            setCalibrationData({...calibrationData, accelBiasZ: value});
-        }
-        if (event.target.name === "accelScaleX") {
-            setCalibrationData({...calibrationData, accelScaleX: value});
-        }
-        if (event.target.name === "accelScaleY") {
-            setCalibrationData({...calibrationData, accelScaleY: value});
-        }
-        if (event.target.name === "accelScaleZ") {
-            setCalibrationData({...calibrationData, accelScaleZ: value});
+            setCalibrationData({...calibrationData, accelRadius: value});
         }
     };
 
     const handleCheckBoxChange = (checkBoxValue) => {
         console.log(checkBoxValue.checked);
         if(checkBoxValue.name === 'calibrateMag') {
-            setCalibrationData({...calibrationData, calibrateMag: checkBoxValue.checked});
+            setCalibrationData({...calibrationData, compassCalibrated: checkBoxValue.checked});
         }
     };
 
     const handleButton = (event) => {
         console.log(event);
         if (event === "calibrateCompass") {
-            
+            setCalibrationData({...calibrationData, compassCalibrated: false});
         }
     }
 
@@ -131,40 +119,28 @@ export default function CalibrationInputForm({}) {
 
     return (
         <form className={styles['info-form']} onSubmit={handleSubmit(onSubmit)}>
-            <label className={styles['info-label']} htmlFor="calibrateMag">Enable MagCal on startup:</label>
-            <Checkbox id='1' parentCallback={handleCheckBoxChange} disabled={false} name="calibrateMag" labelname="" defaultChecked={calibrationData.calibrateMag}/>
             <label className={styles['info-label']} htmlFor="compassOffset">Compass Offset:</label>
             <input className={styles['info-input']} name="compassOffset" type="text" id="compassOffset" defaultValue={calibrationData.compassOffset} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="magBiasX">Magnometer Bias X:</label>
-            <input className={styles['info-input']} name="magBiasX" type="text" id="magBiasX" defaultValue={calibrationData.magBiasX} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="magBiasY">Magnometer Bias Y:</label>
-            <input className={styles['info-input']} name="magBiasY" type="text" id="magBiasY" defaultValue={calibrationData.magBiasY} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="magBiasZ">Magnometer Bias Z:</label>
-            <input className={styles['info-input']} name="magBiasZ" type="text" id="magBiasZ" defaultValue={calibrationData.magBiasZ} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="magScaleFacX">Magnometer Scale X:</label>
-            <input className={styles['info-input']} name="magScaleFacX" type="text" id="magScaleFacX" defaultValue={calibrationData.magScaleFacX} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="magScaleFacY">Magnometer Scale Y:</label>
-            <input className={styles['info-input']} name="magScaleFacY" type="text" id="magScaleFacY" defaultValue={calibrationData.magScaleFacY} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="magScaleFacZ">Magnometer Scale Z:</label>
-            <input className={styles['info-input']} name="magScaleFacZ" type="text" id="magScaleFacZ" defaultValue={calibrationData.magScaleFacZ} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="gyroBiasX">Gyro Bias X:</label>
-            <input className={styles['info-input']} name="gyroBiasX" type="text" id="gyroBiasX" defaultValue={calibrationData.gyroBiasX} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="gyroBiasY">Gyro Bias Y:</label>
-            <input className={styles['info-input']} name="gyroBiasY" type="text" id="gyroBiasY" defaultValue={calibrationData.gyroBiasY} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="gyroBiasZ">Gyro Bias Z:</label>
-            <input className={styles['info-input']} name="gyroBiasZ" type="text" id="gyroBiasZ" defaultValue={calibrationData.gyroBiasZ} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="accelBiasX">Accel. Bias X:</label>
-            <input className={styles['info-input']} name="accelBiasX" type="text" id="accelBiasX" defaultValue={calibrationData.accelBiasX} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="accelBiasY">Accel. Bias Y:</label>
-            <input className={styles['info-input']} name="accelBiasY" type="text" id="accelBiasY" defaultValue={calibrationData.accelBiasY} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="accelBiasZ">Accel. Bias Z:</label>
-            <input className={styles['info-input']} name="accelBiasZ" type="text" id="accelBiasZ" defaultValue={calibrationData.accelBiasZ} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="accelScaleX">Accel. Scale X:</label>
-            <input className={styles['info-input']} name="accelScaleX" type="text" id="accelScaleX" defaultValue={calibrationData.accelScaleX} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="accelScaleY">Accel. Scale Y:</label>
-            <input className={styles['info-input']} name="accelScaleY" type="text" id="accelScaleY" defaultValue={calibrationData.accelScaleY} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="accelScaleZ">Accel. Scale Z:</label>
-            <input className={styles['info-input']} name="accelScaleZ" type="text" id="accelScaleZ" defaultValue={calibrationData.accelScaleZ} onChange={handleInputUpdate} />            
+            <label className={styles['info-label']} htmlFor="magOffsetX">Magnometer Bias X:</label>
+            <input className={styles['info-input']} name="magOffsetX" type="text" id="magOffsetX" defaultValue={calibrationData.magOffsetX} onChange={handleInputUpdate} />
+            <label className={styles['info-label']} htmlFor="magOffsetY">Magnometer Bias Y:</label>
+            <input className={styles['info-input']} name="magOffsetY" type="text" id="magOffsetY" defaultValue={calibrationData.magOffsetY} onChange={handleInputUpdate} />
+            <label className={styles['info-label']} htmlFor="magOffsetZ">Magnometer Bias Z:</label>
+            <input className={styles['info-input']} name="magOffsetZ" type="text" id="magOffsetZ" defaultValue={calibrationData.magOffsetZ} onChange={handleInputUpdate} />
+            <label className={styles['info-label']} htmlFor="gyroOffsetX">Magnometer Scale X:</label>
+            <input className={styles['info-input']} name="gyroOffsetX" type="text" id="gyroOffsetX" defaultValue={calibrationData.gyroOffsetX} onChange={handleInputUpdate} />
+            <label className={styles['info-label']} htmlFor="gyroOffsetY">Magnometer Scale Y:</label>
+            <input className={styles['info-input']} name="gyroOffsetY" type="text" id="gyroOffsetY" defaultValue={calibrationData.gyroOffsetY} onChange={handleInputUpdate} />
+            <label className={styles['info-label']} htmlFor="gyroOffsetZ">Magnometer Scale Z:</label>
+            <input className={styles['info-input']} name="gyroOffsetZ" type="text" id="gyroOffsetZ" defaultValue={calibrationData.gyroOffsetZ} onChange={handleInputUpdate} />
+            <label className={styles['info-label']} htmlFor="accelOffsetX">Gyro Bias X:</label>
+            <input className={styles['info-input']} name="accelOffsetX" type="text" id="accelOffsetX" defaultValue={calibrationData.accelOffsetX} onChange={handleInputUpdate} />
+            <label className={styles['info-label']} htmlFor="accelOffsetY">Gyro Bias Y:</label>
+            <input className={styles['info-input']} name="accelOffsetY" type="text" id="accelOffsetY" defaultValue={calibrationData.accelOffsetY} onChange={handleInputUpdate} />
+            <label className={styles['info-label']} htmlFor="accelOffsetZ">Gyro Bias Z:</label>
+            <input className={styles['info-input']} name="accelOffsetZ" type="text" id="accelOffsetZ" defaultValue={calibrationData.accelOffsetZ} onChange={handleInputUpdate} />
+            <label className={styles['info-label']} htmlFor="accelRadius">Accel. Bias X:</label>
+            <input className={styles['info-input']} name="accelRadius" type="text" id="accelRadius" defaultValue={calibrationData.accelRadius} onChange={handleInputUpdate} />
             <input type="submit" id="submit-button" className={styles['apply-button']} value="Apply Changes"/>
             <Button buttonText='Calibrate Compass' parentCallback={handleButton} buttonName="calibrateCompass" styleName='add-button'/>
             <div className={styles['error-message']}>
