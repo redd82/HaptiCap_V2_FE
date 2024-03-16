@@ -18,6 +18,10 @@ export default function CalibrationInputForm({}) {
     let newFaultTemp = {};
 
     async function onSubmit(){
+        await sendSettings();
+    }
+
+    async function sendSettings(){
         let serverHost = getServerHost();
             let json = JSON.stringify({compassCalibrated: calibrationData.compassCalibrated, compassOffset: calibrationData.compassOffset, magOffsetX: calibrationData.magOffsetX, magOffsetY: calibrationData.magOffsetY, magOffsetZ: calibrationData.magOffsetX, magRadius: calibrationData.magRadius,
                 magScaleFacY: calibrationData.magScaleFacY, magScaleFacZ: calibrationData.magScaleFacZ, gyroBiasX: calibrationData.gyroBiasX, gyroBiasY: calibrationData.gyroBiasY, 
@@ -48,7 +52,8 @@ export default function CalibrationInputForm({}) {
                     setError(e.response.data.message);
                 }
             }
-        }
+
+    }
 
     const handleInputUpdate = (event) => {
         const value = event?.target?.value;
@@ -92,7 +97,7 @@ export default function CalibrationInputForm({}) {
 
     const handleCheckBoxChange = (checkBoxValue) => {
         console.log(checkBoxValue.checked);
-        if(checkBoxValue.name === 'calibrateMag') {
+        if(checkBoxValue.name === 'compassCalibrated') {
             setCalibrationData({...calibrationData, compassCalibrated: checkBoxValue.checked});
         }
     };
@@ -101,6 +106,7 @@ export default function CalibrationInputForm({}) {
         console.log(event);
         if (event === "calibrateCompass") {
             setCalibrationData({...calibrationData, compassCalibrated: false});
+            sendSettings();
         }
     }
 
@@ -119,6 +125,8 @@ export default function CalibrationInputForm({}) {
 
     return (
         <form className={styles['info-form']} onSubmit={handleSubmit(onSubmit)}>
+            <label className={styles['info-label']} htmlFor="compassCalibrated">Compass calibrated</label>
+            <Checkbox id='1' parentCallback={handleCheckBoxChange} defaultChecked={calibrationData.compassCalibrated} disabled={false} name="compassCalibrated" labelname=""/>
             <label className={styles['info-label']} htmlFor="compassOffset">Compass Offset:</label>
             <input className={styles['info-input']} name="compassOffset" type="text" id="compassOffset" defaultValue={calibrationData.compassOffset} onChange={handleInputUpdate} />
             <label className={styles['info-label']} htmlFor="magOffsetX">Magnometer Bias X:</label>

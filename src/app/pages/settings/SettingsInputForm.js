@@ -139,7 +139,7 @@ export default function SettingsInputForm({}) {
     const handleButton = (event) => {
         console.log(event);
         if (event === "restart") {
-            restartHaptiCap();
+            restartHaptiCap();              // TODO: Visualize to show user to wait for the restart
         }
     }
 
