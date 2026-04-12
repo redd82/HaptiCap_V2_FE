@@ -1,20 +1,13 @@
-import React, {useContext, useEffect} from "react";
-import styles from'../../styles/Content.module.css';
-import {NavLink, Outlet, useLocation} from "react-router-dom";
-import MapsContextProvider from "../../contexts/MapsContext";
+import React from 'react';
+import styles from '../../styles/Content.module.css';
+import { Outlet } from 'react-router-dom';
 
-export default function Navigation(){
-    useEffect( () => {
-
-    }, []);
-
-    return(
+export default function Navigation() {
+    return (
         <div>
             <main>
                 <div className={styles['outlet-maps']}>
-                    <MapsContextProvider>
-                        <Outlet />
-                    </MapsContextProvider>
+                    <Outlet />
                 </div>
             </main>
         </div>

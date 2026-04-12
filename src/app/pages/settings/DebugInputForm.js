@@ -1,288 +1,191 @@
-import React, {useContext, useEffect, useState, useRef} from 'react';
-import {useForm} from 'react-hook-form';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
-import styles from '../../styles/pages/InputForm.module.css';
-// import stylesContent from '../../styles/Content.module.css'
-import {CommsContext} from "../../contexts/CommsContext";
+import {
+    Alert, Box, Button, Checkbox, CircularProgress, Divider,
+    FormControlLabel, Grid, Stack, TextField, Typography,
+} from '@mui/material';
+import { CommsContext } from '../../contexts/CommsContext';
 import { CalculationContext } from '../../contexts/CalculationContext';
 import { MapsContext } from '../../contexts/MapsContext';
-import Checkbox from "../components/CheckBox";
-import Button from "../components/Button";
-import { message } from 'antd';
-import { convertLegacyProps } from 'antd/es/button/button';
-import parser from 'fast-xml-parser';
 import { DebugContext } from '../../contexts/DebugContext';
 
-export default function DebugInputForm({}) {
-    const { XMLParser, XMLBuilder, XMLValidator} = require("fast-xml-parser");
-    const DATEFORMAT = 'yyyy-MM-dd';
-    const {storeData, fetchDebugSettings, getServerHost, listFiles} = useContext(CommsContext);
-    const {SystemDebug} = useContext(DebugContext);
-    const {DataConversion, CalculateDistance} = useContext(CalculationContext);
-    const {fetchKMLFile} = useContext(MapsContext);
+export default function DebugInputForm() {
+    const { XMLParser } = require('fast-xml-parser');
+    const { fetchDebugSettings, getServerHost, listFiles } = useContext(CommsContext);
+    const { DataConversion } = useContext(CalculationContext);
+    const { fetchKMLFile } = useContext(MapsContext);
     const [loading, setLoading] = useState(true);
-    const {register, handleSubmit, formState: { errors } } = useForm();
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
-    const [readOnly, setReadOnly] = useState(true);
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
     const [debugSettingsData, setDebugSettingsData] = useState({});
     const [mapDataDebug, setMapDataDebug] = useState({});
-    const [outputDebug,setOutputDebug] = useState([{outLegs0 : 1, outlegs1: 1, scaleHeight: 1, scaleWidth: 1}]);
-    const [kmlData, setKmlData] = useState([]);
-    let newFaultTemp = {};
-    let debugEnabled = 1;
+    const [outputDebug, setOutputDebug] = useState({ outLegs0: 1, outlegs1: 1, scaleHeight: 1, scaleWidth: 1 });
+    const [kmlData] = useState([]);
 
-    async function applyChanges(){
+    async function applyChanges() {
         let serverHost = getServerHost();
-            console.log(debugSettingsData);
-            let json = JSON.stringify({debug2Serial: debugSettingsData.debug2Serial, debugGPS2Serial: debugSettingsData.debugGPS2Serial, debugHaptic: debugSettingsData.debugHaptic});
-                console.log(json);
-            try{
-                const response = await axios.post(serverHost + '/settings/debug_form', json, {
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                });
-                console.log(response);
-                setError("");
-                setSuccess("");               
-                if(response.status === 200){
-                    setTimeout(500);
-                    setSuccess("Settings changed");
-                }else{
-                    setError("Error");
-                }
-            }   catch (e){
-                setError(e.response.data.message);
-                if(e.response.status >= 401) {
-
-                }else if(e.response.status === 400){
-                    setError(e.response.data.message);
-                }
+        console.log(debugSettingsData);
+        let json = JSON.stringify({
+            debug2Serial: debugSettingsData.debug2Serial,
+            debugGPS2Serial: debugSettingsData.debugGPS2Serial,
+            debugHaptic: debugSettingsData.debugHaptic,
+        });
+        console.log(json);
+        try {
+            const response = await axios.post(serverHost + '/settings/debug_form', json, {
+                headers: { 'Content-Type': 'application/json' },
+            });
+            console.log(response);
+            setError('');
+            setSuccess('');
+            if (response.status === 200) {
+                setTimeout(500);
+                setSuccess('Settings changed');
+            } else {
+                setError('Error');
             }
+        } catch (e) {
+            setError(e.response?.data?.message || 'Error');
+            if (e.response?.status === 400) setError(e.response.data.message);
         }
-
-    const addObjectToArray = obj => {
-        //setCarFaultList(current => [...current, obj]);
-    };
+    }
 
     const handleCheckBoxChange = (checkBoxValue) => {
-        console.log(checkBoxValue.checked);
-        if(checkBoxValue.name === 'debug2Serial') {
-            setDebugSettingsData({...debugSettingsData, debug2Serial: checkBoxValue.checked});
-        }
-        if(checkBoxValue.name === 'debugGPS2Serial') {
-            setDebugSettingsData({...debugSettingsData, debugGPS2Serial: checkBoxValue.checked});
-        }
-        if(checkBoxValue.name === 'debugHaptic') {
-            setDebugSettingsData({...debugSettingsData, debugHaptic: checkBoxValue.checked});
-        }
+        setDebugSettingsData((prev) => ({ ...prev, [checkBoxValue.name]: checkBoxValue.checked }));
     };
-
-    function setCheckboxes(){
-        
-    }
-
-    function listFilesButton(){
-        listFiles();
-    }
-
 
     const handleInputUpdate = (event) => {
-        const value = event?.target?.value;
-        if (event.target.name === "Radius") {
-            setMapDataDebug({...mapDataDebug, radius: value});
-        }
-        if (event.target.name === "North") {
-            setMapDataDebug({...mapDataDebug, north: value});
-        }
-        if (event.target.name === "West") {
-            setMapDataDebug({...mapDataDebug, west: value});
-        }
-        if (event.target.name === "South") {
-            setMapDataDebug({...mapDataDebug, south: value});
-        }
-        if (event.target.name === "East") {
-            setMapDataDebug({...mapDataDebug, east: value});
-        }
-        if (event.target.name === "Rotation") {
-            setMapDataDebug({...mapDataDebug, rotation: value});
-        }
-        if (event.target.name === "ImageHeigt") {
-            setMapDataDebug({...mapDataDebug, imageHeight: value});
-        }
-        if (event.target.name === "ImageWidth") {
-            setMapDataDebug({...mapDataDebug, imageWidth: value});
+        setDebugSettingsData((prev) => ({ ...prev, [event.target.name]: event.target.value }));
+    };
+
+    const listFilesButton = async () => {
+        try {
+            const result = await listFiles();
+            setMapDataDebug(result);
+        } catch (e) {
+            setError('Error listing files');
         }
     };
-    /*
-        name: "Test",
-        area: "Test", 
-        country: "Test", 
-        pngFile: "/maps/Home.png",
-        pngWidth: "",
-        pngHeight: "", 
-        kmlFile: "",
-        realWorldHeight: "",
-        realWorldWidth: "",
-        scaleHeight: "",
-        scaleWidth:"",
-        north: "50.656633",
-        west: "14.657694",
-        south: "50.629909",
-        east: "14.717431",
-        rotation: "0.3858",
-        radius: ""
-    */
 
-    function runDataConversion(){
-        let output = [];
-        output = DataConversion(mapDataDebug.north, mapDataDebug.west, mapDataDebug.south, mapDataDebug.east, mapDataDebug.rotation, mapDataDebug.imageHeight, mapDataDebug.imageWidth);
-        setOutputDebug({...outputDebug, outLegs0: output[0], outlegs1: output[1], scaleHeight: output[2], scaleWidth: output[3]});
-        console.log(output);
-    } 
-
-    async function getKMLFile(){
-        let fileName = "/maps/BW12.kml"
-        let response = await fetchKMLFile(fileName);
-        const kml = response.data;
-        //putKMLDataInArray(kml);
-        extractKMLData(kml);
-    }
-
-    async function extractKMLData(kml){
-        //console.log(kml);
-        //let response = await fetchKMLFile(fileName);
-        //let kml = response.data;
-        let kmlArrayData = putKMLDataInArray(kml);
-        console.log(kmlArrayData);
-        let latlonBox = kmlArrayData[0];
-        let rotation = 0;
-        console.log(latlonBox);
-        if (typeof latlonBox.rotation !== 'undefined'){
-            rotation = latlonBox.rotation;
+    const runDataConversion = () => {
+        if (typeof DataConversion === 'function') {
+            const result = DataConversion(mapDataDebug);
+            setOutputDebug(result);
         }
-        setMapDataDebug({...mapDataDebug, north: latlonBox.north, west: latlonBox.west, south: latlonBox.south, east: latlonBox.east, rotation: rotation });
-        console.log("setMapDataDebug");
-        console.log(mapDataDebug);
-        //sendMapInfo("update");
-    }
+    };
 
-    function putKMLDataInArray(kmlData){
-        const parser = new XMLParser();
-        const options = {
-            attributeNamePrefix: '',
-            ignoreAttributes: false,
-            ignoreNameSpace: false,
-            parseNodeValue: true,
-            parseAttributeValue: true,
-            trimValues: true
-        };
-
-        const result = parser.parse(kmlData, options);
-        console.log(result);
-        let latLonBox = result.kml.Document.Folder.GroundOverlay.LatLonBox;
-        let href = result.kml.Document.Folder.GroundOverlay.Icon.href;
-        console.log(latLonBox.rotation);
-        console.log(latLonBox);
-        console.log(href);
-        return [latLonBox, href];
+    const extractKMLData = (xmlData) => {
+        try {
+            const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_' });
+            const parsed = parser.parse(xmlData);
+            const placemarks = parsed?.kml?.Document?.Folder?.Placemark ?? [];
+            const arr = Array.isArray(placemarks) ? placemarks : [placemarks];
+            return arr.map((pm) => ({
+                name: pm.name,
+                coordinates: pm.Point?.coordinates ?? pm.LineString?.coordinates ?? '',
+            }));
+        } catch (e) {
+            setError('Error parsing KML');
+            return [];
+        }
     };
 
     const handleFileUpload = (event) => {
         const file = event.target.files[0];
+        if (!file) return;
         const reader = new FileReader();
-        reader.onload = (event) => {
-        const xml = event.target.result;
-            console.log(xml);
+        reader.onload = (e) => {
+            const result = extractKMLData(e.target.result);
+            kmlData.push(...result);
+            setMapDataDebug(result);
         };
         reader.readAsText(file);
-      };
+    };
 
-    useEffect( () => {
-        fetchDebugSettings().then(r => {
+    useEffect(() => {
+        fetchDebugSettings().then((r) => {
             setDebugSettingsData(r);
-            setCheckboxes(r);
+            setLoading(false);
         });
-        setLoading(false);
-    }, []);
+    }, [fetchDebugSettings]);
 
-    if(loading){
-        return <div className={styles['loading-text']}>Loading Data... Please Wait...</div>
+    if (loading) {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+                <CircularProgress />
+            </Box>
+        );
     }
 
     return (
-        <form className={styles['info-form']}>
-                <label className={styles['info-label']} htmlFor="debug2Serial">Serial</label>
-                <Checkbox id='1' parentCallback={handleCheckBoxChange} disabled={false} name="debug2Serial" labelname="" defaultChecked={debugSettingsData.debug2Serial}/>
-                <label className={styles['info-label']} htmlFor="debugGPS2Serial">GPS2Serial</label>  
-                <Checkbox id='2' parentCallback={handleCheckBoxChange} disabled={false} name="debugGPS2Serial" labelname="" defaultChecked={debugSettingsData.debugGPS2Serial}/>
-                <label className={styles['info-label']} htmlFor="debugHaptic">Haptic</label> 
-                <Checkbox id='3' parentCallback={handleCheckBoxChange} disabled={false} name="debugHaptic" labelname="" defaultChecked={debugSettingsData.debugHaptic}/>
-                <label className={styles['info-label']} htmlFor="fileList">Files:</label>
-                <button className={styles['apply-button']} onClick={listFilesButton} type="button"> List files </button>
-                <button className={styles['apply-button']} onClick={applyChanges} type="button"> Apply Changes </button>
-            <div className={styles['empty-grid-space-4']}/>
-            <div className={styles['error-message']}>
-                {(error !== "") ? (
-                    <div className={styles['error']}>{error}</div>
-                ) : ((success !== "") ? (
-                    <div className={styles['success']}>{success}</div>
-                ) : (
-                    <div className={styles['no-error']}></div>
-                    )
-                )}
-            </div>
-            
-            <h3>Debugging input fields for testing functions</h3>
-            <br/>
-                <label className={styles['info-label']} htmlFor="Radius">Radius (m)</label>
-                <input className={styles['info-input']} name="Radius" type="text" id="Radius" defaultValue={mapDataDebug.radius} onChange={handleInputUpdate} />           
-                
-                <label className={styles['info-label']} htmlFor="North">North</label>
-                <input className={styles['info-input']} name="North" type="text" id="North" defaultValue={mapDataDebug.north} onChange={handleInputUpdate} />  
-
-                <label className={styles['info-label']} htmlFor="West">West</label>
-                <input className={styles['info-input']} name="West" type="text" id="West" defaultValue={mapDataDebug.west} onChange={handleInputUpdate} />  
-
-                <label className={styles['info-label']} htmlFor="South">South</label>
-                <input className={styles['info-input']} name="South" type="text" id="South" defaultValue={mapDataDebug.south} onChange={handleInputUpdate} />  
-
-                <label className={styles['info-label']} htmlFor="East">East</label>
-                <input className={styles['info-input']} name="East" type="text" id="East" defaultValue={mapDataDebug.east} onChange={handleInputUpdate} />  
-
-                <label className={styles['info-label']} htmlFor="Rotation">Rotation</label>
-                <input className={styles['info-input']} name="Rotation" type="text" id="Rotation" defaultValue={mapDataDebug.rotation} onChange={handleInputUpdate} />  
-
-                <label className={styles['info-label']} htmlFor="ImageHeigt">ImageHeigt</label>
-                <input className={styles['info-input']} name="ImageHeigt" type="text" id="ImageHeigt" defaultValue={mapDataDebug.imageHeight} onChange={handleInputUpdate} />  
-
-                <label className={styles['info-label']} htmlFor="ImageWidth">ImageWidth</label>
-                <input className={styles['info-input']} name="ImageWidth" type="text" id="ImageWidth" defaultValue={mapDataDebug.imageWidth} onChange={handleInputUpdate} />  
-
-                {/* <label className={styles['info-label']} htmlFor="MapSouth">MapSouth</label>
-                <input className={styles['info-input']} name="MapSouth" type="text" id="MapSouth" defaultValue={mapDataDebug.} onChange={handleInputUpdate} />   */}
-                <h4>Output</h4>
-                <div className={styles['empty-grid-space-1']}/>
-                <label className={styles['info-label']} htmlFor="Legs0">Legs[0]</label>
-                <label className={styles['valueRO']} htmlFor="Legs0">{outputDebug.outLegs0}</label>
-                
-                <label className={styles['info-label']} htmlFor="Legs1">Legs[1]</label>
-                <label className={styles['valueRO']} htmlFor="Legs1">{outputDebug.outlegs1}</label>
-
-                <label className={styles['info-label']} htmlFor="ScaleHeight">ScaleHeight</label>
-                <label className={styles['valueRO']} htmlFor="ScaleHeight">{outputDebug.scaleHeight}</label>
-
-                <label className={styles['info-label']} htmlFor="ScaleWidth">ScaleWidth</label>
-                <label className={styles['valueRO']} htmlFor="ScaleWidth">{outputDebug.scaleWidth}</label>
-                <button className={styles['apply-button']} onClick={runDataConversion} type="button"> Calculate </button>
-                <div>
-                <input type="file" onChange={handleFileUpload} />
-                {kmlData && <pre>{JSON.stringify(kmlData, null, 2)}</pre>}
-                </div>
-
-                {/* <button className={styles['apply-button']} onClick={getKMLFile} type="button"> Get KML File </button> */}
-                    {/* //let output = [legs[0], legs[1], ScaleHeight, ScaleWidth]; */}
-        </form>
+        <Box component="form">
+            <Typography variant="h6" gutterBottom>Debug Settings</Typography>
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid item xs={12} sm={4}>
+                    <FormControlLabel
+                        label="Debug to Serial"
+                        control={
+                            <Checkbox
+                                name="debug2Serial"
+                                defaultChecked={!!debugSettingsData.debug2Serial}
+                                onChange={(e) => handleCheckBoxChange(e.target)}
+                            />
+                        }
+                    />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                    <FormControlLabel
+                        label="GPS Debug to Serial"
+                        control={
+                            <Checkbox
+                                name="debugGPS2Serial"
+                                defaultChecked={!!debugSettingsData.debugGPS2Serial}
+                                onChange={(e) => handleCheckBoxChange(e.target)}
+                            />
+                        }
+                    />
+                </Grid>
+                <Grid item xs={12} sm={4}>
+                    <FormControlLabel
+                        label="Debug Haptic"
+                        control={
+                            <Checkbox
+                                name="debugHaptic"
+                                defaultChecked={!!debugSettingsData.debugHaptic}
+                                onChange={(e) => handleCheckBoxChange(e.target)}
+                            />
+                        }
+                    />
+                </Grid>
+            </Grid>
+            <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+                <Button variant="contained" onClick={applyChanges} type="button">Apply Changes</Button>
+            </Stack>
+            <Divider sx={{ my: 2 }} />
+            <Typography variant="subtitle1" gutterBottom>KML / File Tools</Typography>
+            <Stack spacing={2} sx={{ mb: 2 }}>
+                <Button variant="outlined" component="label" type="button">
+                    Upload KML File
+                    <input type="file" hidden accept=".kml" onChange={handleFileUpload} />
+                </Button>
+                <Stack direction="row" spacing={2}>
+                    <Button variant="outlined" onClick={listFilesButton} type="button">List Files</Button>
+                    <Button variant="outlined" onClick={runDataConversion} type="button">Run Data Conversion</Button>
+                </Stack>
+            </Stack>
+            {mapDataDebug && Object.keys(mapDataDebug).length > 0 && (
+                <Box sx={{ mt: 2 }}>
+                    <Typography variant="subtitle2">Output:</Typography>
+                    <Box
+                        component="pre"
+                        sx={{ fontSize: 12, p: 1, bgcolor: 'action.hover', borderRadius: 1, overflow: 'auto' }}
+                    >
+                        {JSON.stringify(mapDataDebug, null, 2)}
+                    </Box>
+                </Box>
+            )}
+            {error && <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert>}
+            {success && <Alert severity="success" sx={{ mt: 1 }}>{success}</Alert>}
+        </Box>
     );
 }

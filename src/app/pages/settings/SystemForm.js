@@ -1,105 +1,71 @@
-import React, {useContext, useEffect, useState} from 'react';
-import {useForm} from 'react-hook-form';
-import axios from 'axios';
-import styles from '../../styles/pages/InputForm.module.css';
-import {CommsContext} from "../../contexts/CommsContext";
-import Checkbox from "../components/CheckBox";
-import Button from "../components/Button";
+import React, { useContext, useEffect, useState } from 'react';
+import { Alert, Box, Button, CircularProgress, Grid, TextField, Typography } from '@mui/material';
+import { CommsContext } from '../../contexts/CommsContext';
 
-export default function SystemForm({}) {
-    const [time, setTime] = useState(Date.now());
-    const DATEFORMAT = 'yyyy-MM-dd';
-    const {storeData, fetchSensorData, getServerHost, setHome} = useContext(CommsContext);
+function ReadOnlyField({ label, value }) {
+    return (
+        <Grid item xs={12} sm={6}>
+            <TextField
+                label={label}
+                value={value ?? ''}
+                disabled
+                fullWidth
+                size="small"
+                variant="filled"
+                InputLabelProps={{ shrink: true }}
+            />
+        </Grid>
+    );
+}
+
+export default function SystemForm() {
+    const { fetchSensorData, setHome } = useContext(CommsContext);
     const [loading, setLoading] = useState(true);
-    const {register, handleSubmit, formState: { errors } } = useForm();
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
-    const [readOnly, setReadOnly] = useState(true);
-    const [sensorData, setSensorData ] = useState({magBiasX:""});
-    let newFaultTemp = {};
-    let timeDelay = 1000;
+    const [sensorData, setSensorData] = useState({ magBiasX: '' });
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
 
-    const handleButton = (event) => {
-        console.log(event);
-        if (event === "setHome") {
-            setHome();
-        }
-    }
-
-    useEffect( () => {
+    useEffect(() => {
         const interval = setInterval(() => {
-            fetchSensorData().then(r => {
-                setSensorData(r);
-            });
-        }, timeDelay);
+            fetchSensorData().then((r) => setSensorData(r));
+        }, 1000);
         setLoading(false);
-        return () => {
-            clearInterval(interval);
-        };
-      }, [timeDelay, fetchSensorData]);
+        return () => clearInterval(interval);
+    }, [fetchSensorData]);
 
-    if(loading){
-        return <div className={styles['loading-text']}>Loading Data... Please Wait...</div>
+    if (loading) {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+                <CircularProgress />
+            </Box>
+        );
     }
 
     return (
-        <form className={styles['info-form']} >
-            <label className={styles['info-label']} htmlFor="nrOfSatellites">Number of Sats.:</label>
-            <input className={styles['ROdata']} name="nrOfSatellites" type="text" id="nrOfSatellites" defaultValue={sensorData.nrOfSatellites} disabled/>
-
-            <label className={styles['info-label']} htmlFor="currentPositionLat">Current Position Lat:</label>
-            <input className={styles['ROdata']} name="currentPositionLat" type="text" id="currentPositionLat" defaultValue={sensorData.ownLat} disabled/>
-
-            <label className={styles['info-label']} htmlFor="currentPositionLon">Current Position Lon:</label>
-            <input className={styles['ROdata']} name="currentPositionLon" type="text" id="currentPositionLon" defaultValue={sensorData.ownLon} disabled/>
-
-            <label className={styles['info-label']} htmlFor="compassHeading">Compass Heading:</label>
-            <input className={styles['ROdata']} name="compassHeading" type="text" id="compassHeading" defaultValue={sensorData.compassHeading} disabled/>
-
-            <label className={styles['info-label']} htmlFor="compassCardinal">Compass Cardinal Hdg:</label>
-            <input className={styles['ROdata']} name="compassCardinal" type="text" id="compassCardinal" defaultValue={sensorData.compassCardinal} disabled/>  
-
-            <label className={styles['info-label']} htmlFor="homeBaseLat">Homebase Lat:</label>
-            <input className={styles['ROdata']} name="homeBaseLat" type="text" id="homeBaseLat" defaultValue={sensorData.homeBaseLat} disabled/>
-
-            <label className={styles['info-label']} htmlFor="homeBaseLon">Homebase Lon:</label>
-            <input className={styles['ROdata']} name="homeBaseLon" type="text" id="homeBaseLon" defaultValue={sensorData.homeBaseLon} disabled/>
-
-            <label className={styles['info-label']} htmlFor="homeBaseBearing">Homebase bearing:</label>
-            <input className={styles['ROdata']} name="homeBaseBearing" type="text" id="homeBaseBearing" defaultValue={sensorData.homeBaseBearing} disabled/>
-
-            <label className={styles['info-label']} htmlFor="homeBaseCardinal">Homebase direction:</label>
-            <input className={styles['ROdata']} name="homeBaseCardinal" type="text" id="homeBaseCardinal" defaultValue={sensorData.homeBaseCardinal} disabled/>
-
-            <label className={styles['info-label']} htmlFor="homeBaseDistance">Homebase distance:</label>
-            <input className={styles['ROdata']} name="homeBaseDistance" type="text" id="homeBaseDistance" defaultValue={sensorData.homeBaseDistance} disabled/>
-
-            <label className={styles['info-label']} htmlFor="wayPointLat">Current Waypoint Lat:</label>
-            <input className={styles['ROdata']} name="wayPointLat" type="text" id="wayPointLat" defaultValue={sensorData.wayPointLat} disabled/>
-
-            <label className={styles['info-label']} htmlFor="wayPointLon">Current Waypoint Lon:</label>
-            <input className={styles['ROdata']} name="wayPointLon" type="text" id="wayPointLon" defaultValue={sensorData.wayPointLon} disabled/>
-
-            <label className={styles['info-label']} htmlFor="waypointBearing">Waypoint bearing:</label>
-            <input className={styles['ROdata']} name="waypointBearing" type="text" id="wayPointBearing" defaultValue={sensorData.wayPointBearing} disabled/>
-
-            <label className={styles['info-label']} htmlFor="wayPointCardinal">Waypoint direction:</label>
-            <input className={styles['ROdata']} name="wayPointCardinal" type="text" id="wayPointCardinal" defaultValue={sensorData.wayPointCardinal} disabled/>
-
-            <label className={styles['info-label']} htmlFor="wayPointDistance">Waypoint distance:</label>
-            <input className={styles['ROdata']} name="wayPointDistance" type="text" id="wayPointDistance" defaultValue={sensorData.wayPointDistance} disabled/>
-        
-            <Button buttonText='Set Home' parentCallback={handleButton} buttonName="setHome" styleName='add-button'/>
-            <div className={styles['error-message']}>
-                {(error !== "") ? (
-                    <div className={styles['error']}>{error}</div>
-                ) : ((success !== "") ? (
-                    <div className={styles['success']}>{success}</div>
-                ) : (
-                    <div className={styles['no-error']}></div>
-                    )
-                )}
-            </div>
-        </form>
+        <Box component="form">
+            <Typography variant="h6" gutterBottom>System Info</Typography>
+            <Grid container spacing={2} sx={{ mb: 2 }}>
+                <ReadOnlyField label="Number of Satellites" value={sensorData.nrOfSatellites} />
+                <ReadOnlyField label="Current Position Lat" value={sensorData.ownLat} />
+                <ReadOnlyField label="Current Position Lon" value={sensorData.ownLon} />
+                <ReadOnlyField label="Compass Heading" value={sensorData.compassHeading} />
+                <ReadOnlyField label="Compass Cardinal Heading" value={sensorData.compassCardinal} />
+                <ReadOnlyField label="Homebase Lat" value={sensorData.homeBaseLat} />
+                <ReadOnlyField label="Homebase Lon" value={sensorData.homeBaseLon} />
+                <ReadOnlyField label="Homebase Bearing" value={sensorData.homeBaseBearing} />
+                <ReadOnlyField label="Homebase Direction" value={sensorData.homeBaseCardinal} />
+                <ReadOnlyField label="Homebase Distance" value={sensorData.homeBaseDistance} />
+                <ReadOnlyField label="Waypoint Lat" value={sensorData.wayPointLat} />
+                <ReadOnlyField label="Waypoint Lon" value={sensorData.wayPointLon} />
+                <ReadOnlyField label="Waypoint Bearing" value={sensorData.wayPointBearing} />
+                <ReadOnlyField label="Waypoint Direction" value={sensorData.wayPointCardinal} />
+                <ReadOnlyField label="Waypoint Distance" value={sensorData.wayPointDistance} />
+            </Grid>
+            <Button variant="contained" onClick={() => setHome()} type="button" sx={{ mb: 2 }}>
+                Set Home
+            </Button>
+            {error && <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert>}
+            {success && <Alert severity="success" sx={{ mt: 1 }}>{success}</Alert>}
+        </Box>
     );
 }

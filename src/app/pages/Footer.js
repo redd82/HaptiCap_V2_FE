@@ -1,49 +1,41 @@
-import React, { useContext,useState, useEffect } from "react";
-import '../styles/Footer.css';
-import styles from '../styles/Content.module.css';
-import {CommsContext} from "../contexts/CommsContext";
+import React, { useContext, useEffect, useState } from 'react';
+import { Box, Paper, Stack, Typography } from '@mui/material';
+import { CommsContext } from '../contexts/CommsContext';
 
-export default function Footer(props){
-    const {storeData, fetchTimeDate, fetchPosition} = useContext(CommsContext);
+export default function Footer() {
+    const { fetchTimeDate } = useContext(CommsContext);
     const [espTimeDate, setEspTimeDate] = useState({});
-    const [espGPSPosition, setGPSPosition] = useState({GPSLat: 0.00000000, GPSLon: 0.00000000});
-    let tempTime = {GPSTime: '', GPSDate: ''};
-    let timeDelayMin = 60000;
-    let timeDelaySec = 5000;
 
-    useEffect( () => {
-        fetchTimeDate().then(r => {
-            setEspTimeDate(r);
+    useEffect(() => {
+        fetchTimeDate().then((response) => {
+            setEspTimeDate(response);
         });
-      
-        }, []);
+    }, [fetchTimeDate]);
 
     useEffect(() => {
         const interval = setInterval(() => {
-            fetchTimeDate().then(r => {
-                setEspTimeDate(r);
+            fetchTimeDate().then((response) => {
+                setEspTimeDate(response);
             });
-            // fetchPosition().then(r => {
-            //     setGPSPosition(r);
-            // });
-        }, timeDelayMin);
+        }, 60000);
+
         return () => {
             clearInterval(interval);
         };
-        }, []);
+    }, [fetchTimeDate]);
 
-    return(
-        <footer className="footer">
-            <table className={styles['standard-table']}>
-                <tbody>
-                    <tr>
-                        <td className={styles['standard-td-15']}>Date:<br/>{espTimeDate.GPSDate}</td>
-                        <td className={styles['standard-td-5']}>Time:<br/>{espTimeDate.GPSTime}</td>
-                        <td className={styles['standard-td-10']}></td>
-                        <td className={styles['standard-td-10']}></td>
-                    </tr>
-                </tbody>
-            </table>
-        </footer>
+    return (
+        <Box component="footer" sx={{ px: { xs: 1.5, md: 3 }, pb: 2 }}>
+            <Paper sx={{ px: 2, py: 1.25 }}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                    <Typography variant="body2" color="text.secondary">
+                        Date: {espTimeDate.GPSDate || '--'}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        Time: {espTimeDate.GPSTime || '--'}
+                    </Typography>
+                </Stack>
+            </Paper>
+        </Box>
     );
 }
