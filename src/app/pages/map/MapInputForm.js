@@ -65,7 +65,7 @@ export default function MapInputForm({map, newMap}) {
             try {
                 setSuccess("Uploading file....");
                 setLoading(true);
-                const response = await axios.post(serverHost + '/file-upload', formData, {
+                const response = await axios.post(serverHost + '/upload-file', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
@@ -206,11 +206,27 @@ export default function MapInputForm({map, newMap}) {
 
     async function useSelectedMap() {
         const response = await requestMap(mapData, kmlUploaded);
-        //console.log(response[0].data);
-        setMapData(response[0].data);
-        setHomeToUseMap(response[0].data);
-        setSuccess(response[1]);
-        setError(response[2]);
+        const selectedMapData = response?.[0]?.data;
+        const fallbackMapData = (mapData && mapData.pngFile) ? mapData : null;
+        const resolvedMapData = (selectedMapData && selectedMapData.pngFile) ? selectedMapData : fallbackMapData;
+
+        if (!resolvedMapData) {
+            const backendError = response?.[2] || selectedMapData?.message || selectedMapData?.error;
+            setError(backendError || "Map payload is incomplete (missing pngFile).");
+            setSuccess("");
+            return;
+        }
+
+        setMapData(resolvedMapData);
+        setHomeToUseMap(resolvedMapData);
+        if (!selectedMapData || !selectedMapData.pngFile) {
+            const backendError = response?.[2] || selectedMapData?.message || selectedMapData?.error;
+            setError(backendError || "");
+            setSuccess("Loaded map using local data.");
+        } else {
+            setSuccess(response[1]);
+            setError(response[2]);
+        }
         setUseMap(true);
     }
 

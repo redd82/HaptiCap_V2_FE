@@ -2,7 +2,7 @@ import React, {useCallback, useContext, useEffect, useState, useRef} from 'react
 import { IconContext } from "react-icons";
 import { SiArchlinux } from "react-icons/si";
 import stylesMap from '../../styles/pages/UseMap.module.css';
-import { Box, Button, Paper, Stack } from '@mui/material';
+import { Alert, Box, Button, Paper, Stack } from '@mui/material';
 import { useLocation} from "react-router-dom";
 import PositionModal from './components/PositionModal';
 import MessageModal from './components/MessageModal';
@@ -14,7 +14,7 @@ export default function UseMap(){
   const {getServerHost, fetchPositionCompassHeading} = useContext(CommsContext);
     const {onLoad, getLatLongFromXY,getXYFromLatLon} = useContext(CalculationContext);
     const location = useLocation();
-    const { mapData } = location.state;
+    const mapData = location?.state?.mapData;
     const [enableAddWaypoints, setEnableAddWaypoints] = useState(false);
     const [enableWaypointOptions, setEnableWaypointOptions] = useState(true);
     const [ownPosition, setOwnPosition] = useState({GPSLat: 0.00000000, GPSLon: 0.00000000});
@@ -125,6 +125,9 @@ export default function UseMap(){
       }
 
       useEffect( () => {
+        if(!mapData){
+          return;
+        }
         onLoad(mapData);
         fetchPositionCompassHeading().then(r => {
           if(r.GPSLat === 0){
@@ -139,6 +142,9 @@ export default function UseMap(){
     }, []);
 
     useEffect(() => {
+      if(!mapData){
+        return;
+      }
       const interval = setInterval(() => {
         fetchPositionCompassHeading().then(r => {
           if(r.GPSLat === 0){
@@ -163,6 +169,20 @@ export default function UseMap(){
     const noGpsModalPosition = topLeftPosition.current
       ? { top: topLeftPosition.current.height / 2, left: topLeftPosition.current.width / 2 }
       : { top: 100, left: 100 };
+
+    if(!mapData){
+      return (
+        <Alert severity="error">No map selected. Please go back to Map List and select a map.</Alert>
+      );
+    }
+
+    if(!mapData.pngFile){
+      return (
+        <Alert severity="error">Selected map has no image file (pngFile missing).</Alert>
+      );
+    }
+
+    const mapImageSrc = getServerHost() + mapData.pngFile;
 
     return(
       <Box id="useMap" sx={{ position: 'relative' }}>
@@ -193,7 +213,7 @@ export default function UseMap(){
           </Button>
           {(enableAddWaypoints) ? (
             <ImageMarker
-              src={getServerHost() + mapData.pngFile}
+              src={mapImageSrc}
               markers={markers}
               onAddMarker={((marker) => setMarkers((prev) => [...prev, marker]))}
               markerComponent={CustomMarker}
@@ -202,7 +222,7 @@ export default function UseMap(){
             <div className={stylesMap['map-overlay']} onClick={getClickCoords}>
                 <ImageMarker
                   id="marker"
-                  src={getServerHost() + mapData.pngFile}
+                  src={mapImageSrc}
                   markers={markers}
                   markerComponent={CustomMarker}
                 />
