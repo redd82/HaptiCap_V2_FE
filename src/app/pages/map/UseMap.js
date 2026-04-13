@@ -19,17 +19,19 @@ export default function UseMap(){
     const [enableWaypointOptions, setEnableWaypointOptions] = useState(true);
     const [ownPosition, setOwnPosition] = useState({GPSLat: 0.00000000, GPSLon: 0.00000000});
     const [iconPos, setIconPos] = useState({top: 0, left: 0});
+    const [iconRotation, setIconRotation] = useState(0);
     const [showModalOwnPosition, setShowModalOwnPosition] = useState(false);
     const [modalPosition, setModalPosition] = useState({top: 0, left: 0});
     const [noGPSFix, setNoGPSFix] = useState(false);
     const topLeftPosition = useRef(null);
+    const markerRef = useRef(null);
+    const latestPositionData = useRef(null);
+    const frameRef = useRef(null);
+    const renderedIconRef = useRef({top: null, left: null, rotation: null});
 
     const [markers, setMarkers] = useState([]);
     const timeDelaySec = 1000;
-
-    const getSizes = useCallback(() => {
-      topLeftPosition.current = getMapTopLeftPosition();
-    }, []);
+    const iconUpdateDeadbandPx = 0.5;
 
     const CustomMarker = (props) => {
         return (
@@ -55,28 +57,38 @@ export default function UseMap(){
 
     const getClickCoords = (event) => {
       const topLeftOfMap = topLeftPosition.current;
+      if(!topLeftOfMap){
+        return;
+      }
         if(event.detail === 1){
           mapData["imageWidth"] = topLeftOfMap.width;
           mapData["imageHeight"] = topLeftOfMap.height;
-          let temp = getLatLongFromXY(event.pageX - topLeftOfMap.left, event.pageY - topLeftOfMap.top, mapData);
+          let temp = getLatLongFromXY(event.clientX - topLeftOfMap.left, event.clientY - topLeftOfMap.top, mapData);
           console.log("temp: " + temp);
-          console.log("getClickCoords; Output: X:" + (event.pageX - topLeftOfMap.left) + " Y:" + (event.pageY - topLeftOfMap.top));
+          console.log("getClickCoords; Output: X:" + (event.clientX - topLeftOfMap.left) + " Y:" + (event.clientY - topLeftOfMap.top));
         }else{
           console.log(event.detail);
         }
       };
 
-      function getMapTopLeftPosition(){
-        const container = document.getElementById("marker");
+      const getMapTopLeftPosition = useCallback(() => {
+        const container = markerRef.current;
+        if (!container) {
+          return null;
+        }
         const rect = container.getBoundingClientRect();
         return rect;
-      }
+      }, []);
 
-      function setOwnPositionIcon(data){
+      const setOwnPositionIcon = useCallback((data) => {
+        latestPositionData.current = data;
+        topLeftPosition.current = getMapTopLeftPosition();
         const topLeftOfMap = topLeftPosition.current;
-        let XY = getXYFromLatLon(data.GPSLat, data.GPSLon, mapData, topLeftOfMap.width, topLeftOfMap.height, topLeftOfMap);
-        let scale = topLeftOfMap.height/mapData.imageHeight;
-        let iconSize = Math.round(scale * 25);
+        if (!topLeftOfMap) {
+          return;
+        }
+
+        let XY = getXYFromLatLon(data.GPSLat, data.GPSLon, mapData, topLeftOfMap.width, topLeftOfMap.height);
 
         if(XY.x < 0){
           XY.x = 0;
@@ -86,15 +98,33 @@ export default function UseMap(){
           XY.y = 0;
         }
 
-        setIconPos({top: XY.y, left: XY.x});
-        document.documentElement.style.setProperty('--own-pos-icon-rotation', (Math.round((convertIconRotation(data.CompassHeading))) + "deg"));
-        document.documentElement.style.setProperty('--own-pos-icon-size', iconSize + "px");
-        document.documentElement.style.setProperty('--own-pos-top', (XY.y-10) + "px");
-        document.documentElement.style.setProperty('--own-pos-left', (XY.x-3) + "px");
-        if(showModalOwnPosition){
-          setModalPosition(iconPos);
+        if(XY.x > topLeftOfMap.width){
+          XY.x = topLeftOfMap.width;
         }
-      }
+
+        if(XY.y > topLeftOfMap.height){
+          XY.y = topLeftOfMap.height;
+        }
+
+        const nextRotation = Math.round(convertIconRotation(data.CompassHeading));
+        const previous = renderedIconRef.current;
+        const movedEnough =
+          previous.top === null ||
+          previous.left === null ||
+          Math.abs(previous.top - XY.y) >= iconUpdateDeadbandPx ||
+          Math.abs(previous.left - XY.x) >= iconUpdateDeadbandPx ||
+          previous.rotation !== nextRotation;
+
+        if(movedEnough){
+          setIconPos({top: XY.y, left: XY.x});
+          setIconRotation(nextRotation);
+          renderedIconRef.current = {top: XY.y, left: XY.x, rotation: nextRotation};
+        }
+
+        if(showModalOwnPosition){
+          setModalPosition({top: XY.y, left: XY.x});
+        }
+      }, [getMapTopLeftPosition, getXYFromLatLon, mapData, showModalOwnPosition, iconUpdateDeadbandPx]);
 
       function convertIconRotation(heading){
         let rotation = 45;
@@ -136,10 +166,9 @@ export default function UseMap(){
             setNoGPSFix(false);
           }
           setOwnPosition(r);
-          topLeftPosition.current = getMapTopLeftPosition();
           setOwnPositionIcon(r);
       });
-    }, []);
+    }, [fetchPositionCompassHeading, mapData, onLoad, setOwnPositionIcon]);
 
     useEffect(() => {
       if(!mapData){
@@ -159,12 +188,58 @@ export default function UseMap(){
       return () => {
           clearInterval(interval);
       };
-      }, []);
+      }, [fetchPositionCompassHeading, mapData, setOwnPositionIcon]);
 
     useEffect(() => {
-      window.addEventListener("resize", getSizes, false);
-      return () => window.removeEventListener("resize", getSizes, false);
-    }, [getSizes]);
+      if(!mapData || !markerRef.current){
+        return;
+      }
+
+      topLeftPosition.current = getMapTopLeftPosition();
+      if (typeof ResizeObserver === 'undefined') {
+        return;
+      }
+
+      const observer = new ResizeObserver(() => {
+        topLeftPosition.current = getMapTopLeftPosition();
+        if(latestPositionData.current){
+          setOwnPositionIcon(latestPositionData.current);
+        }
+      });
+
+      observer.observe(markerRef.current);
+
+      return () => observer.disconnect();
+    }, [mapData, setOwnPositionIcon, getMapTopLeftPosition]);
+
+    useEffect(() => {
+      if(!mapData){
+        return;
+      }
+
+      const requestReposition = () => {
+        if(frameRef.current || !latestPositionData.current){
+          return;
+        }
+
+        frameRef.current = window.requestAnimationFrame(() => {
+          frameRef.current = null;
+          setOwnPositionIcon(latestPositionData.current);
+        });
+      };
+
+      window.addEventListener('scroll', requestReposition, { passive: true });
+      window.addEventListener('resize', requestReposition);
+
+      return () => {
+        window.removeEventListener('scroll', requestReposition);
+        window.removeEventListener('resize', requestReposition);
+        if(frameRef.current){
+          window.cancelAnimationFrame(frameRef.current);
+          frameRef.current = null;
+        }
+      };
+    }, [mapData, setOwnPositionIcon]);
 
     const noGpsModalPosition = topLeftPosition.current
       ? { top: topLeftPosition.current.height / 2, left: topLeftPosition.current.width / 2 }
@@ -202,7 +277,7 @@ export default function UseMap(){
           </Stack>
         </Paper>) : (<></>)}
 
-        <Box id="marker" sx={{ position: 'relative' }}>
+        <Box id="marker" ref={markerRef} sx={{ position: 'relative' }}>
           <Button
             variant="contained"
             size="small"
@@ -221,21 +296,28 @@ export default function UseMap(){
           ) : (
             <div className={stylesMap['map-overlay']} onClick={getClickCoords}>
                 <ImageMarker
-                  id="marker"
                   src={mapImageSrc}
                   markers={markers}
                   markerComponent={CustomMarker}
                 />
             </div>
           )}
-          </Box>
           <IconContext.Provider value={{ color: "blue", className: "global-class-name", size: "0.4em"}}>
-            <div className={stylesMap['own-position-icon-custom']} onClick={clickOwnPos}>
+            <div
+              className={stylesMap['own-position-icon-custom']}
+              style={{
+                top: iconPos.top - 10,
+                left: iconPos.left - 3,
+                transform: `rotate(${iconRotation}deg)`,
+              }}
+              onClick={clickOwnPos}
+            >
               <SiArchlinux />
             </div>
           </IconContext.Provider>
-            {(showModalOwnPosition)? (<PositionModal position={modalPosition} text={[ownPosition.GPSLat, ownPosition.GPSLon]}/>) : (<></>)}
-            {(noGPSFix) ? (<MessageModal position={noGpsModalPosition} text={["No GPS FIX"]}/>) : (<></>)}
+          {(showModalOwnPosition)? (<PositionModal position={modalPosition} text={[ownPosition.GPSLat, ownPosition.GPSLon]}/>) : (<></>)}
+          {(noGPSFix) ? (<MessageModal position={noGpsModalPosition} text={["No GPS FIX"]}/>) : (<></>)}
+          </Box>
       </Box>
     );
 }

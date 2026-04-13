@@ -1,25 +1,44 @@
-import React, { useContext, useEffect, useState } from "react";
-import styles from'../styles/Content.module.css';
+import React, { useContext, useEffect } from "react";
 import { StoreContext } from "../contexts/StoreContext";
-import MapsContextProvider from "../contexts/MapsContext";
-import {NavLink, Outlet, useLocation, useNavigate} from "react-router-dom";
-import UseMap from "./map/UseMap";
+import { useNavigate } from "react-router-dom";
+import { MapsContext } from "../contexts/MapsContext";
 
 
 export default function Home({title}){
-    const {getLoadedMapData} = useContext(StoreContext);
-    const [ mapData, setMapData ] = useState({});
+    const { getLoadedMapData, setHomeToUseMap } = useContext(StoreContext);
+    const { fetchMapList } = useContext(MapsContext);
     const navigate = useNavigate();
-    // const location = useLocation();
-    //const { mapData } = location.state;
 
     useEffect( () => {
-        setMapData(getLoadedMapData());
-        console.log(getLoadedMapData()); 
-        if(getLoadedMapData()){
-            navigate("../use-map", { state: { mapData } });
+        let active = true;
+
+        async function openFirstMap() {
+            const loadedMapData = getLoadedMapData();
+            if (loadedMapData && loadedMapData.pngFile) {
+                navigate("/navigation/use-map", { state: { mapData: loadedMapData }, replace: true });
+                return;
+            }
+
+            const response = await fetchMapList();
+            if (!active) {
+                return;
+            }
+
+            const mapList = response?.data?.maps || [];
+            const firstMap = mapList.find((map) => map && map.pngFile && map.name !== "Click here to add map");
+
+            if (firstMap) {
+                setHomeToUseMap(firstMap);
+                navigate("/navigation/use-map", { state: { mapData: firstMap }, replace: true });
+            }
         }
-        }, []);
+
+        openFirstMap();
+
+        return () => {
+            active = false;
+        };
+    }, [fetchMapList, getLoadedMapData, navigate, setHomeToUseMap]);
 
     return(
         <>
