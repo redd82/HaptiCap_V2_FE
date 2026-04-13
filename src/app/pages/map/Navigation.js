@@ -1,15 +1,11 @@
 import React from 'react';
-import styles from '../../styles/Content.module.css';
+import { Box } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 
 export default function Navigation() {
     return (
-        <div>
-            <main>
-                <div className={styles['outlet-maps']}>
-                    <Outlet />
-                </div>
-            </main>
-        </div>
+        <Box component="main" sx={{ m: 0 }}>
+            <Outlet />
+        </Box>
     );
 }

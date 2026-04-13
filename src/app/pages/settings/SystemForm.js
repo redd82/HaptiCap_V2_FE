@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Alert, Box, Button, CircularProgress, Grid, TextField, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, Grid, TextField, Typography } from '@mui/material';
 import { CommsContext } from '../../contexts/CommsContext';
 
 function ReadOnlyField({ label, value }) {
@@ -22,8 +22,6 @@ export default function SystemForm() {
     const { fetchSensorData, setHome } = useContext(CommsContext);
     const [loading, setLoading] = useState(true);
     const [sensorData, setSensorData] = useState({ magBiasX: '' });
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -64,8 +62,6 @@ export default function SystemForm() {
             <Button variant="contained" onClick={() => setHome()} type="button" sx={{ mb: 2 }}>
                 Set Home
             </Button>
-            {error && <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert>}
-            {success && <Alert severity="success" sx={{ mt: 1 }}>{success}</Alert>}
         </Box>
     );
 }

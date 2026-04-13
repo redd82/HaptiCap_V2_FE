@@ -2,24 +2,20 @@ import React, { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import {
     Alert, Box, Button, Checkbox, CircularProgress, Divider,
-    FormControlLabel, Grid, Stack, TextField, Typography,
+    FormControlLabel, Grid, Stack, Typography,
 } from '@mui/material';
 import { CommsContext } from '../../contexts/CommsContext';
 import { CalculationContext } from '../../contexts/CalculationContext';
-import { MapsContext } from '../../contexts/MapsContext';
-import { DebugContext } from '../../contexts/DebugContext';
 
 export default function DebugInputForm() {
     const { XMLParser } = require('fast-xml-parser');
     const { fetchDebugSettings, getServerHost, listFiles } = useContext(CommsContext);
     const { DataConversion } = useContext(CalculationContext);
-    const { fetchKMLFile } = useContext(MapsContext);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [debugSettingsData, setDebugSettingsData] = useState({});
     const [mapDataDebug, setMapDataDebug] = useState({});
-    const [outputDebug, setOutputDebug] = useState({ outLegs0: 1, outlegs1: 1, scaleHeight: 1, scaleWidth: 1 });
     const [kmlData] = useState([]);
 
     async function applyChanges() {
@@ -54,10 +50,6 @@ export default function DebugInputForm() {
         setDebugSettingsData((prev) => ({ ...prev, [checkBoxValue.name]: checkBoxValue.checked }));
     };
 
-    const handleInputUpdate = (event) => {
-        setDebugSettingsData((prev) => ({ ...prev, [event.target.name]: event.target.value }));
-    };
-
     const listFilesButton = async () => {
         try {
             const result = await listFiles();
@@ -70,7 +62,7 @@ export default function DebugInputForm() {
     const runDataConversion = () => {
         if (typeof DataConversion === 'function') {
             const result = DataConversion(mapDataDebug);
-            setOutputDebug(result);
+            setMapDataDebug(result);
         }
     };
 
