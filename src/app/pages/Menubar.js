@@ -13,12 +13,14 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 import NavigationRoundedIcon from '@mui/icons-material/NavigationRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
+import QrCode2RoundedIcon from '@mui/icons-material/QrCode2Rounded';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const links = [
     { label: 'Home', path: '/', icon: HomeRoundedIcon },
     { label: 'Navigation', path: '/navigation/map-list', icon: NavigationRoundedIcon },
     { label: 'System', path: '/system/system-info', icon: SettingsRoundedIcon },
+    { label: 'TAK', path: '/system/takform', icon: QrCode2RoundedIcon },
 ];
 
 export default function Menubar({ open, onClose }) {
@@ -45,7 +47,7 @@ export default function Menubar({ open, onClose }) {
                         const Icon = item.icon;
                         const isActive = item.path === '/'
                             ? location.pathname === '/'
-                            : location.pathname.startsWith(item.path.split('/').slice(0, 2).join('/'));
+                            : location.pathname.startsWith(item.path);
 
                         return (
                             <ListItemButton

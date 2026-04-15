@@ -11,22 +11,24 @@ export default function CalibrationInputForm() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [calibrating, setCalibrating] = useState(false);
     const [calibrationData, setCalibrationData] = useState({ compassOffset: '' });
 
-    async function sendSettings() {
+    async function sendSettings(overrides = {}) {
         let serverHost = getServerHost();
+        const payloadData = { ...calibrationData, ...overrides };
         let json = JSON.stringify({
-            compassCalibrated: calibrationData.compassCalibrated,
-            compassCalibrationMode: calibrationData.compassCalibrationMode,
-            compassOffset: calibrationData.compassOffset,
-            magOffsetX: calibrationData.magOffsetX, magOffsetY: calibrationData.magOffsetY,
-            magOffsetZ: calibrationData.magOffsetX, magSoftIron: calibrationData.magSoftIron,
-            magScaleFacY: calibrationData.magScaleFacY, magScaleFacZ: calibrationData.magScaleFacZ,
-            gyroBiasX: calibrationData.gyroBiasX, gyroBiasY: calibrationData.gyroBiasY,
-            gyroOffsetX: calibrationData.gyroOffsetX, gyroOffsetY: calibrationData.gyroOffsetY,
-            gyroOffsetZ: calibrationData.gyroOffsetZ, accelOffsetX: calibrationData.accelOffsetX,
-            accelOffsetY: calibrationData.accelOffsetY, accelOffsetZ: calibrationData.accelOffsetZ,
-            accSoftIron: calibrationData.accSoftIron,
+            compassCalibrated: payloadData.compassCalibrated,
+            compassCalibrationMode: payloadData.compassCalibrationMode,
+            compassOffset: payloadData.compassOffset,
+            magOffsetX: payloadData.magOffsetX, magOffsetY: payloadData.magOffsetY,
+            magOffsetZ: payloadData.magOffsetZ, magSoftIron: payloadData.magSoftIron,
+            magScaleFacY: payloadData.magScaleFacY, magScaleFacZ: payloadData.magScaleFacZ,
+            gyroBiasX: payloadData.gyroBiasX, gyroBiasY: payloadData.gyroBiasY,
+            gyroOffsetX: payloadData.gyroOffsetX, gyroOffsetY: payloadData.gyroOffsetY,
+            gyroOffsetZ: payloadData.gyroOffsetZ, accelOffsetX: payloadData.accelOffsetX,
+            accelOffsetY: payloadData.accelOffsetY, accelOffsetZ: payloadData.accelOffsetZ,
+            accSoftIron: payloadData.accSoftIron,
         });
         console.log(json);
         try {
@@ -37,7 +39,6 @@ export default function CalibrationInputForm() {
             setError('');
             setSuccess('');
             if (response.status === 200) {
-                setTimeout(500);
                 setSuccess('Settings changed');
             } else {
                 setError('Error');
@@ -68,18 +69,37 @@ export default function CalibrationInputForm() {
 
     const handleButton = (event) => {
         if (event === 'calibrateCompass') {
-            setCalibrationData((prev) => ({ ...prev, compassCalibrationMode: true }));
-            sendSettings();
+            setCalibrating(true);
+            setSuccess('Compass calibration requested. Move sensor in a figure-8 and keep this page open.');
+            sendSettings({ compassCalibrationMode: true, compassCalibrated: false });
         }
     };
 
     useEffect(() => {
+        let isMounted = true;
         fetchCalData().then((r) => {
+            if (!isMounted) return;
             setCalibrationData(r);
             console.log(r);
             setLoading(false);
         });
-    }, [fetchCalData]);
+
+        const interval = setInterval(() => {
+            fetchCalData().then((data) => {
+                if (!isMounted) return;
+                setCalibrationData(data);
+                if (calibrating && data?.compassCalibrated) {
+                    setCalibrating(false);
+                    setSuccess('Compass calibration completed. New values loaded.');
+                }
+            });
+        }, 1000);
+
+        return () => {
+            isMounted = false;
+            clearInterval(interval);
+        };
+    }, [fetchCalData, calibrating]);
 
     if (loading) {
         return (
@@ -94,7 +114,7 @@ export default function CalibrationInputForm() {
             <TextField
                 label={label}
                 name={name}
-                defaultValue={calibrationData[stateKey] ?? ''}
+                value={calibrationData[stateKey] ?? ''}
                 onChange={handleInputUpdate}
                 fullWidth
                 size="small"
@@ -113,7 +133,7 @@ export default function CalibrationInputForm() {
                         control={
                             <Checkbox
                                 name="compassCalibrated"
-                                defaultChecked={!!calibrationData.compassCalibrated}
+                                checked={!!calibrationData.compassCalibrated}
                                 onChange={(e) => handleCheckBoxChange(e.target)}
                             />
                         }
@@ -136,7 +156,7 @@ export default function CalibrationInputForm() {
             <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
                 <Button variant="contained" onClick={sendSettings} type="button">Apply Changes</Button>
                 <Button variant="outlined" onClick={() => handleButton('calibrateCompass')} type="button">
-                    Calibrate Compass
+                    {calibrating ? 'Calibrating...' : 'Calibrate Compass'}
                 </Button>
             </Stack>
             {error && <Alert severity="error">{error}</Alert>}

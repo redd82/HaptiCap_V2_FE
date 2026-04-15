@@ -7,6 +7,7 @@ const systemTabs = [
     { label: 'Debug', path: '/system/debugform' },
     { label: 'Settings', path: '/system/settingsform' },
     { label: 'Calibration', path: '/system/calibrationform' },
+    { label: 'TAK', path: '/system/takform' },
 ];
 
 export default function System() {
