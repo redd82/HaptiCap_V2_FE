@@ -19,6 +19,7 @@ const links = [
     { label: 'Home', path: '/', icon: HomeRoundedIcon },
     { label: 'Navigation', path: '/navigation/map-list', icon: NavigationRoundedIcon },
     { label: 'System', path: '/system/system-info', icon: SettingsRoundedIcon },
+    { label: 'TAK', path: '/system/tak', icon: SettingsRoundedIcon },
 ];
 
 export default function Menubar({ open, onClose }) {
