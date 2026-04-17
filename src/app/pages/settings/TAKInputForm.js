@@ -230,6 +230,14 @@ export default function TAKInputForm() {
         keyExists: false,
         caExists: false,
         message: '',
+        reconnecting: false,
+        reconnectGivenUp: false,
+        reconnectAttempts: 0,
+        reconnectTotalAttempts: 0,
+        reconnectTotalSuccesses: 0,
+        reconnectLastReason: '',
+        timeSinceDisconnectMs: 0,
+        nextReconnectInMs: 0,
     });
     const [takConfig, setTakConfig] = useState({
         takEnabled: false,
@@ -247,6 +255,12 @@ export default function TAKInputForm() {
         takClientKeyPath: '/certs/tak_client.key',
         takClientP12Path: '/certs/tak_client.p12',
         takTruststoreP12Path: '/certs/truststore-root.p12',
+        takReconnectEnabled: true,
+        takReconnectOnWifiReconnect: true,
+        takReconnectInitialDelayMs: 5000,
+        takReconnectMaxDelayMs: 300000,
+        takReconnectBackoffMultiplier: 1.5,
+        takReconnectMaxDurationMs: 1800000,
     });
 
     function setMessage({ err = '', ok = '' }) {
@@ -290,6 +304,10 @@ export default function TAKInputForm() {
             takServer: String(cfg.takServer || '').trim().replace(/^https?:\/\//i, '').replace(/\/+$/g, ''),
             takTLSServerName: String(cfg.takTLSServerName || '').trim().replace(/^https?:\/\//i, '').replace(/\/+$/g, ''),
             takPort: Number(cfg.takPort) || 8089,
+            takReconnectInitialDelayMs: Math.max(1000, Number(cfg.takReconnectInitialDelayMs) || 5000),
+            takReconnectMaxDelayMs: Math.max(Number(cfg.takReconnectInitialDelayMs) || 5000, Number(cfg.takReconnectMaxDelayMs) || 300000),
+            takReconnectBackoffMultiplier: Math.max(1.1, parseFloat(cfg.takReconnectBackoffMultiplier) || 1.5),
+            takReconnectMaxDurationMs: Math.max(0, Number(cfg.takReconnectMaxDurationMs) || 1800000),
         };
     }
 
@@ -436,6 +454,35 @@ export default function TAKInputForm() {
                 <LabeledField label="Client P12 Path" name="takClientP12Path" value={takConfig.takClientP12Path} onChange={handleInputChange} />
                 <LabeledField label="Truststore P12 Path" name="takTruststoreP12Path" value={takConfig.takTruststoreP12Path} onChange={handleInputChange} />
             </Grid>
+
+            <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>Reconnection Settings</Typography>
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+                <LabeledCheck label="Auto Reconnect Enabled" name="takReconnectEnabled" checked={takConfig.takReconnectEnabled} onChange={handleCheckChange} />
+                <LabeledCheck label="Reconnect on WiFi Reconnect" name="takReconnectOnWifiReconnect" checked={takConfig.takReconnectOnWifiReconnect} onChange={handleCheckChange} />
+                <LabeledField label="Initial Delay (ms)" name="takReconnectInitialDelayMs" value={takConfig.takReconnectInitialDelayMs} onChange={handleInputChange} type="number" />
+                <LabeledField label="Max Delay (ms)" name="takReconnectMaxDelayMs" value={takConfig.takReconnectMaxDelayMs} onChange={handleInputChange} type="number" />
+                <LabeledField label="Backoff Multiplier" name="takReconnectBackoffMultiplier" value={takConfig.takReconnectBackoffMultiplier} onChange={handleInputChange} type="number" />
+                <LabeledField label="Max Reconnect Duration (ms, 0=unlimited)" name="takReconnectMaxDurationMs" value={takConfig.takReconnectMaxDurationMs} onChange={handleInputChange} type="number" />
+            </Grid>
+
+            <Typography variant="h6" gutterBottom sx={{ mt: 1 }}>Reconnection Metrics</Typography>
+            <Typography variant="body2" sx={{ mb: 0.5 }}>
+                Status: {takStatus.reconnecting ? 'Reconnecting...' : takStatus.reconnectGivenUp ? 'Gave up' : 'Idle'}
+                {takStatus.reconnectGivenUp && ` \u2014 ${takStatus.reconnectLastReason}`}
+            </Typography>
+            {takStatus.timeSinceDisconnectMs > 0 && (
+                <Typography variant="body2" sx={{ mb: 0.5 }}>
+                    Time since disconnect: {Math.round(takStatus.timeSinceDisconnectMs / 1000)}s
+                    {takStatus.reconnectAttempts > 0 && ` | Attempts this cycle: ${takStatus.reconnectAttempts}`}
+                    {takStatus.nextReconnectInMs > 0 && ` | Next attempt in: ${Math.round(takStatus.nextReconnectInMs / 1000)}s`}
+                </Typography>
+            )}
+            {takStatus.reconnectLastReason && !takStatus.reconnectGivenUp && (
+                <Typography variant="body2" sx={{ mb: 0.5 }}>Last failure: {takStatus.reconnectLastReason}</Typography>
+            )}
+            <Typography variant="body2" sx={{ mb: 2 }}>
+                Lifetime: {takStatus.reconnectTotalAttempts} attempts | {takStatus.reconnectTotalSuccesses} successes
+            </Typography>
 
             <Stack direction="row" spacing={1.5} sx={{ mb: 2, flexWrap: 'wrap' }}>
                 <Button variant="contained" type="button" onClick={saveConfig} disabled={saving}>
