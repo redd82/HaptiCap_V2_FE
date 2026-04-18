@@ -124,17 +124,16 @@ function getLatLongFromXY(x, y,mapData)
     return latlonDestination;
 }
 
-function getXYFromLatLon(lat, lon, mapData, imageWidth, imageHeight, topLeftPosition){
+function getXYFromLatLon(lat, lon, mapData, imageWidth, imageHeight){
     onLoad(mapData);
-    // console.log({imageWidth, imageHeight});
-    // console.log(topLeftPosition.top);      
+
     const NWLat = LatLonNorthWest[0];
     const NWLng = LatLonNorthWest[1];
     const SELat = LatLonSouthEast[0];
     const SELng = LatLonSouthEast[1];
 
-    const x = (((lon - NWLng) / (SELng - NWLng)) * imageWidth) + topLeftPosition.left;
-    const y = (((NWLat - lat) / (NWLat - SELat)) * imageHeight) + topLeftPosition.top;
+    const x = ((lon - NWLng) / (SELng - NWLng)) * imageWidth;
+    const y = ((NWLat - lat) / (NWLat - SELat)) * imageHeight;
     return { x, y };
 }
   

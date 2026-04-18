@@ -1,10 +1,10 @@
-import React, {createContext, useState} from 'react';
+import React, {createContext, useRef, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 
 export const CommsContext = createContext({});
 export default function CommsContextProvider({ children }) {
-    let serverHost = '';
+    const serverHostRef = useRef('');
     const navigate = useNavigate();
     const [defaultTimeDateData, setDefaultTimeDateData] = useState({GPSTime: '00:00', GPSDate: '00-00-00'});
     const [defaultPositionData, setDefaultPositionData] = useState({GPSLat: 0.00000000, GPSLon: 0.00000000});
@@ -24,7 +24,7 @@ export default function CommsContextProvider({ children }) {
 
     async function fetchSettings() {
         try {
-            const response = await axios.get(serverHost + '/hapticap.json', {
+            const response = await axios.get(getServerHost() + '/hapticap.json', {
                 headers: {
                     "Content-Type": "application/json",
                     
@@ -38,7 +38,7 @@ export default function CommsContextProvider({ children }) {
 
     async function fetchCalData() {
         try {
-            const response = await axios.get(serverHost + '/caldata.json', {
+            const response = await axios.get(getServerHost() + '/caldata.json', {
                 headers: {
                     "Content-Type": "application/json",
                     
@@ -52,7 +52,7 @@ export default function CommsContextProvider({ children }) {
 
     async function fetchDebugSettings() {
         try {
-            const response = await axios.get(serverHost + '/debug.json', {
+            const response = await axios.get(getServerHost() + '/debug.json', {
                 headers: {
                     "Content-Type": "application/json",
                     
@@ -66,7 +66,7 @@ export default function CommsContextProvider({ children }) {
 
     async function fetchData() {
         try {
-            const response = await axios.get(serverHost + '/data.json', {
+            const response = await axios.get(getServerHost() + '/data.json', {
                 headers: {
                     "Content-Type": "application/json",
                     
@@ -80,7 +80,7 @@ export default function CommsContextProvider({ children }) {
 
     async function fetchTimeDate() {
         try {
-            const response = await axios.get(serverHost + '/getGPSTimeDate', {
+            const response = await axios.get(getServerHost() + '/getGPSTimeDate', {
                 headers: {
                     "Content-Type": "application/json",
                     
@@ -94,7 +94,7 @@ export default function CommsContextProvider({ children }) {
 
     async function fetchTime() {
         try {
-            const response = await axios.get(serverHost + '/getGPSTime', {
+            const response = await axios.get(getServerHost() + '/getGPSTime', {
                 headers: {
                     "Content-Type": "application/json",
                     
@@ -108,7 +108,7 @@ export default function CommsContextProvider({ children }) {
 
     async function fetchDate() {
         try {
-            const response = await axios.get(serverHost + '/getGPSDate', {
+            const response = await axios.get(getServerHost() + '/getGPSDate', {
                 headers: {
                     "Content-Type": "application/json",
                     
@@ -122,7 +122,7 @@ export default function CommsContextProvider({ children }) {
 
     async function fetchPosition() {
         try {
-            const response = await axios.get(serverHost + '/getGPSPosition', {
+            const response = await axios.get(getServerHost() + '/getGPSPosition', {
                 headers: {
                     "Content-Type": "application/json",
                     
@@ -138,7 +138,7 @@ export default function CommsContextProvider({ children }) {
 
     async function fetchCompassHeading() {
         try {
-            const response = await axios.get(serverHost + '/getCompassHeading', {
+            const response = await axios.get(getServerHost() + '/getCompassHeading', {
                 headers: {
                     "Content-Type": "application/json",
                     
@@ -154,7 +154,7 @@ export default function CommsContextProvider({ children }) {
 
     async function fetchPositionCompassHeading() {
         try {
-            const response = await axios.get(serverHost + '/getGPSPositionCompassHeading', {
+            const response = await axios.get(getServerHost() + '/getGPSPositionCompassHeading', {
                 headers: {
                     "Content-Type": "application/json",
                     
@@ -174,7 +174,7 @@ export default function CommsContextProvider({ children }) {
 
     async function fetchDeviceName() {
         try {
-            const response = await axios.get(serverHost + '/getDeviceName', {
+            const response = await axios.get(getServerHost() + '/getDeviceName', {
                 headers: {
                     "Content-Type": "application/json",
                     
@@ -189,7 +189,7 @@ export default function CommsContextProvider({ children }) {
 
     async function fetchSensorData() {
         try {
-            const response = await axios.get(serverHost + '/getSensorData', {
+            const response = await axios.get(getServerHost() + '/getSensorData', {
                 headers: {
                     "Content-Type": "application/json",
                     
@@ -204,7 +204,21 @@ export default function CommsContextProvider({ children }) {
 
     async function setHome() {
         try {
-            const response = await axios.get(serverHost + '/setHome', {
+            const response = await axios.get(getServerHost() + '/setHome', {
+                headers: {
+                    "Content-Type": "application/json",
+                    
+                }, withCredentials: false,
+            });
+            return response.data;
+        } catch (e) {
+            return defaultData;
+        }
+    }
+
+    async function setNorth() {
+        try {
+            const response = await axios.get(getServerHost() + '/setNorth', {
                 headers: {
                     "Content-Type": "application/json",
                     
@@ -218,7 +232,7 @@ export default function CommsContextProvider({ children }) {
 
     async function listFiles() {
         try {
-            const response = await axios.get(serverHost + '/listFiles', {
+            const response = await axios.get(getServerHost() + '/listFiles', {
                 headers: {
                     "Content-Type": "application/json",
                     
@@ -232,7 +246,7 @@ export default function CommsContextProvider({ children }) {
 
     async function restartHaptiCap() {
         try {
-            const response = await axios.get(serverHost + '/restart', {
+            const response = await axios.get(getServerHost() + '/restart', {
                 headers: {
                     "Content-Type": "application/json",
                     
@@ -245,12 +259,12 @@ export default function CommsContextProvider({ children }) {
     }
 
     function setServerHost(hostAddress){
-        serverHost = hostAddress;
+        serverHostRef.current = hostAddress || window.location.origin;
         // console.log('Host Address (from index.html) set to:' + hostAddress);
     }
 
     function getServerHost(){
-        return serverHost;
+        return serverHostRef.current || window.location.origin;
     }
 
     const contextData = {
@@ -271,6 +285,7 @@ export default function CommsContextProvider({ children }) {
         fetchData:fetchData,
         fetchSensorData:fetchSensorData,
         setHome:setHome,
+        setNorth:setNorth,
         listFiles:listFiles,
         restartHaptiCap:restartHaptiCap,
     };

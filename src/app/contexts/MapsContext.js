@@ -28,8 +28,8 @@ export default function MapsContextProvider({ children }) {
     async function requestMap(mapData, kmlUploaded){
         let serverHost = getServerHost();
         let json;
-        let errorMessage;
-        let successMessage;
+        let errorMessage = "";
+        let successMessage = "";
         if(kmlUploaded){
         json = JSON.stringify({id: mapData.id, name: mapData.name, country: mapData.country, area: mapData.area, pngFile: "/maps/" + mapData.pngFile,  kmlFile: "/maps/" + mapData.kmlFile});
         //console.log(kmlUploaded);
@@ -45,8 +45,6 @@ export default function MapsContextProvider({ children }) {
                 },
             });
             //console.log(response);
-            errorMessage = "";
-            successMessage = "";            
             if(response.status === 200){
                 setTimeout(500);
                 successMessage = "Map request recieved.";
@@ -56,13 +54,9 @@ export default function MapsContextProvider({ children }) {
             }
             return [response, successMessage, errorMessage ];
         }   catch (e){
-            errorMessage = e.response.data.message;
-            if(e.response.status >= 401) {
-
-            }else if(e.response.status === 400){
-                errorMessage = e.response.data.message;
-            }
-            return [e.response, successMessage, errorMessage];
+            const responseData = e?.response?.data || {};
+            errorMessage = responseData.message || responseData.error || "Map request failed.";
+            return [e?.response, successMessage, errorMessage];
         }
         
     }

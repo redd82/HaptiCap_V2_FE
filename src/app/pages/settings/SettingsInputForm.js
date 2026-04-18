@@ -1,210 +1,154 @@
-import React, {useContext, useEffect, useState} from 'react';
-import {useForm} from 'react-hook-form';
+import React, { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
-import styles from '../../styles/pages/InputForm.module.css';
-import {CommsContext} from "../../contexts/CommsContext";
-import Checkbox from "../components/CheckBox";
-import Button from "../components/Button";
+import {
+    Alert, Box, Button, Checkbox, CircularProgress,
+    FormControlLabel, Grid, Stack, TextField, Typography,
+} from '@mui/material';
+import { CommsContext } from '../../contexts/CommsContext';
 
-export default function SettingsInputForm({}) {
-    const DATEFORMAT = 'yyyy-MM-dd';
-    const {storeData, fetchSettings, getServerHost, restartHaptiCap} = useContext(CommsContext);
+export default function SettingsInputForm() {
+    const { fetchSettings, getServerHost, restartHaptiCap } = useContext(CommsContext);
     const [loading, setLoading] = useState(true);
-    const {register, handleSubmit, formState: { errors } } = useForm();
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
-    const [readOnly, setReadOnly] = useState(true);
-    const [settingsData, setSettingsData] = useState({clientSSID: ""});
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
+    const [settingsData, setSettingsData] = useState({ clientSSID: '' });
 
-    async function onSubmit(){
+    async function onSubmit() {
         let serverHost = getServerHost();
-            let json = JSON.stringify({asAP: settingsData.asAP, clientSSID: settingsData.clientSSID, clientPasswd: settingsData.clientPasswd, connectionTimeOut: settingsData.connectionTimeOut,
-                deviceName: settingsData.deviceName, apPasswd: settingsData.apPasswd, httpPort: settingsData.httpPort, gpsPollSec: settingsData.gpsPollSec, targetReached: settingsData.targetReached, 
-                compPollMs: settingsData.compPollMs, compOffset: settingsData.compOffset, HOME_LAT: settingsData.HOME_LAT, HOME_LON: settingsData.HOME_LON, WAYPOINT_LAT: settingsData.WAYPOINT_LAT, 
-                WAYPOINT_LON: settingsData.WAYPOINT_LON, declAngleRad: settingsData.declAngleRad, sleepMins: settingsData.sleepMins, touchThreshold: settingsData.touchThreshold,
-                touchEnabled: settingsData.touchEnabled, maxDistance:settingsData.maxDistance, maxDelay:settingsData.maxDelay, timeZoneOffset:settingsData.timeZoneOffset, 
-                ftpEnabled: settingsData.ftpEnabled});
-                console.log(json);
-            try{
-                const response = await axios.post(serverHost + '/settings/settings_form', json, {
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                });
-                console.log(response);
-                setError("");
-                setSuccess("");               
-                if(response.statusText === "OK"){
-                    setTimeout(500);
-                    setSuccess("Settings changed");
-                }else{
-                    setError("Error");
-                }
-            }   catch (e){
-                setError(e.response.data.message);
-                if(e.response.status >= 401) {
-
-                }else if(e.response.status === 400){
-                    setError(e.response.data.message);
-                }
+        let json = JSON.stringify({
+            asAP: settingsData.asAP, clientSSID: settingsData.clientSSID,
+            clientPasswd: settingsData.clientPasswd, connectionTimeOut: settingsData.connectionTimeOut,
+            deviceName: settingsData.deviceName, apPasswd: settingsData.apPasswd,
+                httpPort: parseInt(settingsData.httpPort, 10) || 80,
+                gpsPollSec: parseInt(settingsData.gpsPollSec, 10) || 1,
+                targetReached: parseInt(settingsData.targetReached, 10) || 10,
+                compPollMs: parseInt(settingsData.compPollMs, 10) || 100,
+                compOffset: parseFloat(settingsData.compOffset) || 0,
+                HOME_LAT: parseFloat(settingsData.HOME_LAT) || 0,
+                HOME_LON: parseFloat(settingsData.HOME_LON) || 0,
+                WAYPOINT_LAT: parseFloat(settingsData.WAYPOINT_LAT) || 0,
+                WAYPOINT_LON: parseFloat(settingsData.WAYPOINT_LON) || 0,
+                declAngleRad: parseFloat(settingsData.declAngleRad) || 0,
+                sleepMins: parseInt(settingsData.sleepMins, 10) || 5,
+                touchThreshold: parseInt(settingsData.touchThreshold, 10) || 50,
+            touchEnabled: settingsData.touchEnabled, maxDistance: settingsData.maxDistance,
+            maxDistance: parseInt(settingsData.maxDistance, 10) || 500,
+            maxDelay: parseInt(settingsData.maxDelay, 10) || 1000,
+            timeZoneOffset: parseInt(settingsData.timeZoneOffset, 10) || 0,
+            ftpEnabled: settingsData.ftpEnabled,
+        });
+        console.log(json);
+        try {
+            const response = await axios.post(serverHost + '/settings/settings_form', json, {
+                headers: { 'Content-Type': 'application/json' },
+            });
+            console.log(response);
+            setError('');
+            setSuccess('');
+            if (response.statusText === 'OK') {
+                setTimeout(500);
+                setSuccess('Settings changed');
+            } else {
+                setError('Error');
             }
+        } catch (e) {
+            setError(e.response?.data?.message || 'Error');
+            if (e.response?.status === 400) setError(e.response.data.message);
         }
+    }
 
     const handleInputUpdate = (event) => {
-        const value = event?.target?.value;
-        console.log(value);
-        if (event.target.name === "asAP") {
-            setSettingsData({...settingsData, asAP: value});
-        }
-        if (event.target.name === "clientSSID") {
-            setSettingsData({...settingsData, clientSSID: value});
-        }
-        if (event.target.name === "clientPasswd") {
-            setSettingsData({...settingsData, clientPasswd: value});
-        }
-        if (event.target.name === "connectionTimeOut") {
-            setSettingsData({...settingsData, connectionTimeOut: value});
-        }
-        if (event.target.name === "deviceName") {
-            setSettingsData({...settingsData, deviceName: value});
-        }
-        if (event.target.name === "apPasswd") {
-            setSettingsData({...settingsData, apPasswd: value});
-        }
-        if (event.target.name === "httpPort") {
-            setSettingsData({...settingsData, httpPort: value});
-        }
-        if (event.target.name === "gpsPollSec") {
-            setSettingsData({...settingsData, gpsPollSec: value});
-        }
-        if (event.target.name === "targetReached") {
-            setSettingsData({...settingsData, targetReached: value});
-        }
-        if (event.target.name === "compPollMs") {
-            setSettingsData({...settingsData, compPollMs: value});
-        }
-        if (event.target.name === "compOffset") {
-            setSettingsData({...settingsData, compOffset: value});
-        }
-        if (event.target.name === "HOME_LAT") {
-            setSettingsData({...settingsData, HOME_LAT: value});
-        }
-        if (event.target.name === "HOME_LON") {
-            setSettingsData({...settingsData, HOME_LON: value});
-        }
-        if (event.target.name === "WAYPOINT_LAT") {
-            setSettingsData({...settingsData, WAYPOINT_LAT: value});
-        }
-        if (event.target.name === "WAYPOINT_LON") {
-            setSettingsData({...settingsData, WAYPOINT_LON: value});
-        }
-        if (event.target.name === "declAngleRad") {
-            setSettingsData({...settingsData, declAngleRad: value});
-        }
-        if (event.target.name === "sleepMins") {
-            setSettingsData({...settingsData, sleepMins: value});
-        }
-        if (event.target.name === "maxDistance") {
-            setSettingsData({...settingsData, maxDistance: value});
-        }
-        if (event.target.name === "maxDelay") {
-            setSettingsData({...settingsData, maxDelay: value});
-        }
-        if (event.target.name === "timeZoneOffset") {
-            setSettingsData({...settingsData, timeZoneOffset: value});
-        }
-        if (event.target.name === "touchThreshold") {
-            setSettingsData({...settingsData, touchThreshold: value});
-        }
-        if (event.target.name === "touchEnabled") {
-            setSettingsData({...settingsData, touchEnabled: value});
-        }           
+        setSettingsData((prev) => ({ ...prev, [event.target.name]: event.target.value }));
     };
 
     const handleCheckBoxChange = (checkBoxValue) => {
-        if(checkBoxValue.name === 'touchEnabled') {
-            console.log(checkBoxValue.checked);
-            setSettingsData({...settingsData, touchEnabled: checkBoxValue.checked});
-        }
-        if(checkBoxValue.name === 'asAP') {
-            console.log(checkBoxValue.checked);
-            setSettingsData({...settingsData, asAP: checkBoxValue.checked});
-        }
-        if(checkBoxValue.name === 'ftpEnabled') {
-            console.log(checkBoxValue.checked);
-            setSettingsData({...settingsData, ftpEnabled: checkBoxValue.checked});
-        }
+        setSettingsData((prev) => ({ ...prev, [checkBoxValue.name]: checkBoxValue.checked }));
     };
 
     const handleButton = (event) => {
-        console.log(event);
-        if (event === "restart") {
-            restartHaptiCap();              // TODO: Visualize to show user to wait for the restart
-        }
-    }
+        if (event === 'restartHaptiCap') restartHaptiCap();
+    };
 
-    useEffect( () => {
-        fetchSettings().then(r => {
+    useEffect(() => {
+        fetchSettings().then((r) => {
             setSettingsData(r);
-            console.log(r);
+            setLoading(false);
         });
-        
-        setLoading(false);
-    }, []);
+    }, [fetchSettings]);
 
-    if(loading){
-        return <div className={styles['loading-text']}>Loading Data... Please Wait...</div>
+    if (loading) {
+        return (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+                <CircularProgress />
+            </Box>
+        );
     }
 
-    //onSubmit={handleSubmit(onSubmit)}
+    const field = (label, name) => (
+        <Grid item xs={12} sm={6}>
+            <TextField
+                label={label}
+                name={name}
+                defaultValue={settingsData[name] ?? ''}
+                onChange={handleInputUpdate}
+                fullWidth
+                size="small"
+                InputLabelProps={{ shrink: true }}
+            />
+        </Grid>
+    );
+
+    const check = (label, name) => (
+        <Grid item xs={12} sm={6}>
+            <FormControlLabel
+                label={label}
+                control={
+                    <Checkbox
+                        name={name}
+                        defaultChecked={!!settingsData[name]}
+                        onChange={(e) => handleCheckBoxChange(e.target)}
+                    />
+                }
+            />
+        </Grid>
+    );
+
     return (
-        <form className={styles['info-form']} >
-            <label className={styles['info-label']} htmlFor="asAP">Is AccessPoint</label>
-            <Checkbox id='1' parentCallback={handleCheckBoxChange} defaultChecked={settingsData.asAP} disabled={false} name="asAP" labelname=""/>
-            <label className={styles['info-label']} htmlFor="clientSSID">Client SSID:</label>
-            <input className={styles['info-input']} name="clientSSID" type="text" id="clientSSID" defaultValue={settingsData.clientSSID} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="clientPasswd">Client Password:</label>
-            <input className={styles['info-input']} name="clientPasswd" type="text" id="clientPasswd" defaultValue={settingsData.clientPasswd} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="connectionTimeOut">Connection Timeout:</label>
-            <input className={styles['info-input']} name="connectionTimeOut" type="text" id="connectionTimeOut" defaultValue={settingsData.connectionTimeOut} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="deviceName">Devicename:</label>
-            <input className={styles['info-input']} name="deviceName" type="text" id="deviceName" defaultValue={settingsData.deviceName} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="apPasswd">AP Password:</label>
-            <input className={styles['info-input']} name="apPasswd" type="text" id="apPasswd" defaultValue={settingsData.apPasswd} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="httpPort">HTTP Port:</label>
-            <input className={styles['info-input']} name="httpPort" type="text" id="httpPort" defaultValue={settingsData.httpPort} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="gpsPollSec">GPS Polling time (s):</label>
-            <input className={styles['info-input']} name="gpsPollSec" type="text" id="gpsPollSec" defaultValue={settingsData.gpsPollSec} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="maxDistance">Max Distance (m):</label>
-            <input className={styles['info-input']} name="maxDistance" type="text" id="maxDistance" defaultValue={settingsData.maxDistance} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="targetReached">Target reached (m):</label>
-            <input className={styles['info-input']} name="targetReached" type="text" id="targetReached" defaultValue={settingsData.targetReached} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="maxDelay">Max Delay (dPulse ms):</label>
-            <input className={styles['info-input']} name="maxDelay" type="text" id="maxDelay" defaultValue={settingsData.maxDelay} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="declAngleRad">Declanation Angle:</label>
-            <input className={styles['info-input']} name="declAngleRad" type="text" id="declAngleRad" defaultValue={settingsData.declAngleRad} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="sleepMins">Sleeptime (mins):</label>
-            <input className={styles['info-input']} name="sleepMins" type="text" id="sleepMins" defaultValue={settingsData.sleepMins} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="compPollMs">Compass polling time (ms):</label>
-            <input className={styles['info-input']} name="compPollMs" type="text" id="compPollMs" defaultValue={settingsData.compPollMs} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="touchEnabled">Touch enabled</label>
-            <Checkbox id='2' parentCallback={handleCheckBoxChange} defaultChecked={settingsData.touchEnabled} disabled={false} name="touchEnabled" labelname=""/>
-            <label className={styles['info-label']} htmlFor="touchThreshold">Touch threshold:</label>
-            <input className={styles['info-input']} name="touchThreshold" type="text" id="touchThreshold" defaultValue={settingsData.touchThreshold} onChange={handleInputUpdate} />
-            <label className={styles['info-label']} htmlFor="timeZoneOffset">Timezone Offset (h):</label>
-            <input className={styles['info-input']} name="timeZoneOffset" type="text" id="timeZoneOffset" defaultValue={settingsData.timeZoneOffset} onChange={handleInputUpdate} />            
-            <button className={styles['apply-button']} onClick={onSubmit} type="button"> Apply Changes</button>
-            <Button buttonText='Restart HaptiCap' parentCallback={handleButton} buttonName="restart" styleName='add-button'/>
-            <div className={styles['error-message']}>
-                {(error !== "") ? (
-                    <div className={styles['error']}>{error}</div>
-                ) : ((success !== "") ? (
-                    <div className={styles['success']}>{success}</div>
-                ) : (
-                    <div className={styles['no-error']}> </div>
-                    )
-                )}
-            </div>
-        </form>
+        <Box component="form">
+            <Typography variant="h6" gutterBottom>Settings</Typography>
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+                {check('Access Point Mode', 'asAP')}
+                {field('Client SSID', 'clientSSID')}
+                {field('Client Password', 'clientPasswd')}
+                {field('Connection Timeout', 'connectionTimeOut')}
+                {field('Device Name', 'deviceName')}
+                {field('AP Password', 'apPasswd')}
+                {field('HTTP Port', 'httpPort')}
+                {field('GPS Poll (sec)', 'gpsPollSec')}
+                {field('Target Reached', 'targetReached')}
+                {field('Compass Poll (ms)', 'compPollMs')}
+                {field('Compass Offset', 'compOffset')}
+                {field('Home Latitude', 'HOME_LAT')}
+                {field('Home Longitude', 'HOME_LON')}
+                {field('Waypoint Latitude', 'WAYPOINT_LAT')}
+                {field('Waypoint Longitude', 'WAYPOINT_LON')}
+                {field('Declination Angle (rad)', 'declAngleRad')}
+                {field('Sleep (mins)', 'sleepMins')}
+                {field('Touch Threshold', 'touchThreshold')}
+                {check('Touch Enabled', 'touchEnabled')}
+                {field('Max Distance', 'maxDistance')}
+                {field('Max Delay', 'maxDelay')}
+                {field('Time Zone Offset', 'timeZoneOffset')}
+                {check('FTP Enabled', 'ftpEnabled')}
+            </Grid>
+            <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+                <Button variant="contained" onClick={onSubmit} type="button">Apply Changes</Button>
+                <Button variant="outlined" onClick={() => handleButton('restartHaptiCap')} type="button">
+                    Restart HaptiCap
+                </Button>
+            </Stack>
+            {error && <Alert severity="error">{error}</Alert>}
+            {success && <Alert severity="success">{success}</Alert>}
+        </Box>
     );
 }

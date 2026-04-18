@@ -1,34 +1,25 @@
-import React, {useContext, useState} from 'react';
-import Popup from 'reactjs-popup';
-import styles from '../../../styles/pages/UseMap.module.css';
+import React from 'react';
+import { Paper, Typography } from '@mui/material';
 
-
-export default function PositionModal({position, text}){
-    const [error, setError] = useState("")
-    const [open, setOpen] = useState(false);
-    const closeModal = () => setOpen(false);
-
-
-    document.documentElement.style.setProperty('--modal-pos-top', (position.top) + "px");
-    document.documentElement.style.setProperty('--modal-pos-left', (position.left) + "px");
-
-    return(
-        <>
-            <Popup  trigger={<div className={styles['popup-modal-own-position']}>
-                <div>
-                    {text[0]}
-                </div> 
-                <div>
-                    {text[1]}
-                </div>
-                <div>
-                    {text[3]}
-                </div>
-                <div>
-                    {text[4]}
-                </div>
-                 </div>} position="left top" modal nested>
-            </Popup>
-        </>
+export default function PositionModal({ position, text }) {
+    return (
+        <Paper
+            elevation={4}
+            sx={{
+                position: 'absolute',
+                top: position.top,
+                left: position.left,
+                zIndex: 10,
+                p: 1,
+                borderRadius: 1.5,
+                minWidth: 90,
+                backgroundColor: 'primary.main',
+                color: 'primary.contrastText',
+            }}
+        >
+            {Array.isArray(text) && text.filter(Boolean).map((line, i) => (
+                <Typography key={i} variant="caption" display="block">{String(line)}</Typography>
+            ))}
+        </Paper>
     );
 }

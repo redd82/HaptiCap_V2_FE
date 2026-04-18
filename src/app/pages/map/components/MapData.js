@@ -1,6 +1,6 @@
 import React from 'react';
 import {useNavigate} from "react-router-dom";
-import styles from '../../../styles/Content.module.css';
+import { TableCell, TableRow } from '@mui/material';
 
 export default function MapData({id, map}) {
     const navigate = useNavigate();
@@ -9,13 +9,16 @@ export default function MapData({id, map}) {
     }
 
     return (
-        <tbody>
-            <tr className={styles['standard-tr']} key={map.id} onClick={handleClick}>
-            <td className={styles['standard-td-10']}>{map.id}</td>
-            <td className={styles['standard-td-25']}>{map.name}</td>
-            <td className={styles['standard-td-25']}>{map.country}</td>
-            <td className={styles['standard-td-25']}>{map.area}</td>
-            </tr>
-        </tbody>
+        <TableRow
+            key={map.id}
+            hover
+            onClick={handleClick}
+            sx={{ cursor: 'pointer' }}
+        >
+            <TableCell width="10%">{map.id}</TableCell>
+            <TableCell width="30%">{map.name}</TableCell>
+            <TableCell width="30%">{map.country}</TableCell>
+            <TableCell width="30%">{map.area}</TableCell>
+        </TableRow>
     );
 }
