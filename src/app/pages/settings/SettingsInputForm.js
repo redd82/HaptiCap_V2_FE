@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import {
     Alert, Box, Button, Checkbox, CircularProgress,
-    FormControlLabel, Grid, Stack, TextField, Typography,
+    FormControlLabel, Grid, Stack, TextField, Typography, MenuItem,
 } from '@mui/material';
 import { CommsContext } from '../../contexts/CommsContext';
 
@@ -31,7 +31,8 @@ export default function SettingsInputForm() {
                 declAngleRad: parseFloat(settingsData.declAngleRad) || 0,
                 sleepMins: parseInt(settingsData.sleepMins, 10) || 5,
                 touchThreshold: parseInt(settingsData.touchThreshold, 10) || 50,
-            touchEnabled: settingsData.touchEnabled, maxDistance: settingsData.maxDistance,
+            touchEnabled: settingsData.touchEnabled,
+            guidanceOutputMode: parseInt(settingsData.guidanceOutputMode, 10) || 0,
             maxDistance: parseInt(settingsData.maxDistance, 10) || 500,
             maxDelay: parseInt(settingsData.maxDelay, 10) || 1000,
             timeZoneOffset: parseInt(settingsData.timeZoneOffset, 10) || 0,
@@ -113,6 +114,27 @@ export default function SettingsInputForm() {
         </Grid>
     );
 
+    const select = (label, name, options) => (
+        <Grid item xs={12} sm={6}>
+            <TextField
+                select
+                label={label}
+                name={name}
+                value={settingsData[name] ?? 0}
+                onChange={handleInputUpdate}
+                fullWidth
+                size="small"
+                InputLabelProps={{ shrink: true }}
+            >
+                {options.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                    </MenuItem>
+                ))}
+            </TextField>
+        </Grid>
+    );
+
     return (
         <Box component="form">
             <Typography variant="h6" gutterBottom>Settings</Typography>
@@ -136,6 +158,10 @@ export default function SettingsInputForm() {
                 {field('Sleep (mins)', 'sleepMins')}
                 {field('Touch Threshold', 'touchThreshold')}
                 {check('Touch Enabled', 'touchEnabled')}
+                {select('Guidance Output', 'guidanceOutputMode', [
+                    { value: 0, label: 'Vibrator PWM' },
+                    { value: 1, label: 'RGB LED PWM' },
+                ])}
                 {field('Max Distance', 'maxDistance')}
                 {field('Max Delay', 'maxDelay')}
                 {field('Time Zone Offset', 'timeZoneOffset')}

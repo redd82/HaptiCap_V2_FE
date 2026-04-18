@@ -221,8 +221,10 @@ export default function TAKInputForm() {
     const [success, setSuccess] = useState('');
     const [selectedFileName, setSelectedFileName] = useState('');
     const [importPreview, setImportPreview] = useState(null);
+    const [isAdvanced, setIsAdvanced] = useState(false);
     const [takStatus, setTakStatus] = useState({
         connected: false,
+        connecting: false,
         enabled: false,
         configured: false,
         packageImported: false,
@@ -287,6 +289,18 @@ export default function TAKInputForm() {
     useEffect(() => {
         loadAll();
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    useEffect(() => {
+        if (!takStatus.connecting) {
+            return undefined;
+        }
+
+        const timerId = setInterval(() => {
+            loadAll();
+        }, 1500);
+
+        return () => clearInterval(timerId);
+    }, [takStatus.connecting]); // eslint-disable-line react-hooks/exhaustive-deps
 
     function handleInputChange(event) {
         const { name, value } = event.target;
@@ -401,7 +415,17 @@ export default function TAKInputForm() {
 
     return (
         <Box component="form">
-            <Typography variant="h6" gutterBottom>TAK Package Import</Typography>
+            <Stack direction="row" spacing={1.5} sx={{ mb: 1, flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="h6" gutterBottom sx={{ mb: 0 }}>TAK Settings</Typography>
+                <Button 
+                    variant={isAdvanced ? 'contained' : 'outlined'} 
+                    size="small"
+                    onClick={() => setIsAdvanced(!isAdvanced)}
+                >
+                    {isAdvanced ? 'Basic' : 'Advanced'}
+                </Button>
+            </Stack>
+
             <Typography variant="body2" sx={{ mb: 2 }}>
                 Upload the TAK server enrollment package. The browser will unpack the nested archive, read the connection XML,
                 convert the PKCS#12 files to PEM, and send the resulting TAK settings and certificate material to the device.
@@ -412,9 +436,16 @@ export default function TAKInputForm() {
                     {importing ? 'Importing package...' : 'Choose TAK Package'}
                     <input type="file" hidden accept=".zip,application/zip" onChange={handlePackageSelection} />
                 </Button>
-                <Button variant="outlined" type="button" onClick={() => postSimple('/tak/connect', 'TAK connection requested')}>Connect</Button>
+                <Button
+                    variant="outlined"
+                    type="button"
+                    onClick={() => postSimple('/tak/connect', 'TAK connection requested')}
+                    disabled={takStatus.connecting || takStatus.connected}
+                >
+                    {takStatus.connecting ? 'Connecting...' : 'Connect'}
+                </Button>
                 <Button variant="outlined" type="button" onClick={() => postSimple('/tak/disconnect', 'TAK disconnected')}>Disconnect</Button>
-                <Button variant="text" type="button" onClick={loadAll}>Refresh Status</Button>
+                {isAdvanced && <Button variant="text" type="button" onClick={loadAll}>Refresh Status</Button>}
             </Stack>
 
             {selectedFileName && (
@@ -429,60 +460,76 @@ export default function TAKInputForm() {
                 </Alert>
             )}
 
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                Status: {takStatus.connected ? 'Connected' : 'Disconnected'} | Configured: {takStatus.configured ? 'Yes' : 'No'} | Package Imported: {takStatus.packageImported ? 'Yes' : 'No'}
+            <Typography variant="subtitle2" sx={{ mb: isAdvanced ? 1 : 2 }}>
+                Connection Status: {takStatus.connected ? 'Connected' : takStatus.connecting ? 'Connecting...' : 'Disconnected'}
             </Typography>
-            <Typography variant="subtitle2" sx={{ mb: 2 }}>
-                Certs: client {takStatus.certExists ? 'Yes' : 'No'} | key {takStatus.keyExists ? 'Yes' : 'No'} | CA {takStatus.caExists ? 'Yes' : 'No'}
-            </Typography>
+
+            {isAdvanced && (
+                <>
+                    <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                        Status: {takStatus.connected ? 'Connected' : takStatus.connecting ? 'Connecting...' : 'Disconnected'} | Configured: {takStatus.configured ? 'Yes' : 'No'} | Package Imported: {takStatus.packageImported ? 'Yes' : 'No'}
+                    </Typography>
+                    <Typography variant="subtitle2" sx={{ mb: 2 }}>
+                        Certs: client {takStatus.certExists ? 'Yes' : 'No'} | key {takStatus.keyExists ? 'Yes' : 'No'} | CA {takStatus.caExists ? 'Yes' : 'No'}
+                    </Typography>
+                </>
+            )}
 
             <Grid container spacing={2} sx={{ mb: 3 }}>
                 <LabeledCheck label="TAK Enabled" name="takEnabled" checked={takConfig.takEnabled} onChange={handleCheckChange} />
-                <LabeledCheck label="Use SSL/TLS" name="takSSL" checked={takConfig.takSSL} onChange={handleCheckChange} />
-                <LabeledCheck label="Verify Certificate" name="takVerifyCert" checked={takConfig.takVerifyCert} onChange={handleCheckChange} />
-                <LabeledCheck label="Use Client Certificate" name="takUseClientCert" checked={takConfig.takUseClientCert} onChange={handleCheckChange} />
-
                 <LabeledField label="TAK Server" name="takServer" value={takConfig.takServer} onChange={handleInputChange} />
-                <LabeledField label="TLS Server Name (CN/SAN)" name="takTLSServerName" value={takConfig.takTLSServerName} onChange={handleInputChange} />
-                <LabeledField label="TAK Port" name="takPort" value={takConfig.takPort} onChange={handleInputChange} type="number" />
-                <LabeledField label="Callsign" name="takCallsign" value={takConfig.takCallsign} onChange={handleInputChange} />
-                <LabeledField label="UID" name="takUID" value={takConfig.takUID} onChange={handleInputChange} />
-                <LabeledField label="Description" name="takDescription" value={takConfig.takDescription} onChange={handleInputChange} />
-                <LabeledField label="CA Path" name="takCACertPath" value={takConfig.takCACertPath} onChange={handleInputChange} />
-                <LabeledField label="Client Cert Path" name="takClientCertPath" value={takConfig.takClientCertPath} onChange={handleInputChange} />
-                <LabeledField label="Client Key Path" name="takClientKeyPath" value={takConfig.takClientKeyPath} onChange={handleInputChange} />
-                <LabeledField label="Client P12 Path" name="takClientP12Path" value={takConfig.takClientP12Path} onChange={handleInputChange} />
-                <LabeledField label="Truststore P12 Path" name="takTruststoreP12Path" value={takConfig.takTruststoreP12Path} onChange={handleInputChange} />
+                
+                {isAdvanced && (
+                    <>
+                        <LabeledCheck label="Use SSL/TLS" name="takSSL" checked={takConfig.takSSL} onChange={handleCheckChange} />
+                        <LabeledCheck label="Verify Certificate" name="takVerifyCert" checked={takConfig.takVerifyCert} onChange={handleCheckChange} />
+                        <LabeledCheck label="Use Client Certificate" name="takUseClientCert" checked={takConfig.takUseClientCert} onChange={handleCheckChange} />
+                        <LabeledField label="TLS Server Name (CN/SAN)" name="takTLSServerName" value={takConfig.takTLSServerName} onChange={handleInputChange} />
+                        <LabeledField label="TAK Port" name="takPort" value={takConfig.takPort} onChange={handleInputChange} type="number" />
+                        <LabeledField label="Callsign" name="takCallsign" value={takConfig.takCallsign} onChange={handleInputChange} />
+                        <LabeledField label="UID" name="takUID" value={takConfig.takUID} onChange={handleInputChange} />
+                        <LabeledField label="Description" name="takDescription" value={takConfig.takDescription} onChange={handleInputChange} />
+                        <LabeledField label="CA Path" name="takCACertPath" value={takConfig.takCACertPath} onChange={handleInputChange} />
+                        <LabeledField label="Client Cert Path" name="takClientCertPath" value={takConfig.takClientCertPath} onChange={handleInputChange} />
+                        <LabeledField label="Client Key Path" name="takClientKeyPath" value={takConfig.takClientKeyPath} onChange={handleInputChange} />
+                        <LabeledField label="Client P12 Path" name="takClientP12Path" value={takConfig.takClientP12Path} onChange={handleInputChange} />
+                        <LabeledField label="Truststore P12 Path" name="takTruststoreP12Path" value={takConfig.takTruststoreP12Path} onChange={handleInputChange} />
+                    </>
+                )}
             </Grid>
 
-            <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>Reconnection Settings</Typography>
-            <Grid container spacing={2} sx={{ mb: 3 }}>
-                <LabeledCheck label="Auto Reconnect Enabled" name="takReconnectEnabled" checked={takConfig.takReconnectEnabled} onChange={handleCheckChange} />
-                <LabeledCheck label="Reconnect on WiFi Reconnect" name="takReconnectOnWifiReconnect" checked={takConfig.takReconnectOnWifiReconnect} onChange={handleCheckChange} />
-                <LabeledField label="Initial Delay (ms)" name="takReconnectInitialDelayMs" value={takConfig.takReconnectInitialDelayMs} onChange={handleInputChange} type="number" />
-                <LabeledField label="Max Delay (ms)" name="takReconnectMaxDelayMs" value={takConfig.takReconnectMaxDelayMs} onChange={handleInputChange} type="number" />
-                <LabeledField label="Backoff Multiplier" name="takReconnectBackoffMultiplier" value={takConfig.takReconnectBackoffMultiplier} onChange={handleInputChange} type="number" />
-                <LabeledField label="Max Reconnect Duration (ms, 0=unlimited)" name="takReconnectMaxDurationMs" value={takConfig.takReconnectMaxDurationMs} onChange={handleInputChange} type="number" />
-            </Grid>
+            {isAdvanced && (
+                <>
+                    <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>Reconnection Settings</Typography>
+                    <Grid container spacing={2} sx={{ mb: 3 }}>
+                        <LabeledCheck label="Auto Reconnect Enabled" name="takReconnectEnabled" checked={takConfig.takReconnectEnabled} onChange={handleCheckChange} />
+                        <LabeledCheck label="Reconnect on WiFi Reconnect" name="takReconnectOnWifiReconnect" checked={takConfig.takReconnectOnWifiReconnect} onChange={handleCheckChange} />
+                        <LabeledField label="Initial Delay (ms)" name="takReconnectInitialDelayMs" value={takConfig.takReconnectInitialDelayMs} onChange={handleInputChange} type="number" />
+                        <LabeledField label="Max Delay (ms)" name="takReconnectMaxDelayMs" value={takConfig.takReconnectMaxDelayMs} onChange={handleInputChange} type="number" />
+                        <LabeledField label="Backoff Multiplier" name="takReconnectBackoffMultiplier" value={takConfig.takReconnectBackoffMultiplier} onChange={handleInputChange} type="number" />
+                        <LabeledField label="Max Reconnect Duration (ms, 0=unlimited)" name="takReconnectMaxDurationMs" value={takConfig.takReconnectMaxDurationMs} onChange={handleInputChange} type="number" />
+                    </Grid>
 
-            <Typography variant="h6" gutterBottom sx={{ mt: 1 }}>Reconnection Metrics</Typography>
-            <Typography variant="body2" sx={{ mb: 0.5 }}>
-                Status: {takStatus.reconnecting ? 'Reconnecting...' : takStatus.reconnectGivenUp ? 'Gave up' : 'Idle'}
-                {takStatus.reconnectGivenUp && ` \u2014 ${takStatus.reconnectLastReason}`}
-            </Typography>
-            {takStatus.timeSinceDisconnectMs > 0 && (
-                <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    Time since disconnect: {Math.round(takStatus.timeSinceDisconnectMs / 1000)}s
-                    {takStatus.reconnectAttempts > 0 && ` | Attempts this cycle: ${takStatus.reconnectAttempts}`}
-                    {takStatus.nextReconnectInMs > 0 && ` | Next attempt in: ${Math.round(takStatus.nextReconnectInMs / 1000)}s`}
-                </Typography>
+                    <Typography variant="h6" gutterBottom sx={{ mt: 1 }}>Reconnection Metrics</Typography>
+                    <Typography variant="body2" sx={{ mb: 0.5 }}>
+                        Status: {takStatus.reconnecting ? 'Reconnecting...' : takStatus.reconnectGivenUp ? 'Gave up' : 'Idle'}
+                        {takStatus.reconnectGivenUp && ` \u2014 ${takStatus.reconnectLastReason}`}
+                    </Typography>
+                    {takStatus.timeSinceDisconnectMs > 0 && (
+                        <Typography variant="body2" sx={{ mb: 0.5 }}>
+                            Time since disconnect: {Math.round(takStatus.timeSinceDisconnectMs / 1000)}s
+                            {takStatus.reconnectAttempts > 0 && ` | Attempts this cycle: ${takStatus.reconnectAttempts}`}
+                            {takStatus.nextReconnectInMs > 0 && ` | Next attempt in: ${Math.round(takStatus.nextReconnectInMs / 1000)}s`}
+                        </Typography>
+                    )}
+                    {takStatus.reconnectLastReason && !takStatus.reconnectGivenUp && (
+                        <Typography variant="body2" sx={{ mb: 0.5 }}>Last failure: {takStatus.reconnectLastReason}</Typography>
+                    )}
+                    <Typography variant="body2" sx={{ mb: 2 }}>
+                        Lifetime: {takStatus.reconnectTotalAttempts} attempts | {takStatus.reconnectTotalSuccesses} successes
+                    </Typography>
+                </>
             )}
-            {takStatus.reconnectLastReason && !takStatus.reconnectGivenUp && (
-                <Typography variant="body2" sx={{ mb: 0.5 }}>Last failure: {takStatus.reconnectLastReason}</Typography>
-            )}
-            <Typography variant="body2" sx={{ mb: 2 }}>
-                Lifetime: {takStatus.reconnectTotalAttempts} attempts | {takStatus.reconnectTotalSuccesses} successes
-            </Typography>
 
             <Stack direction="row" spacing={1.5} sx={{ mb: 2, flexWrap: 'wrap' }}>
                 <Button variant="contained" type="button" onClick={saveConfig} disabled={saving}>
