@@ -216,6 +216,20 @@ export default function CommsContextProvider({ children }) {
         }
     }
 
+    async function setNorth() {
+        try {
+            const response = await axios.get(getServerHost() + '/setNorth', {
+                headers: {
+                    "Content-Type": "application/json",
+                    
+                }, withCredentials: false,
+            });
+            return response.data;
+        } catch (e) {
+            return defaultData;
+        }
+    }
+
     async function listFiles() {
         try {
             const response = await axios.get(getServerHost() + '/listFiles', {
@@ -271,6 +285,7 @@ export default function CommsContextProvider({ children }) {
         fetchData:fetchData,
         fetchSensorData:fetchSensorData,
         setHome:setHome,
+        setNorth:setNorth,
         listFiles:listFiles,
         restartHaptiCap:restartHaptiCap,
     };

@@ -7,7 +7,7 @@ import {
 import { CommsContext } from '../../contexts/CommsContext';
 
 export default function CalibrationInputForm() {
-    const { fetchCalData, getServerHost } = useContext(CommsContext);
+    const { fetchCalData, getServerHost, setNorth } = useContext(CommsContext);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -20,7 +20,7 @@ export default function CalibrationInputForm() {
             compassCalibrationMode: calibrationData.compassCalibrationMode,
             compassOffset: calibrationData.compassOffset,
             magOffsetX: calibrationData.magOffsetX, magOffsetY: calibrationData.magOffsetY,
-            magOffsetZ: calibrationData.magOffsetX, magSoftIron: calibrationData.magSoftIron,
+            magOffsetZ: calibrationData.magOffsetZ, magSoftIron: calibrationData.magSoftIron,
             magScaleFacY: calibrationData.magScaleFacY, magScaleFacZ: calibrationData.magScaleFacZ,
             gyroBiasX: calibrationData.gyroBiasX, gyroBiasY: calibrationData.gyroBiasY,
             gyroOffsetX: calibrationData.gyroOffsetX, gyroOffsetY: calibrationData.gyroOffsetY,
@@ -70,6 +70,17 @@ export default function CalibrationInputForm() {
         if (event === 'calibrateCompass') {
             setCalibrationData((prev) => ({ ...prev, compassCalibrationMode: true }));
             sendSettings();
+        } else if (event === 'setNorth') {
+            setNorth().then(() => {
+                fetchCalData().then((r) => {
+                    setCalibrationData(r);
+                    setError('');
+                    setSuccess('North set and saved');
+                });
+            }).catch((e) => {
+                setSuccess('');
+                setError(e.response?.data?.message || 'Failed to set north');
+            });
         }
     };
 
@@ -137,6 +148,9 @@ export default function CalibrationInputForm() {
                 <Button variant="contained" onClick={sendSettings} type="button">Apply Changes</Button>
                 <Button variant="outlined" onClick={() => handleButton('calibrateCompass')} type="button">
                     Calibrate Compass
+                </Button>
+                <Button variant="outlined" onClick={() => handleButton('setNorth')} type="button">
+                    Set North
                 </Button>
             </Stack>
             {error && <Alert severity="error">{error}</Alert>}
