@@ -10,12 +10,33 @@ import {
     CircularProgress,
     FormControlLabel,
     Grid,
+    MenuItem,
     Stack,
     TextField,
     Typography,
 } from '@mui/material';
 import { XMLParser } from 'fast-xml-parser';
 import { CommsContext } from '../../contexts/CommsContext';
+
+const TAK_TYPE_PRESET_DEFAULT = 'atak_phone';
+const TAK_TYPE_PRESETS = [
+    { value: 'atak_phone', label: 'ATAK Phone', cotType: 'a-f-G-U-C' },
+    { value: 'team_lead', label: 'Team Lead', cotType: 'a-f-G-U-C' },
+    { value: 'generic_friendly', label: 'Generic Friendly Unit', cotType: 'a-f-G-U-C' },
+    { value: 'unknown_pending', label: 'Unknown / Pending', cotType: 'a-u-G' },
+];
+
+function resolveCotTypeFromPreset(presetValue) {
+    const selectedPreset = TAK_TYPE_PRESETS.find((item) => item.value === presetValue);
+    return selectedPreset?.cotType || 'a-f-G-U-C';
+}
+
+function resolvePresetFromCotType(cotType) {
+    if (String(cotType || '').trim() === 'a-u-G') {
+        return 'unknown_pending';
+    }
+    return TAK_TYPE_PRESET_DEFAULT;
+}
 
 function ensureArray(value) {
     if (!value) {
@@ -211,6 +232,29 @@ function LabeledCheck({ label, name, checked, onChange }) {
     );
 }
 
+function LabeledSelect({ label, name, value, onChange, options }) {
+    return (
+        <Grid item xs={12} sm={6}>
+            <TextField
+                select
+                label={label}
+                name={name}
+                value={value ?? ''}
+                onChange={onChange}
+                fullWidth
+                size="small"
+                InputLabelProps={{ shrink: true }}
+            >
+                {options.map((option) => (
+                    <MenuItem key={`${option.label}-${option.value}`} value={option.value}>
+                        {option.label}
+                    </MenuItem>
+                ))}
+            </TextField>
+        </Grid>
+    );
+}
+
 export default function TAKInputForm() {
     const { getServerHost } = useContext(CommsContext);
     const serverHost = useMemo(() => getServerHost(), [getServerHost]);
@@ -251,6 +295,8 @@ export default function TAKInputForm() {
         takPort: 8089,
         takCallsign: 'HaptiCap',
         takUID: '',
+        takTypePreset: TAK_TYPE_PRESET_DEFAULT,
+        takType: 'a-f-G-U-C',
         takDescription: '',
         takCACertPath: '/certs/tak_ca.crt',
         takClientCertPath: '/certs/tak_client.crt',
@@ -276,7 +322,16 @@ export default function TAKInputForm() {
                 axios.get(`${serverHost}/tak/config`),
                 axios.get(`${serverHost}/tak/status`),
             ]);
-            setTakConfig((prev) => ({ ...prev, ...cfgRes.data }));
+            setTakConfig((prev) => {
+                const merged = { ...prev, ...cfgRes.data };
+                const presetFromConfig = TAK_TYPE_PRESETS.some((item) => item.value === merged.takTypePreset)
+                    ? merged.takTypePreset
+                    : resolvePresetFromCotType(merged.takType);
+                return {
+                    ...merged,
+                    takTypePreset: presetFromConfig,
+                };
+            });
             setTakStatus(statusRes.data || {});
             setMessage({});
         } catch (requestError) {
@@ -304,6 +359,14 @@ export default function TAKInputForm() {
 
     function handleInputChange(event) {
         const { name, value } = event.target;
+        if (name === 'takTypePreset') {
+            setTakConfig((prev) => ({
+                ...prev,
+                takTypePreset: value,
+                takType: resolveCotTypeFromPreset(value),
+            }));
+            return;
+        }
         setTakConfig((prev) => ({ ...prev, [name]: value }));
     }
 
@@ -313,11 +376,16 @@ export default function TAKInputForm() {
     }
 
     function sanitizeConfigForSave(cfg) {
+        const normalizedPreset = TAK_TYPE_PRESETS.some((item) => item.value === cfg.takTypePreset)
+            ? cfg.takTypePreset
+            : TAK_TYPE_PRESET_DEFAULT;
         return {
             ...cfg,
             takServer: String(cfg.takServer || '').trim().replace(/^https?:\/\//i, '').replace(/\/+$/g, ''),
             takTLSServerName: String(cfg.takTLSServerName || '').trim().replace(/^https?:\/\//i, '').replace(/\/+$/g, ''),
             takPort: Number(cfg.takPort) || 8089,
+            takTypePreset: normalizedPreset,
+            takType: resolveCotTypeFromPreset(normalizedPreset),
             takReconnectInitialDelayMs: Math.max(1000, Number(cfg.takReconnectInitialDelayMs) || 5000),
             takReconnectMaxDelayMs: Math.max(Number(cfg.takReconnectInitialDelayMs) || 5000, Number(cfg.takReconnectMaxDelayMs) || 300000),
             takReconnectBackoffMultiplier: Math.max(1.1, parseFloat(cfg.takReconnectBackoffMultiplier) || 1.5),
@@ -478,6 +546,13 @@ export default function TAKInputForm() {
             <Grid container spacing={2} sx={{ mb: 3 }}>
                 <LabeledCheck label="TAK Enabled" name="takEnabled" checked={takConfig.takEnabled} onChange={handleCheckChange} />
                 <LabeledField label="TAK Server" name="takServer" value={takConfig.takServer} onChange={handleInputChange} />
+                <LabeledSelect
+                    label="TAK Unit Type"
+                    name="takTypePreset"
+                    value={takConfig.takTypePreset}
+                    onChange={handleInputChange}
+                    options={TAK_TYPE_PRESETS}
+                />
                 
                 {isAdvanced && (
                     <>

@@ -21,20 +21,28 @@ function ReadOnlyField({ label, value }) {
 export default function SystemForm() {
     const { fetchSensorData, setHome } = useContext(CommsContext);
     const [loading, setLoading] = useState(true);
-    const [sensorData, setSensorData] = useState({ magBiasX: '' });
+    const [sensorData, setSensorData] = useState(null);
 
     useEffect(() => {
+        const fetchData = async () => {
+            const data = await fetchSensorData();
+            setSensorData(data);
+            setLoading(false);
+        };
+
+        fetchData();
         const interval = setInterval(() => {
             fetchSensorData().then((r) => setSensorData(r));
         }, 1000);
-        setLoading(false);
+
         return () => clearInterval(interval);
     }, [fetchSensorData]);
 
     if (loading) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-                <CircularProgress />
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1, p: 4 }}>
+                <CircularProgress size={20} />
+                <Typography>Getting data</Typography>
             </Box>
         );
     }
