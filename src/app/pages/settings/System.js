@@ -1,44 +1,38 @@
-import React, {useContext, useEffect} from "react";
-import StoreContextProvider from "../../contexts/StoreContext";
-import {NavLink, Outlet, useLocation} from "react-router-dom";
-import styles from '../../styles/Content.module.css';
-import SettingsInputForm from "./SettingsInputForm";
+import React from 'react';
+import { Box, Tab, Tabs } from '@mui/material';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
-export default function System({title}){
+const systemTabs = [
+    { label: 'System Info', path: '/system/system-info' },
+    { label: 'Debug', path: '/system/debugform' },
+    { label: 'Settings', path: '/system/settingsform' },
+    { label: 'Calibration', path: '/system/calibrationform' },
+    { label: 'TAK', path: '/system/tak' },
+];
+
+export default function System() {
     const location = useLocation();
-    let debugLink = <div/>;
-    let settingsLink = <div/>;
-    let calibrationLink = <div/>;
+    const navigate = useNavigate();
+    const activeTab = systemTabs.findIndex((tab) => location.pathname.startsWith(tab.path));
 
-    try {
-        debugLink = <div className={styles['sub-menu-li']}><NavLink to="debugform">Debug</NavLink></div>;
-        settingsLink = <div className={styles['sub-menu-li']}><NavLink to="settingsform">Settings</NavLink></div>;
-        calibrationLink = <div className={styles['sub-menu-li']}><NavLink to="calibrationform">Calibration</NavLink></div>;
-    }
-    catch (e) {
-        console.log("error:")
-        console.error(e);
+    function handleTabChange(_, newIndex) {
+        navigate(systemTabs[newIndex].path);
     }
 
-
-    useEffect( () => {
-
-    }, []);
-
-    return(
-        <div>
-            <nav className={styles['sub-menu']}>
-                <div className={styles['sub-menu-ul']}>
-                    {debugLink}
-                    {calibrationLink}
-                    {settingsLink}                    
-                </div>
-            </nav>
-            <main>
-                <div className={styles['outlet-maps']}>
-                        <Outlet />
-                </div>
-            </main>
-        </div>
+    return (
+        <Box>
+            <Tabs
+                value={activeTab >= 0 ? activeTab : 0}
+                onChange={handleTabChange}
+                variant="scrollable"
+                scrollButtons="auto"
+                sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}
+            >
+                {systemTabs.map((tab) => (
+                    <Tab key={tab.path} label={tab.label} />
+                ))}
+            </Tabs>
+            <Outlet />
+        </Box>
     );
 }

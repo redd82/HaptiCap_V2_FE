@@ -1,22 +1,11 @@
-import React, {useContext, useEffect} from "react";
-import styles from'../../styles/Content.module.css';
-import {NavLink, Outlet, useLocation} from "react-router-dom";
-import MapsContextProvider from "../../contexts/MapsContext";
+import React from 'react';
+import { Box } from '@mui/material';
+import { Outlet } from 'react-router-dom';
 
-export default function Navigation(){
-    useEffect( () => {
-
-    }, []);
-
-    return(
-        <div>
-            <main>
-                <div className={styles['outlet-maps']}>
-                    <MapsContextProvider>
-                        <Outlet />
-                    </MapsContextProvider>
-                </div>
-            </main>
-        </div>
+export default function Navigation() {
+    return (
+        <Box component="main" sx={{ m: 0 }}>
+            <Outlet />
+        </Box>
     );
 }

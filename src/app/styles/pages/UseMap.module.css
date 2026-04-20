@@ -49,11 +49,6 @@
 
 .own-position-icon-custom{
     position: absolute;
-    /* width: var(--own-pos-icon-size);
-    height: var(--own-pos-icon-size); */
-    top: var(--own-pos-top);
-    left: var(--own-pos-left);
-    transform: rotate(var(--own-pos-icon-rotation));
     z-index: 4;
 }
 

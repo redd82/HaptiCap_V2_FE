@@ -1,38 +1,58 @@
 import React, {useContext, useEffect, useState} from 'react';
 
 import {useNavigate} from "react-router-dom";
-import {useForm} from 'react-hook-form';
 import axios from 'axios';
 import {FilePicker} from 'react-file-picker';
+import {
+    Alert,
+    Box,
+    Button,
+    CircularProgress,
+    Grid,
+    Stack,
+    TextField,
+    Typography,
+} from '@mui/material';
 import {CommsContext} from "../../contexts/CommsContext";
 import { StoreContext } from '../../contexts/StoreContext';
 import { MapsContext } from '../../contexts/MapsContext';
-import styles from '../../styles/pages/InputForm.module.css';
-import stylesContent from '../../styles/Content.module.css';
-import Button from "../components/Button";
+
+const DEFAULT_MAP_DATA = {
+    id: '',
+    name: '',
+    country: '',
+    area: '',
+    pngFile: '',
+    imageWidth: '',
+    imageHeight: '',
+    kmlFile: '',
+    realWorldHeight: '',
+    realWorldWidth: '',
+    scaleHeight: '',
+    scaleWidth: '',
+    north: '',
+    west: '',
+    south: '',
+    east: '',
+    rotation: '',
+    radius: 6371000,
+};
 
 export default function MapInputForm({map, newMap}) {
-    const { XMLParser, XMLBuilder, XMLValidator} = require("fast-xml-parser");
+    const { XMLParser } = require("fast-xml-parser");
     const navigate = useNavigate();
-    const DATEFORMAT = 'yyyy-MM-dd';
-    const {storeData, fetchData, getServerHost} = useContext(CommsContext);
+    const {getServerHost} = useContext(CommsContext);
     const {fetchKMLFile, requestMap, sendMapInfoToESP} = useContext(MapsContext);
     const {setHomeToUseMap} = useContext(StoreContext);
     const [loading, setLoading] = useState(true);
-    const { formState: { errors } } = useForm();
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
-    const [uploading, setUploading] = useState(false);
-    const [readOnly, setReadOnly] = useState(true);
     const [editMap, setEditMap] = useState(newMap);
-    const [mapData, setMapData] = useState(map);
+    const [mapData, setMapData] = useState(map || DEFAULT_MAP_DATA);
     const [pngUploaded, setPngUploaded] = useState(false);
     const [kmlUploaded, setKmlUploaded] = useState(false);
-    const [kmlData, setKmlData] = useState(null);
     const [useMap, setUseMap] = useState (false);
     let maxFileSize = 1.7;
-    let newFaultTemp = {};
-    let mapDataTemp = {};
 
     async function uploadMapFile(fileToUpload) {
         setError("");
@@ -45,7 +65,7 @@ export default function MapInputForm({map, newMap}) {
             try {
                 setSuccess("Uploading file....");
                 setLoading(true);
-                const response = await axios.post(serverHost + '/file-upload', formData, {
+                const response = await axios.post(serverHost + '/upload-file', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
@@ -140,8 +160,6 @@ export default function MapInputForm({map, newMap}) {
 
     async function sendMapInfo(type){
         console.log(mapData);
-        let response = "";
-        let serverHost = getServerHost();
         let json = JSON.stringify({id: mapData.id, name: mapData.name, country: mapData.country, area: mapData.area, pngFile: mapData.pngFile, imageWidth: mapData.imageWidth, imageHeight: mapData.imageHeight,
                                     kmlFile: mapData.kmlFile, realWorldHeight: mapData.realWorldHeight, realWorldWidth: mapData.realWorldWidth, scaleHeight: mapData.scaleHeight, scaleWidth: mapData.scaleWidth,
                                     north: mapData.north, west: mapData.west, south: mapData.south, east: mapData.east, rotation: mapData.rotation, radius: mapData.radius});
@@ -149,26 +167,21 @@ export default function MapInputForm({map, newMap}) {
     }
 
     async function clearMap(){
-        let serverHost = getServerHost();
+        const serverHost = getServerHost();
         setMapData({...mapData, id: mapData.id, name: "Click here to add map", country: "NoMap", area: "NoMap", pngFile: "NoMap.png", kmlFile: "NoMap.kml", radius: 63713000});
         let json = JSON.stringify({id: mapData.id, name: "Click here to add map", country: "NoMap", area: "NoMap", pngFile: mapData.pngFile, kmlFile: mapData.kmlFile, radius: mapData.radius});
         console.log(json);
         try{
-            const response = await axios.post(serverHost + '/navigation/clear-map', json, {
+            await axios.post(serverHost + '/navigation/clear-map', json, {
                 headers: {
                     "Content-Type": "application/json",
                 },
             });
-            console.log(response);
             setError("");
             setSuccess("");               
-            if(response.status === 200){
-                setTimeout(500);
-                setSuccess("Map clear sent.");
-                setError("");
-            }else{
-                setError("Error");
-            }
+            setTimeout(500);
+            setSuccess("Map clear sent.");
+            setError("");
         }   catch (e){
             setError(e.response.data.message);
             if(e.response.status >= 401) {
@@ -193,11 +206,27 @@ export default function MapInputForm({map, newMap}) {
 
     async function useSelectedMap() {
         const response = await requestMap(mapData, kmlUploaded);
-        //console.log(response[0].data);
-        setMapData(response[0].data);
-        setHomeToUseMap(response[0].data);
-        setSuccess(response[1]);
-        setError(response[2]);
+        const selectedMapData = response?.[0]?.data;
+        const fallbackMapData = (mapData && mapData.pngFile) ? mapData : null;
+        const resolvedMapData = (selectedMapData && selectedMapData.pngFile) ? selectedMapData : fallbackMapData;
+
+        if (!resolvedMapData) {
+            const backendError = response?.[2] || selectedMapData?.message || selectedMapData?.error;
+            setError(backendError || "Map payload is incomplete (missing pngFile).");
+            setSuccess("");
+            return;
+        }
+
+        setMapData(resolvedMapData);
+        setHomeToUseMap(resolvedMapData);
+        if (!selectedMapData || !selectedMapData.pngFile) {
+            const backendError = response?.[2] || selectedMapData?.message || selectedMapData?.error;
+            setError(backendError || "");
+            setSuccess("Loaded map using local data.");
+        } else {
+            setSuccess(response[1]);
+            setError(response[2]);
+        }
         setUseMap(true);
     }
 
@@ -233,140 +262,134 @@ export default function MapInputForm({map, newMap}) {
     }
 
     useEffect( () => {
-        setMapData(map);
+        setMapData(map || DEFAULT_MAP_DATA);
         setLoading(false);
-    },[]);
+    },[map]);
 
     useEffect(() => {
         if (useMap) {
             // console.log("navigate to usemap");
             navigate("../use-map", { state: {mapData} });   //id: map.id, name: map.name, country: map.country
         }
-      }, [useMap]);
+            }, [mapData, navigate, useMap]);
 
     return (
-        <form className={styles['info-form']} >
-            <label className={styles['info-label']} htmlFor="id">ID: </label>
-            <div id="id">{mapData.id}</div>
-            <label className={styles['info-label']} htmlFor="name">Name (short):</label>
-            {(editMap) ? (
-                <input className={styles['info-input']} name="name" type="text" id="name" defaultValue={mapData.name} onChange={handleInputUpdate} />
-            ) : (
-                <div className={styles['valueRO-info-button']}>
-                <div id={styles['valueRO-numberplate']}>{mapData.name}</div>
-                </div>
-            )}     
-            <label className={styles['info-label']} htmlFor="country">Country:</label>
-            {(editMap) ? (
-                <input className={styles['info-input']} name="country" type="text" id="country" defaultValue={mapData.country} onChange={handleInputUpdate} />
-            ) : (
-                <div className={styles['valueRO-info-button']}>
-                <div id={styles['valueRO-numberplate']}>{mapData.country}</div>
-                </div>
-            )}      
-            <label className={styles['info-label']} htmlFor="area">Area: </label>
-            {(editMap) ? (
-                <input className={styles['info-input']} name="area" type="text" id="area" defaultValue={mapData.area} onChange={handleInputUpdate}/>
-            ) : (
-                <div className={styles['valueRO-info-button']}>
-                <div id={styles['valueRO-numberplate']}>{mapData.area}</div>
-                </div>
-            )}
-            <label className={styles['info-label']} htmlFor="radius">World Map Radius (m): </label>
-            {(editMap) ? (
-                <input className={styles['info-input']} name="radius" type="text" id="radius" defaultValue={mapData.radius} onChange={handleInputUpdate}/>
-            ) : (
-                <div className={styles['valueRO-info-button']}>
-                <div id={styles['valueRO-numberplate']}>{mapData.radius}</div>
-                </div>
-            )}
-            {(!editMap) ? (<>
-                            <label className={styles['info-label']} htmlFor="mapPNGFile">Map (.png): </label>
-                            <label className={styles['numberRO']} htmlFor="mapPNGFile">{mapData.pngFile} </label>
-                          </>
-                ) : ((loading) ? (<></>) : (
-                <>
-                    <label className={styles['info-label']} htmlFor="mapPNGFile">Map PNG({mapData.pngFile}) </label>
-                    <FilePicker maxSize={maxFileSize}
-                                extensions={['png']}
-                                onChange={FileObject => (uploadMapFile(FileObject)).then(r => {
-                                    processFileData(r[0], r[1]);})}
-                                onError={errMsg => (setError(errMsg))}>
-                        <button type="button">
-                            Upload PNG map file
-                        </button>
+        <Box component="form">
+            <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid item xs={12} sm={6}>
+                    <TextField label="ID" value={mapData.id ?? ''} fullWidth size="small" InputProps={{ readOnly: true }} />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <TextField
+                        label="Name (short)"
+                        name="name"
+                        defaultValue={mapData.name}
+                        onChange={handleInputUpdate}
+                        fullWidth
+                        size="small"
+                        InputProps={{ readOnly: !editMap }}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <TextField
+                        label="Country"
+                        name="country"
+                        defaultValue={mapData.country}
+                        onChange={handleInputUpdate}
+                        fullWidth
+                        size="small"
+                        InputProps={{ readOnly: !editMap }}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <TextField
+                        label="Area"
+                        name="area"
+                        defaultValue={mapData.area}
+                        onChange={handleInputUpdate}
+                        fullWidth
+                        size="small"
+                        InputProps={{ readOnly: !editMap }}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <TextField
+                        label="World Map Radius (m)"
+                        name="radius"
+                        defaultValue={mapData.radius}
+                        onChange={handleInputUpdate}
+                        fullWidth
+                        size="small"
+                        InputProps={{ readOnly: !editMap }}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <TextField label="Map (.png)" value={mapData.pngFile ?? ''} fullWidth size="small" InputProps={{ readOnly: true }} />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <TextField label="KML map" value={mapData.kmlFile ?? ''} fullWidth size="small" InputProps={{ readOnly: true }} />
+                </Grid>
+            </Grid>
+
+            {editMap && !loading && (
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+                    <FilePicker
+                        maxSize={maxFileSize}
+                        extensions={['png']}
+                        onChange={FileObject => (uploadMapFile(FileObject)).then(r => {
+                            if (r && r[0] && r[1]) {
+                                processFileData(r[0], r[1]);
+                            }
+                        })}
+                        onError={errMsg => (setError(errMsg))}
+                    >
+                        <Button type="button" variant="outlined">Upload PNG map file</Button>
                     </FilePicker>
-                </>
-                ))
-            }
-            {(!editMap) ? (<>
-                            <label className={styles['info-label']} htmlFor="kmlFile">KML map: </label>
-                            <label className={styles['numberRO']} htmlFor="mapPNGFile">{mapData.kmlFile} </label>
-                            </>) : (
-                    (!pngUploaded) ? (<></>) : ((loading)? (<></>): (
-                        <>
-                        <label className={styles['info-label']} htmlFor="kmlFile">KML map {mapData.kmlFile} </label>
-                        <FilePicker extensions={['kml']}
-                                    onChange={FileObject => (uploadMapFile(FileObject)).then(r => {processFileData(r[0], r[1]);})}
-                                    onError={errMsg => (setError(errMsg))}>
-                            <button type="button">
-                                Upload KML map file
-                            </button>
+                    {pngUploaded && (
+                        <FilePicker
+                            extensions={['kml']}
+                            onChange={FileObject => (uploadMapFile(FileObject)).then(r => {
+                                if (r && r[0] && r[1]) {
+                                    processFileData(r[0], r[1]);
+                                }
+                            })}
+                            onError={errMsg => (setError(errMsg))}
+                        >
+                            <Button type="button" variant="outlined">Upload KML map file</Button>
                         </FilePicker>
-                        </>
-                        )
-                    )
-                )
-            }
-            {(editMap) ? ( 
-                (!kmlUploaded) ? 
-                    ((loading) ? (<></>): (
-                        <>
-                            <button className={styles['apply-button']} onClick={saveChangesSelectedMap} type="button"> Save Changes</button>
-                            <div className={styles['empty-grid-space-4']}/>
-                            <button className={styles['apply-button']} onClick={setEditMapToFalse} type="button"> Cancel</button>
-                        </>
-                    )
-                    ):( (loading)? (<></>): (
-                        <>
-                            <button className={styles['apply-button']} onClick={saveChangesSelectedMap} type="button"> Save Changes</button>
-                        </>)
-                    )
-            ): (
-                (mapData.area === "NoMap") ? (        
-                    <>
-                        <button className={styles['apply-button']} onClick={editSelectedMap} type="button"> Edit Map</button>
-                    </>            
-                ) : (
-                    <>
-                        <button className={styles['apply-button']} onClick={editSelectedMap} type="button"> Edit Map</button>
-                        <button className={styles['apply-button']} onClick={useSelectedMap} type="button"> Use Selected Map</button>
-                        <button className={styles['apply-button']} onClick={clearMap} type="button"> Delete Map</button>
-                    </>
-                )
-            )}          
-            <div className={styles['empty-grid-space-4']}/>
-            <div className={styles['error-message']}>
-                {(loading) ? (    
-                    <>
-                        <div className={styles['success']}>{success}</div>             
-                        <div className={stylesContent['loader-container-mapinput']}>
-                            <div className={stylesContent['spinner']}> </div>
-                        </div> 
-                    </>
-                ): (
-                    (error !== "") ? (
-                        <div className={styles['error']}>{error}</div>
-                        ) : (
-                            (success !== "") ? (
-                                <div className={styles['success']}>{success}</div>
-                            ) : (
-                            <div className={styles['no-error']}> <br /> </div>
-                            )
-                    )
-                )
-                }
-            </div>
-        </form>
+                    )}
+                </Stack>
+            )}
+
+            {editMap ? (
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+                    {!loading && (
+                        <Button variant="contained" onClick={saveChangesSelectedMap} type="button">Save Changes</Button>
+                    )}
+                    {!kmlUploaded && !loading && (
+                        <Button variant="outlined" onClick={setEditMapToFalse} type="button">Cancel</Button>
+                    )}
+                </Stack>
+            ) : (
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ mb: 2 }}>
+                    <Button variant="contained" onClick={editSelectedMap} type="button">Edit Map</Button>
+                    {mapData.area !== "NoMap" && (
+                        <Button variant="outlined" onClick={useSelectedMap} type="button">Use Selected Map</Button>
+                    )}
+                    {mapData.area !== "NoMap" && (
+                        <Button color="error" variant="outlined" onClick={clearMap} type="button">Delete Map</Button>
+                    )}
+                </Stack>
+            )}
+
+            {loading && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+                    <CircularProgress size={28} />
+                </Box>
+            )}
+            {error !== "" && <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert>}
+            {success !== "" && <Alert severity="success" sx={{ mt: 1 }}>{success}</Alert>}
+            {!loading && error === "" && success === "" && <Typography variant="body2" sx={{ mt: 1 }}>&nbsp;</Typography>}
+        </Box>
     );
 }

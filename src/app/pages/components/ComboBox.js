@@ -1,19 +1,24 @@
-import React, {useEffect} from 'react';
-import styles from '../../styles/components/ComboBox.module.css'
+import React from 'react';
+import { FormControl, MenuItem, Select } from '@mui/material';
 
 export default function ComboBox(props) {
-    //console.log(props)
-    return(
-        <>
-            <select className={styles.comboBox} name={props.name} onChange={props.handleChange}>
-                {(props.newItem) ? (
-                    <option key="0" >Select Item</option>
-                ) : ( <option key={props.list.id}>{props.selected}</option>)
-                }
-                {props.list.map((item) => (
-                    <option key={props.list.id}>{item.itemName}</option>
+    return (
+        <FormControl size="small" fullWidth>
+            <Select
+                name={props.name}
+                onChange={props.handleChange}
+                defaultValue={props.newItem ? '' : (props.selected || '')}
+                displayEmpty
+            >
+                {props.newItem ? (
+                    <MenuItem value="">Select Item</MenuItem>
+                ) : (
+                    <MenuItem value={props.selected || ''}>{props.selected}</MenuItem>
+                )}
+                {props.list && props.list.map((item, index) => (
+                    <MenuItem key={index} value={item.itemName}>{item.itemName}</MenuItem>
                 ))}
-            </select>
-        </>
+            </Select>
+        </FormControl>
     );
 }

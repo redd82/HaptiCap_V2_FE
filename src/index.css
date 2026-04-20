@@ -1,26 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
 :root {
-  --color-0: #CDF8DE;
-  --color-1: #E8F7EE;
-  --color-2: #C6CAED;
-  --color-3: #ADA8BE;
-  --color-4: #A28497;
-  --color-5: #6F5E5C;
-  --color-6: #4A5240;
-  --color-7: #3C362A;
+  --color-0: #cdf8de;
+  --color-1: #e8f7ee;
+  --color-2: #c6caed;
+  --color-3: #ada8be;
+  --color-4: #a28497;
+  --color-5: #6f5e5c;
+  --color-6: #4a5240;
+  --color-7: #3c362a;
   --color-8: #000000;
   --color-10: #ffffff;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }

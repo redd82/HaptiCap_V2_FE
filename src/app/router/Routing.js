@@ -9,6 +9,7 @@ import Settings from "../pages/settings/System";
 import SettingsInputForm from "../pages/settings/SettingsInputForm";
 import DebugInputForm from "../pages/settings/DebugInputForm";
 import CalibrationInputForm from "../pages/settings/CalibrationInputForm";
+import TAKInputForm from "../pages/settings/TAKInputForm";
 import Navigation from "../pages/map/Navigation";
 import SystemForm from "../pages/settings/SystemForm";
 import Waypoints from "../pages/map/Waypoints";
@@ -30,6 +31,7 @@ export default function Routing(){
                     <Route path="debugform" element={<DebugInputForm title="Debugging" />} />
                     <Route path="settingsform" element={<SettingsInputForm title="HaptiCap Settings" />} />
                     <Route path="calibrationform" element={<CalibrationInputForm title="Calibration" />} />
+                    <Route path="tak" element={<TAKInputForm title="TAK Package Import" />} />
                 </Route>
             </Routes>
         </div>
